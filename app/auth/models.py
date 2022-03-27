@@ -1,3 +1,4 @@
+from flask import redirect, url_for
 from app import db, login_manager
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.sqltypes import DateTime, TIMESTAMP
@@ -7,6 +8,10 @@ from flask_login import UserMixin
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for("auth.login"))
 
 class User(db.Model, UserMixin):
     id = Column(Integer, primary_key=True)

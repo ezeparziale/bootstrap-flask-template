@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, url_for, flash
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, ResetPasswordForm
 from .models import User
 from app import db, bcrypt
 from flask_login import login_user, logout_user, current_user
@@ -41,3 +41,17 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for("auth.login"))
+
+
+@auth_bp.route("/reset_password/", methods=["GET", "POST"])
+def reset_password():
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            flash("Solicitud de reseteo de password enviada, revise su", category="success")
+            return redirect(url_for("auth.login"))
+        else:
+            flash("Email no registrado, por favor registrese", category="danger")
+            return redirect(url_for("auth.register"))
+    return render_template("reset_password.html", form=form)
