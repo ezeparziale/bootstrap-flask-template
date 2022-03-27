@@ -2,15 +2,19 @@ from flask import Blueprint, redirect, render_template, url_for, flash
 from .forms import RegistrationForm, LoginForm
 from .models import User
 from app import db, bcrypt
+from flask_login import login_user, logout_user, current_user
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder='templates')
 
 @auth_bp.route("/login/", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("home.home_view"))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user)
             flash(f"Login OK", category="success")
             return redirect(url_for("home.home_view"))
         else:
@@ -20,6 +24,8 @@ def login():
 
 @auth_bp.route("/register/", methods=["GET", "POST"])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("home.home_view"))
     form = RegistrationForm()
     if form.validate_on_submit():
         encrypted_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
@@ -29,3 +35,9 @@ def register():
         flash(f"Cuenta creada exitosamente", category="success")
         return redirect(url_for("auth.login"))
     return render_template("register.html", form=form)
+
+
+@auth_bp.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("auth.login"))
