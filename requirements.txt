@@ -2,3 +2,4 @@ flask
 Flask-WTF
 email_validator
 Flask-SQLAlchemy
+psycopg2
