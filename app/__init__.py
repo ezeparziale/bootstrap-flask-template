@@ -23,3 +23,6 @@ app.register_blueprint(about.about_bp)
 
 from .auth import auth
 app.register_blueprint(auth.auth_bp)
+
+from .account import account
+app.register_blueprint(account.account_bp)
