@@ -1,9 +1,14 @@
-from app import db
+from app import db, login_manager
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.sqltypes import DateTime, TIMESTAMP
 from sqlalchemy.sql.expression import text
+from flask_login import UserMixin
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+class User(db.Model, UserMixin):
     id = Column(Integer, primary_key=True)
     username = Column(String(20), unique=True, nullable=False)
     email = Column(String(120), unique=True, nullable=False)
