@@ -3,3 +3,4 @@ Flask-WTF
 email_validator
 Flask-SQLAlchemy
 psycopg2
+Flask-Bcrypt
