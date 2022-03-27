@@ -1,9 +1,11 @@
-from flask import redirect, url_for
+from flask import current_app, redirect, url_for
 from app import db, login_manager
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.sqltypes import DateTime, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from flask_login import UserMixin
+import jwt
+from datetime import datetime, timedelta, timezone
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -23,3 +25,20 @@ class User(db.Model, UserMixin):
 
     def __repr__(self) -> str:
         return f"{self.username} : {self.email} : {self.created_at}"
+
+    def get_token(self, expires_sec=300):
+        encoded = jwt.encode({
+            "user_id":self.id, 
+            "exp":datetime.now(tz=timezone.utc) + timedelta(seconds=expires_sec)}, 
+            current_app.config["SECRET_KEY"], 
+            algorithm="HS256")
+        return encoded
+
+    @staticmethod
+    def verify_token(token):
+        try:
+            decode = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+            user_id = decode.get("user_id")
+        except: 
+            return None
+        return User.query.get(user_id)
