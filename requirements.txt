@@ -5,3 +5,5 @@ Flask-SQLAlchemy
 psycopg2
 Flask-Bcrypt
 Flask-Login
+PyJWT
+Flask-Mail
