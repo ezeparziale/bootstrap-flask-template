@@ -35,4 +35,4 @@ flask run
 
 - [x] flask
 - [x] blueprints
-- [ ] bootstrap 5
+- [x] bootstrap 5
