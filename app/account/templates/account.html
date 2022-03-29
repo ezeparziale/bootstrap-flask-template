@@ -6,4 +6,33 @@
     
     <h1>{% block title %} Account {% endblock %}</h1>
 
+    <div class="container w-50">
+        <img src="{{ image_url }}" alt="">
+    </div>
+
+    <div class="container w-50">
+        <form method="post" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <legend class="border-bottom mb-4">Account</legend>
+                <div class="form-group">
+                    {{ form.picture.label(class="form-control-label") }}
+                    {% if form.picture.errors %}
+                        {{ form.picture(class="form-control form-control-lg is-invalid") }}
+                            {% for error in form.picture.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                    {% else %}
+                        {{ form.picture(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mt-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+
 {% endblock %}
+
+
