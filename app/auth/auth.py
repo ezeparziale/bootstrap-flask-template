@@ -1,9 +1,10 @@
 from flask import Blueprint, redirect, render_template, url_for, flash
 from .forms import RegistrationForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
 from .models import User
-from app import db, bcrypt
+from app import db, bcrypt, mail
 from flask_login import login_user, logout_user, current_user
 import pprint
+from flask_mail import Message
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder='templates')
 
@@ -45,7 +46,17 @@ def logout():
 
 def send_email(user):
     token = user.get_token()
+    msg = Message(
+        subject="Password Reset Request", 
+        recipients=[user.email],
+        sender="noreplay@test.com"
+    )
+    msg.body = f""" Ingrese al siguiente link para resetear la password:
 
+    { url_for("auth.reset_token", token=token, _external=True) }
+    
+    """
+    mail.send(msg)
     pprint.PrettyPrinter().pprint(url_for("auth.reset_token", token=token, _external=True))
 
 
