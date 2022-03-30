@@ -67,7 +67,7 @@ def reset_password():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             send_email(user)
-            flash("Solicitud de reseteo de password enviada, revise su", category="success")
+            flash("Solicitud de reseteo de password enviada, revise su email", category="success")
             return redirect(url_for("auth.login"))
         else:
             flash("Email no registrado, por favor registrese", category="danger")
