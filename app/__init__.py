@@ -15,6 +15,11 @@ db.create_all()
 bcrypt = Bcrypt(app)
 
 login_manager = LoginManager(app)
+login_manager.refresh_view = "auth.login"
+login_manager.needs_refresh_message = (
+    "Por favor vuelva a loguearse!!!"
+)
+login_manager.needs_refresh_message_category = "info"
 
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587

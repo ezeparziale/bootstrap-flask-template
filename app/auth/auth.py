@@ -1,8 +1,8 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash, request
 from .forms import RegistrationForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
 from .models import User
-from app import db, bcrypt, mail
-from flask_login import login_user, logout_user, current_user
+from app import db, bcrypt, mail, login_manager
+from flask_login import login_required, login_user, logout_user, current_user
 import pprint
 from flask_mail import Message
 
@@ -10,18 +10,17 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder='templ
 
 @auth_bp.route("/login/", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("home.home_view"))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user)
-            flash(f"Login OK", category="success")
-            return redirect(url_for("home.home_view"))
-        else:
-            flash(f"Error al loguearse", category="danger")
-    return render_template("login.html", form=form)
+            login_user(user, remember=form.remember_me.data)
+            next = request.args.get('next')
+            if next is None or not next.startswith('/'):
+                next = url_for('home.home_view')
+            return redirect(next)
+        flash(f"Error al loguearse", category="danger")
+    return render_template('login.html', form=form)
 
 
 @auth_bp.route("/register/", methods=["GET", "POST"])
@@ -40,9 +39,10 @@ def register():
 
 
 @auth_bp.route("/logout/")
+@login_required
 def logout():
     logout_user()
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("home.home_view"))
 
 def send_email(user):
     token = user.get_token()

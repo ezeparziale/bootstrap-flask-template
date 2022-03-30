@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, url_for
-from flask_login import current_user, login_required
+from flask_login import current_user, fresh_login_required, login_required
 from .forms import AccountUpdateForm
 from app import db, app
 import os
@@ -14,6 +14,7 @@ def save_image(picture_file):
 
 @account_bp.route("/", methods=["GET", "POST"])
 @login_required
+@fresh_login_required
 def account():
     form = AccountUpdateForm()
     if form.validate_on_submit():
