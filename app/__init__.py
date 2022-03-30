@@ -1,13 +1,14 @@
+from pprint import pprint
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
+from .config import settings
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "SECRET_KEY"
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://flaskuser:flaskpassword@localhost:5432/flaskdb"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config.from_object(settings)
+
 
 db = SQLAlchemy(app)
 db.create_all()
@@ -20,12 +21,6 @@ login_manager.needs_refresh_message = (
     "Por favor vuelva a loguearse!!!"
 )
 login_manager.needs_refresh_message_category = "info"
-
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = "MY_EMAIL"
-app.config["MAIL_PASSWORD"] = "MY_PASSWORD"
 
 mail = Mail(app)
 
