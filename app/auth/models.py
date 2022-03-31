@@ -1,6 +1,6 @@
 from flask import current_app, redirect, url_for
 from app import db, login_manager
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, BOOLEAN
 from sqlalchemy.sql.sqltypes import DateTime, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from flask_login import UserMixin
@@ -22,9 +22,15 @@ class User(db.Model, UserMixin):
     image_file = Column(String(), nullable=False, default="default.jpg")
     password = Column(String(60), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    confirmed = Column(BOOLEAN, default=False)
+    last_seen = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
     def __repr__(self) -> str:
         return f"{self.username} : {self.email} : {self.created_at}"
+
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.commit()
 
     def get_token(self, expires_sec=300):
         encoded = jwt.encode({
@@ -33,6 +39,25 @@ class User(db.Model, UserMixin):
             current_app.config["SECRET_KEY"], 
             algorithm="HS256")
         return encoded
+
+    def get_confirm_token(self, expires_sec=300):
+        encoded = jwt.encode({
+            "comfirm":self.id, 
+            "exp":datetime.now(tz=timezone.utc) + timedelta(seconds=expires_sec)}, 
+            current_app.config["SECRET_KEY"], 
+            algorithm="HS256")
+        return encoded
+
+    def confirm(self, token):
+        try:
+            decode = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+            if decode.get("comfirm") != self.id:
+                return False
+            self.confirmed = True
+            db.session.commit()
+            return True
+        except: 
+            return None
 
     @staticmethod
     def verify_token(token):

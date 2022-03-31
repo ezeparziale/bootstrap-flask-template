@@ -8,8 +8,29 @@ from flask_mail import Message
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder='templates')
 
+
+@auth_bp.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed \
+                and request.endpoint \
+                and request.blueprint != 'auth' \
+                and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))
+
+
+@auth_bp.route('/unconfirmed/')
+def unconfirmed():
+    if current_user.is_anonymous or current_user.confirmed:
+        return redirect(url_for('home.home_view'))
+    return render_template('unconfirmed.html')
+
+
 @auth_bp.route("/login/", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home.home_view'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -22,6 +43,20 @@ def login():
         flash(f"Error al loguearse", category="danger")
     return render_template('login.html', form=form)
 
+def send_email_confirm(user):
+    token = user.get_confirm_token()
+    msg = Message(
+        subject="Confirme cuenta", 
+        recipients=[user.email],
+        sender="noreplay@test.com"
+    )
+    msg.body = f""" Ingrese al siguiente link para confirmar cuenta:
+
+    { url_for("auth.confirm", token=token, _external=True) }
+    
+    """
+    mail.send(msg)
+    pprint.PrettyPrinter().pprint(url_for("auth.reset_token", token=token, _external=True))
 
 @auth_bp.route("/register/", methods=["GET", "POST"])
 def register():
@@ -34,6 +69,8 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash(f"Cuenta creada exitosamente", category="success")
+        flash(f"Verifique su mail para confirmar cuenta", category="info")
+        send_email_confirm(user)
         return redirect(url_for("auth.login"))
     return render_template("register.html", form=form)
 
@@ -91,3 +128,26 @@ def reset_token(token):
         return redirect(url_for("auth.login"))
     
     return render_template("change_password.html", form=form)
+
+
+@auth_bp.route("/confirm/<token>", methods=["GET", "POST"])
+@login_required
+def confirm(token):
+    if current_user.confirmed:
+        flash('La cuenta ya se encuentra confirmada', category="info")
+        return redirect(url_for("home.home_view"))
+    if current_user.confirm(token):
+        flash("Cuenta confirmada!!!", category="success")
+        return redirect(url_for("auth.login"))
+    else:
+        flash("Token expirado", category="danger")
+    return redirect(url_for("home.home_view"))
+
+
+@auth_bp.route('/confirm')
+@login_required
+def resend_confirmation():
+    token = current_user.get_confirm_token()
+    send_email_confirm(current_user)
+    flash('A new confirmation email has been sent to you by email.')
+    return redirect(url_for("home.home_view"))
