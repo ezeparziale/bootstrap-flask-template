@@ -1,5 +1,5 @@
 from pprint import pprint
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -40,3 +40,14 @@ app.register_blueprint(auth.auth_bp)
 
 from .account import account
 app.register_blueprint(account.account_bp)
+
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
