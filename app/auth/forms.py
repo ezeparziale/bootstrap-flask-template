@@ -18,8 +18,8 @@ class LoginForm(FlaskForm):
     submit = SubmitField(label="Login")
 
 class ResetPasswordRequestForm(FlaskForm):
-    email = StringField(label="Email", validators=[DataRequired(), Email()])
-    submit = SubmitField(label="Reset password")
+    email = StringField(label="EMAIL", validators=[DataRequired(), Email()])
+    submit = SubmitField(label="Restablecer Password")
 
 class ResetPasswordForm(FlaskForm):
     password = PasswordField(label="Password", validators=[DataRequired(), Length(min=6, max=16)])
