@@ -14,7 +14,10 @@
       {% block head %} {% endblock %}
 
       <!--  Titulo -->
-      <title>{% block title %} {% endblock %} - FlaskApp</title>  
+      <title>{% block title %} {% endblock %}</title>
+
+      <!-- Favicon icon -->
+      <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
    </head>
 <body>
    {% block navbar %} {% endblock %}
