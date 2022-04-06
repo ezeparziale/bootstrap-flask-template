@@ -1,46 +1,60 @@
 {% extends "base.html" %}
 
+{% block title %} Login {% endblock %}
+
 {% block content %}
     
-    <h1>{% block title %} Login {% endblock %}</h1>
-
-    <div class="container w-50">
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
         <form method="post" action="">
             {{ form.hidden_tag() }}
-            <fieldset>
-                <legend class="border-bottom mb-4">Login</legend>
-                <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
-                        {{ form.email(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.email(class="form-control form-control-lg") }}
-                    {% endif %}
+            <div class="shadow p-3 mb-5 bg-white rounded">
+                <div class="card-body" style="width: 25rem;">
+                    <div class="text-center">
+                        <p class="fs-4 text-uppercase"><i class="bi bi-stack"></i> APP NAME</p>
+                    </div>
+                    <h4 class="mb-2">Bienvenido a APP NAME! 👋</h4>
+                    <p class="mb-4">Inicia sesión para acceder a tu cuenta</p>
+                    <fieldset>
+                        <div class="form-group">
+                            {{ form.email.label(class="form-control-label") }}
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.email(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group mt-3">
+                            {{ form.password.label(class="form-control-label") }}
+                            {% if form.password.errors %}
+                                {{ form.password(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.password(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="form-group mt-3">
+                        {{ form.remember_me(class="form-check-input") }}
+                        <label class="form-check-label" for="flexCheckDefault">
+                            {{ form.remember_me.label(class="form-control-label") }}
+                        </label>
+                    </div>
+                    <div class="form-group mt-3">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('auth.reset_password') }}">Olvidaste la contraseña?</a>
+                    </div>
+                    <p class="text-center mt-5">
+                        <span>No tienes cuenta?</span>
+                        <a href="{{ url_for('auth.register') }}">
+                          <span>Registrarse</span>
+                        </a>
+                    </p>
                 </div>
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-                    {% if form.password.errors %}
-                        {{ form.password(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.password(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-            </fieldset>
-            <div class="form-group mt-3">
-                {{ form.remember_me(class="form-check-input") }}
-                <label class="form-check-label" for="flexCheckDefault">
-                    Remember me
-                </label>
-            </div>
-            <div class="form-group mt-3">
-                {{ form.submit(class="btn btn-primary") }}
-                <a href="{{ url_for('auth.reset_password') }}">Forgot Password?</a>
             </div>
         </form>
     </div>
