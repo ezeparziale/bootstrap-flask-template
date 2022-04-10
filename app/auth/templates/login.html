@@ -11,14 +11,14 @@
         <form method="post" action="">
             {{ form.hidden_tag() }}
             <div class="shadow p-3 mb-5 bg-white rounded">
-                <div class="card-body" style="width: 25rem;">
+                <div class="card-body">
                     <div class="text-center">
                         <p class="fs-3 text-uppercase fw-bolder mb-5"><i class="bi bi-stack"></i> APP NAME</p>
                     </div>
                     <h4 class="mb-2">Bienvenido a APP NAME! 👋</h4>
                     <p class="mb-4 muted">Inicia sesión para acceder a tu cuenta</p>
                     <fieldset>
-                        <div class="form-group">
+                        <div class="form-group mt-2">
                             {{ form.email.label(class="form-control-label") }}
                             {% if form.email.errors %}
                                 {{ form.email(class="form-control form-control-lg is-invalid") }}
@@ -29,7 +29,7 @@
                                 {{ form.email(class="form-control form-control-lg") }}
                             {% endif %}
                         </div>
-                        <div class="form-group mt-3">
+                        <div class="form-group mt-2">
                             {{ form.password.label(class="form-control-label") }}
                             {% if form.password.errors %}
                                 {{ form.password(class="form-control form-control-lg is-invalid") }}
