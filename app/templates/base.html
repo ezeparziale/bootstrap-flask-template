@@ -18,6 +18,9 @@
 
       <!-- Favicon icon -->
       <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+      <!-- Style core -->
+      <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core.css') }}">
    </head>
 <body>
    {% block navbar %} {% endblock %}
@@ -27,8 +30,9 @@
          {% with messages=get_flashed_messages(with_categories=true) %}
             {% if messages %}
                {% for category, message in messages %}
-                  <div class="alert alert-{{category}}">
+                  <div class="alert alert-{{category}} alert-dismissible fade show">
                      {{ message }}
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                {% endfor %}
             {% endif %}
