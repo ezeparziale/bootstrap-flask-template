@@ -16,6 +16,17 @@
                     <img src="{{ image_url }}" alt="" style="max-height: 150px; max-width: 150px;">
                 </div>
                 <div class="form-group">
+                    {{ form.picture.label(class="form-control-label") }}
+                    {% if form.picture.errors %}
+                        {{ form.picture(class="form-control form-control-lg is-invalid") }}
+                            {% for error in form.picture.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                    {% else %}
+                        {{ form.picture(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
                     {{ form.email.label(class="form-control-label") }}
                     {% if form.email.errors %}
                         {{ form.email(class="form-control form-control-lg is-invalid") }}
@@ -23,7 +34,7 @@
                                 <span>{{ error }}</span>
                             {% endfor%}
                     {% else %}
-                        {{ form.email(class="form-control form-control-lg", disabled=True) }}
+                        {{ form.email(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
                 <div class="form-group">
@@ -34,7 +45,7 @@
                                 <span>{{ error }}</span>
                             {% endfor%}
                     {% else %}
-                        {{ form.username(class="form-control form-control-lg", disabled=True) }}
+                        {{ form.username(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
                 <div class="form-group">
@@ -45,7 +56,7 @@
                                 <span>{{ error }}</span>
                             {% endfor%}
                     {% else %}
-                        {{ form.firstname(class="form-control form-control-lg", disabled=True) }}
+                        {{ form.firstname(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
                 <div class="form-group">
@@ -56,12 +67,15 @@
                                 <span>{{ error }}</span>
                             {% endfor%}
                     {% else %}
-                        {{ form.lastname(class="form-control form-control-lg", disabled=True) }}
+                        {{ form.lastname(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
             </fieldset>
             <div class="form-group mt-3">
                 {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button" aria-disabled="true">
+                    Cancelar
+                </a>
             </div>
         </form>
     </div>
