@@ -1,10 +1,11 @@
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from .forms import RegistrationForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
 from .models import User
-from app import db, bcrypt, mail, login_manager
+from app import db, bcrypt, mail, login_manager, app
 from flask_login import login_required, login_user, logout_user, current_user
 import pprint
 from flask_mail import Message
+from threading import Thread
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder='templates')
 
@@ -43,6 +44,11 @@ def login():
         flash(f"Error al loguearse", category="danger")
     return render_template('login.html', form=form)
 
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
 def send_email_confirm(user):
     token = user.get_confirm_token()
     msg = Message(
@@ -50,13 +56,19 @@ def send_email_confirm(user):
         recipients=[user.email],
         sender="noreplay@test.com"
     )
-    msg.body = f""" Ingrese al siguiente link para confirmar cuenta:
-
-    { url_for("auth.confirm", token=token, _external=True) }
-    
+    msg.html = f"""
+    <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    </head>
+    <body>
+        <p>Ingrese al siguiente link para confirmar cuenta:</p>
+        <a class="btn btn-primary" href="{ url_for("auth.confirm", token=token, _external=True) }">Resetear Password</a>
+    </body>
     """
-    mail.send(msg)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
     pprint.PrettyPrinter().pprint(url_for("auth.reset_token", token=token, _external=True))
+    return thr
 
 @auth_bp.route("/register/", methods=["GET", "POST"])
 def register():
@@ -88,12 +100,10 @@ def send_email(user):
         recipients=[user.email],
         sender="noreplay@test.com"
     )
-    msg.body = f""" Ingrese al siguiente link para resetear la password:
 
-    { url_for("auth.reset_token", token=token, _external=True) }
-    
-    """
-    mail.send(msg)
+    msg.html =render_template("email.html", token=token)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()    
     pprint.PrettyPrinter().pprint(url_for("auth.reset_token", token=token, _external=True))
 
 
