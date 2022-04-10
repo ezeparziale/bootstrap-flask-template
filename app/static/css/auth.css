@@ -29,9 +29,7 @@ body {
 
 .form-control:focus {
   color: var(--global-btn);
-  /* background-color: #fff; */
   border-color: var(--global-btn);
-  /* outline: 2; */
   box-shadow: none;
 }
 
@@ -49,8 +47,6 @@ a:hover {
 }
 
 .form-control-label {
-  /* margin-bottom: 0.5rem !important; */
   font-size: 0.75rem !important;
-  /* font-weight: 500 !important; */
   color: var(--global-body-color) !important;
 }
