@@ -1,5 +1,6 @@
 from flask import current_app, redirect, url_for
 from app import db, login_manager
+from sqlalchemy import Column, Integer, String, BOOLEAN, ForeignKey, Text
 from sqlalchemy.sql.sqltypes import DateTime, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from flask_login import UserMixin
@@ -25,6 +26,7 @@ class User(db.Model, UserMixin):
     confirmed = Column(BOOLEAN, default=False)
     last_seen = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     details = db.relationship("UserDetail", backref="user", lazy=True, uselist=False)
+    posts = db.relationship("Post", backref="author", lazy=True)
 
     def __repr__(self) -> str:
         return f"{self.username} : {self.email} : {self.created_at}"
@@ -78,3 +80,12 @@ class UserDetail(db.Model):
 
     def __repr__(self) -> str:
         return f"{self.firstname} {self.lastname}"
+
+
+class Post(db.Model):
+    __tablename__ = "posts"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(40), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)

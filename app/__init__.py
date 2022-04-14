@@ -45,6 +45,8 @@ app.register_blueprint(auth.auth_bp)
 from .account import account
 app.register_blueprint(account.account_bp)
 
+from .posts import posts
+app.register_blueprint(posts.posts_bp)
 
 
 @app.errorhandler(404)
