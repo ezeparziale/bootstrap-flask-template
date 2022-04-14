@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_moment import Moment
 from .config import settings
 
 # Flask
@@ -27,6 +28,9 @@ login_manager.needs_refresh_message_category = "info"
 
 # Mail
 mail = Mail(app)
+
+# Moment
+moment = Moment(app)
 
 # Blueprints
 from .home import home
