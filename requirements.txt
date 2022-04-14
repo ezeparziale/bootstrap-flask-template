@@ -7,3 +7,4 @@ Flask-Bcrypt
 Flask-Login
 PyJWT
 Flask-Mail
+Flask-Moment
