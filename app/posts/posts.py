@@ -3,6 +3,7 @@ from .forms import PostForm, PostViewForm
 from ..models import Post
 from flask_login import current_user, login_required
 from app import db
+from ..config import settings
 
 posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='templates')
 
@@ -10,7 +11,7 @@ posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='te
 @login_required
 def posts():
     page = request.args.get("page", 1, type=int)
-    pagination = Post.query.order_by(Post.created_at.desc()).paginate(page, 2, error_out=False)
+    pagination = Post.query.order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
 
     form = PostForm()
     if form.validate_on_submit():
@@ -32,8 +33,6 @@ def posts():
 @login_required
 def get_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    import pprint
-    pprint.PrettyPrinter().pprint(id)
     form = PostViewForm()
     form.title.data = post.title
     form.content.data = post.content
