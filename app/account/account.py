@@ -3,7 +3,7 @@ from flask_login import current_user, fresh_login_required, login_required
 from .forms import AccountInfoForm, AccountUpdateForm
 from app import db, app
 import os
-from app.auth.models import UserDetails
+from ..models import UserDetail
 
 account_bp = Blueprint("account", __name__, url_prefix="/account", template_folder='templates')
 
@@ -47,7 +47,7 @@ def edit_account():
             current_user.details.firstname=form.firstname.data
             current_user.details.lastname=form.lastname.data
         else:
-            user_details = UserDetails(
+            user_details = UserDetail(
                 firstname=form.firstname.data, 
                 lastname=form.lastname.data, 
                 user_id=current_user.id)

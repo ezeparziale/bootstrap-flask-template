@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from .forms import RegistrationForm, LoginForm, ResetPasswordRequestForm, ResetPasswordForm
-from .models import User
+from ..models import User
 from app import db, bcrypt, mail, login_manager, app
 from flask_login import login_required, login_user, logout_user, current_user
 import pprint
