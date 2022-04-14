@@ -9,6 +9,9 @@ posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='te
 @posts_bp.route("/", methods=["GET", "POST"])
 @login_required
 def posts():
+    page = request.args.get("page", 1, type=int)
+    pagination = Post.query.order_by(Post.created_at.desc()).paginate(page, 2, error_out=False)
+
     form = PostForm()
     if form.validate_on_submit():
         post = Post(
@@ -20,8 +23,9 @@ def posts():
         db.session.commit()
         flash("Post creado", category="success")
         return redirect(url_for("posts.posts"))
-    posts = Post.query.order_by(Post.created_at.desc()).all()
-    return render_template("posts.html", form=form, posts=posts)
+
+    posts = pagination.items
+    return render_template("posts.html", form=form, posts=posts, pagination=pagination)
 
 
 @posts_bp.route("/<id>", methods=["GET"])
