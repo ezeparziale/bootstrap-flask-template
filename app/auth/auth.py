@@ -62,7 +62,7 @@ def send_email_confirm(user):
     </head>
     <body>
         <p>Ingrese al siguiente link para confirmar cuenta:</p>
-        <a class="btn btn-primary" href="{ url_for("auth.confirm", token=token, _external=True) }">Resetear Password</a>
+        <a class="btn btn-primary" href="{ url_for("auth.confirm", token=token, _external=True) }">Confirmar cuenta</a>
     </body>
     """
     thr = Thread(target=send_async_email, args=[app, msg])
@@ -159,5 +159,5 @@ def confirm(token):
 def resend_confirmation():
     token = current_user.get_confirm_token()
     send_email_confirm(current_user)
-    flash('A new confirmation email has been sent to you by email.')
+    flash("Email de confirmacion reenviado", category="info")
     return redirect(url_for("home.home_view"))
