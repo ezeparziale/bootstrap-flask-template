@@ -21,6 +21,11 @@
 
       <!-- Style core -->
       <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core.css') }}">
+
+      <!-- Moment -->
+      {{ moment.include_moment() }}
+      {{ moment.locale(auto_detect=True) }}
+
    </head>
 <body>
    {% block navbar %} {% endblock %}
