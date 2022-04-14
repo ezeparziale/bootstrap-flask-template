@@ -18,7 +18,7 @@ def unauthorized():
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    username = Column(String(20), unique=True, nullable=False)
+    username = Column(String(40), unique=True, nullable=False)
     email = Column(String(120), unique=True, nullable=False)
     image_file = Column(String(), nullable=False, default="default.jpg")
     password = Column(String(60), nullable=False)
@@ -74,8 +74,8 @@ class User(db.Model, UserMixin):
 class UserDetail(db.Model):
     __tablename__ = "user_details"
     id = Column(Integer, primary_key=True)
-    firstname = Column(String(20), unique=True, nullable=False)
-    lastname = Column(String(20), unique=True, nullable=False)
+    firstname = Column(String(60), unique=True, nullable=False)
+    lastname = Column(String(60), unique=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     def __repr__(self) -> str:
@@ -85,7 +85,7 @@ class UserDetail(db.Model):
 class Post(db.Model):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True)
-    title = Column(String(40), nullable=False)
+    title = Column(String(60), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
