@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     MAIL_USE_TLS: str
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
+    POSTS_PER_PAGE: int
 
     class Config:
         env_file = ".env"
