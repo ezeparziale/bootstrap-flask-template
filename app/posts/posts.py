@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash, request
+from flask import Blueprint, abort, redirect, render_template, url_for, flash, request
 from .forms import PostForm, PostViewForm
 from ..models import Post
 from flask_login import current_user, login_required
@@ -36,4 +36,32 @@ def get_post(id: int):
     form = PostViewForm()
     form.title.data = post.title
     form.content.data = post.content
-    return render_template("post.html", form=form)
+    return render_template("post.html", form=form, post=post)
+
+@posts_bp.route("/edit/<id>", methods=["GET","POST"])
+@login_required
+def edit_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    if current_user != post.author:
+        abort(404)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash("Post actualizado", category="success")
+        return redirect(url_for("posts.posts"))
+    form.title.data = post.title
+    form.content.data = post.content
+    return render_template("edit_post.html", form=form)
+
+@posts_bp.route("/delete/<id>", methods=["GET","POST"])
+@login_required
+def delete_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    if current_user != post.author:
+        abort(404)
+    db.session.delete(post)
+    db.session.commit()
+    flash("Post eliminado", category="success")
+    return redirect(url_for("posts.posts"))
