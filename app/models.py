@@ -50,6 +50,7 @@ class User(db.Model, UserMixin):
         lazy="dynamic", 
         cascade="all, delete-orphan"
     )
+    comments = db.relationship("Comment", backref="author", lazy="dynamic")
 
     def __repr__(self) -> str:
         return f"{self.username} : {self.email} : {self.created_at}"
@@ -133,4 +134,13 @@ class Post(db.Model):
     title = Column(String(60), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    comments = db.relationship("Comment", backref="post", lazy="dynamic")
+
+class Comment(db.Model):
+    __tablename__ = "comments"
+    id = Column(Integer, primary_key=True)
+    content = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
