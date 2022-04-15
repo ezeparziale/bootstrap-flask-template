@@ -1,6 +1,6 @@
 from flask import Blueprint, abort, make_response, redirect, render_template, url_for, flash, request
-from .forms import PostForm, PostViewForm
-from ..models import Post
+from .forms import PostCommentForm, PostForm, PostViewForm
+from ..models import Comment, Post
 from flask_login import current_user, login_required
 from app import db
 from ..config import settings
@@ -37,14 +37,27 @@ def posts():
     return render_template("posts.html", form=form, posts=posts, pagination=pagination, show_followed=show_followed)
 
 
-@posts_bp.route("/<id>", methods=["GET"])
+@posts_bp.route("/<id>", methods=["GET", "POST"])
 @login_required
 def get_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    form = PostViewForm()
-    form.title.data = post.title
-    form.content.data = post.content
-    return render_template("post.html", form=form, post=post, username=post.author.username)
+    form = PostCommentForm()
+    if form.validate_on_submit():
+        comment = Comment(
+            content=form.comment.data,
+            author=current_user,
+            post=post
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash("Comentario creado", category="success")
+        return redirect(url_for("posts.get_post", id=id))
+    
+    page = request.args.get("page", 1, type=int)
+    pagination = post.comments.order_by(Comment.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+
+    comments = pagination.items
+    return render_template("post.html", form=form, post=post, username=post.author.username, comments=comments, pagination=pagination)
 
 @posts_bp.route("/edit/<id>", methods=["GET","POST"])
 @login_required

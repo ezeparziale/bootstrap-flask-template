@@ -10,3 +10,7 @@ class PostForm(FlaskForm):
     title = StringField(label="Titulo", validators=[DataRequired(), Length(min=5, max=40)])
     content = TextAreaField(label="Contenido", validators=[DataRequired(), Length(min=10)])
     submit = SubmitField(label="Postear")
+
+class PostCommentForm(FlaskForm):
+    comment = TextAreaField(label="Comentario", validators=[DataRequired(), Length(min=10)])
+    submit = SubmitField(label="Comentar")

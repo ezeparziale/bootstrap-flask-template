@@ -8,40 +8,80 @@
 
 {% block content %}
     <div class="container">
+        <legend class="border-bottom mb-4">Post</legend>
+        Creado por: 
+        <a class="btn btn-primary" href="{{ url_for('user.user', username=username) }}" role="button">{{ username }}</a> 
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ post.title }}</h5>
+                    <small>{{ moment(post.created_at).fromNow() }}</small>
+                </div>
+                <p class="mb-1">{{ post.content }}</p>
+                <div class="d-flex w-100 justify-content-between">
+                    <span class="badge bg-secondary">Comentarios: {{ post.comments.count() }}</span>
+                </div>
+            </div>
+        </div>
+        {% if current_user == post.author %}
+            <a class="btn btn-primary" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a>
+            <a class="btn btn-danger" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a>
+        {% endif %}   
+        
+        <h2>Comentarios</h2>
+
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset>
-                <legend class="border-bottom mb-4">Post</legend>
-                Creado por: 
-                <a class="btn btn-primary" href="{{ url_for('user.user', username=username) }}" role="button">{{ username }}</a> 
-                <div class="form-group">
-                    {{ form.title.label(class="form-control-label") }}
-                    {% if form.title.errors %}
-                        {{ form.title(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.title.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.title(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.content.label(class="form-control-label") }}
-                    {% if form.content.errors %}
-                        {{ form.content(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.content.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.content(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
+                {{ form.comment.label(class="form-control-label") }}
+                {% if form.comment.errors %}
+                    {{ form.title(class="form-control form-control-lg is-invalid") }}
+                        {% for error in form.title.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor%}
+                {% else %}
+                    {{ form.comment(class="form-control form-control-lg") }}
+                {% endif %} 
             </fieldset>
-            {% if current_user == post.author %}
-                <a class="btn btn-primary" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a>
-                <a class="btn btn-danger" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a>
-            {% endif %}
+            <div class="form-group mt-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
         </form>
+
+        {% for comment in comments %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ comment.author.username }}</h5>
+                            <small>{{ moment(comment.created_at).fromNow() }}</small>
+                        </div>
+                        <p class="mb-1">{{ comment.content }}</p>
+                    </div>
+                </div>
+        {% endfor %}
+
+        <nav aria-label="Posts list">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if not pagination.has_prev %} disabled {% endif %}">
+                    <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=pagination.prev_num) }}" aria-label="Previous">Anterior</a>
+                </li>
+                {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                        <li class="page-item {% if pagination.page == page %} active {% endif %}">
+                            <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=page) }}">{{ page }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %} disabled {% endif %}">
+                    <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=pagination.next_num) }}" aria-label="Next">Siguiente</a>
+                </li>
+              </ul>
+        </nav>        
+
     </div>
   
 {% endblock %}
