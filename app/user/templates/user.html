@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+    {% include "navbar.html" %}
+{% endblock %}
+
+{% block title %} User {% endblock %}
+
+{% block content %}
+  <div class="card mb-3">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img src="{{ url_for('static', filename='img/profiles/' + user.image_file) }}" class="img-fluid rounded-start" alt="...">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{ user.username }}
+            {% if user != current_user and user.is_following(current_user) %}
+              <span class="badge bg-primary">Te sigue</span>  
+            {% endif %}
+          </h5>
+          <p class="card-text">{{ user.details.firstname }} {{ user.details.lastname }}</p>
+          <p class="card-text"><small class="text-muted">Miembro desde: {{ moment(user.created_at).format("L") }}</small></p>
+          <h6>
+            Posts: <span class="badge bg-secondary">{{ user.posts.count() }}</span>  
+            Seguidores: <span class="badge bg-secondary">{{ user.followers.count() }}</span>  
+            Siguiendo: <span class="badge bg-secondary">{{ user.followed.count() }}</span>  
+          </h6>
+          {% if user != current_user %}
+            {% if current_user.is_following(user) %}
+              <a href="{{ url_for('user.unfollow', username=user.username) }}" class="btn btn-secondary">No seguir</a>
+            {% else %}
+              <a href="{{ url_for('user.follow', username=user.username) }}" class="btn btn-primary">Seguir</a>
+            {% endif %}  
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+

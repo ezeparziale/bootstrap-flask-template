@@ -48,6 +48,9 @@ app.register_blueprint(account.account_bp)
 from .posts import posts
 app.register_blueprint(posts.posts_bp)
 
+from .user import user
+app.register_blueprint(user.user_bp)
+
 
 @app.errorhandler(404)
 def page_not_found(e):

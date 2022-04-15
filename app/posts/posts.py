@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, redirect, render_template, url_for, flash, request
+from flask import Blueprint, abort, make_response, redirect, render_template, url_for, flash, request
 from .forms import PostForm, PostViewForm
 from ..models import Post
 from flask_login import current_user, login_required
@@ -10,8 +10,16 @@ posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='te
 @posts_bp.route("/", methods=["GET", "POST"])
 @login_required
 def posts():
+    show_followed = False
+    if current_user.is_authenticated:
+        show_followed = bool(request.cookies.get("show_followed", ""))
+    if show_followed:
+        query = current_user.followed_posts
+    else:
+        query = Post.query
+
     page = request.args.get("page", 1, type=int)
-    pagination = Post.query.order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+    pagination = query.order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
 
     form = PostForm()
     if form.validate_on_submit():
@@ -26,7 +34,7 @@ def posts():
         return redirect(url_for("posts.posts"))
 
     posts = pagination.items
-    return render_template("posts.html", form=form, posts=posts, pagination=pagination)
+    return render_template("posts.html", form=form, posts=posts, pagination=pagination, show_followed=show_followed)
 
 
 @posts_bp.route("/<id>", methods=["GET"])
@@ -36,7 +44,7 @@ def get_post(id: int):
     form = PostViewForm()
     form.title.data = post.title
     form.content.data = post.content
-    return render_template("post.html", form=form, post=post)
+    return render_template("post.html", form=form, post=post, username=post.author.username)
 
 @posts_bp.route("/edit/<id>", methods=["GET","POST"])
 @login_required
@@ -65,3 +73,17 @@ def delete_post(id: int):
     db.session.commit()
     flash("Post eliminado", category="success")
     return redirect(url_for("posts.posts"))
+
+@posts_bp.route("/show_all", methods=["GET","POST"])
+@login_required
+def show_all():
+    resp = make_response(redirect(url_for("posts.posts")))
+    resp.set_cookie("show_followed", "", max_age=30*24*60*60) # 30 days
+    return resp
+
+@posts_bp.route("/show_followed", methods=["GET","POST"])
+@login_required
+def show_followed():
+    resp = make_response(redirect(url_for("posts.posts")))
+    resp.set_cookie("show_followed", "1", max_age=30*24*60*60) # 30 days
+    return resp

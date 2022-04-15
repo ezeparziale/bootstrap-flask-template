@@ -15,6 +15,15 @@ def load_user(user_id):
 def unauthorized():
     return redirect(url_for("auth.login"))
 
+class Follow(db.Model):
+    __tablename__ = "follows"
+    follower_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    followed_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    followed_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"{self.user_id} {self.follower_id}"
+
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -26,7 +35,21 @@ class User(db.Model, UserMixin):
     confirmed = Column(BOOLEAN, default=False)
     last_seen = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     details = db.relationship("UserDetail", backref="user", lazy=True, uselist=False)
-    posts = db.relationship("Post", backref="author", lazy=True)
+    posts = db.relationship("Post", backref="author", lazy="dynamic")
+    followed = db.relationship(
+        "Follow",
+        foreign_keys=[Follow.follower_id],
+        backref=db.backref("follower", lazy="joined"), 
+        lazy="dynamic", 
+        cascade="all, delete-orphan"
+    )
+    followers = db.relationship(
+        "Follow", 
+        foreign_keys=[Follow.followed_id],
+        backref=db.backref("followed", lazy="joined"), 
+        lazy="dynamic", 
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"{self.username} : {self.email} : {self.created_at}"
@@ -70,6 +93,28 @@ class User(db.Model, UserMixin):
         except: 
             return None
         return User.query.get(user_id)
+
+    def follow(self, user):
+        if not self.is_following(user):
+            follow = Follow(follower=self, followed=user)
+            db.session.add(follow)
+            db.session.commit()
+    
+    def unfollow(self, user):
+        follow = self.followed.filter_by(followed_id=user.id).first()
+        if follow:
+            db.session.delete(follow)
+            db.session.commit()
+
+    def is_following(self, user):
+        return self.followed.filter_by(followed_id=user.id).first() is not None
+
+    def is_followed_by(self, user):
+        return self.followers.filter_by(follower_id=user.id).first() is not None
+
+    @property
+    def followed_posts(self):
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
 
 class UserDetail(db.Model):
     __tablename__ = "user_details"
