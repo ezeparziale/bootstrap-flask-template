@@ -129,6 +129,9 @@ class User(db.Model, UserMixin):
     def is_admin(self):
         return self.can(Permission.ADMIN)
 
+    def is_moderate(self):
+        return self.can(Permission.MODERATE)
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, perm):
@@ -163,6 +166,7 @@ class Comment(db.Model):
     __tablename__ = "comments"
     id = Column(Integer, primary_key=True)
     content = Column(Text, nullable=False)
+    disabled = Column(BOOLEAN, default=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
