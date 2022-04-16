@@ -1,9 +1,12 @@
 from flask import Blueprint, abort, make_response, redirect, render_template, url_for, flash, request
+
+from app.decorators import permission_required
 from .forms import PostCommentForm, PostForm, PostViewForm
-from ..models import Comment, Post
+from ..models import Comment, Post, Permission
 from flask_login import current_user, login_required
 from app import db
 from ..config import settings
+
 
 posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='templates')
 
@@ -100,3 +103,35 @@ def show_followed():
     resp = make_response(redirect(url_for("posts.posts")))
     resp.set_cookie("show_followed", "1", max_age=30*24*60*60) # 30 days
     return resp
+
+@posts_bp.route("/moderate/comment", methods=["GET", "POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate_comment():
+    page = request.args.get("page", 1, type=int)
+    pagination = Comment.query.order_by(Comment.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+    comments = pagination.items
+    return render_template("moderate_comment.html", comments=comments, pagination=pagination)
+
+@posts_bp.route("/moderate/comment/enable/<id>", methods=["GET","POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def comment_enable(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment.disabled = False
+    db.session.commit()
+    page = request.args.get("page", 1, type=int)
+    flash("Comentario habilitado", category="success")
+    return redirect(url_for("posts.moderate_comment", page=page))
+
+
+@posts_bp.route("/moderate/comment/disable/<id>", methods=["GET","POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def comment_disable(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment.disabled = True
+    db.session.commit()
+    page = request.args.get("page", 1, type=int)
+    flash("Comentario deshabilitado", category="success")
+    return redirect(url_for("posts.moderate_comment", page=page))

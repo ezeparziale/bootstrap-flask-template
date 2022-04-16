@@ -55,7 +55,12 @@
                             <h5 class="mb-1">{{ comment.author.username }}</h5>
                             <small>{{ moment(comment.created_at).fromNow() }}</small>
                         </div>
-                        <p class="mb-1">{{ comment.content }}</p>
+                        {% if comment.disabled %}
+                            <span class="badge bg-warning">Comentario deshabilitado</span>
+                        {% else %}
+                            <p class="mb-1">{{ comment.content }}</p>
+                        {% endif %}
+                        {{ moderate }}
                     </div>
                 </div>
         {% endfor %}
