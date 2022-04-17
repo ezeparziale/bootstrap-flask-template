@@ -35,6 +35,12 @@
             <a class="btn btn-primary" href="{{ url_for('posts.like_post', id=post.id) }}" role="button">Like</a>
         {% endif %}
         
+        {% if post.if_favorite(current_user) %}
+            <a class="btn btn-danger" href="{{ url_for('posts.unfavorite_post', id=post.id) }}" role="button">Unfavorite</a>
+        {% else %}
+            <a class="btn btn-primary" href="{{ url_for('posts.favorite_post', id=post.id) }}" role="button">Favorite</a>
+        {% endif %}
+
         <h2>Comentarios</h2>
 
         <form method="post" action="" enctype="multipart/form-data">

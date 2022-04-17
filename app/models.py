@@ -53,6 +53,7 @@ class User(db.Model, UserMixin):
     comments = db.relationship("Comment", backref="author", lazy="dynamic")
     rol_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
     likes = db.relationship("Like", backref="user", lazy="dynamic")
+    favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -124,6 +125,10 @@ class User(db.Model, UserMixin):
     def followed_posts(self):
         return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
 
+    @property
+    def favorites_posts(self):
+        return Post.query.join(Favorite, Favorite.post_id == Post.id).filter(Favorite.user_id == self.id)
+        
     def can(self, perm):
         return self.role is not None and self.role.has_permission(perm)
 
@@ -163,6 +168,22 @@ class Post(db.Model):
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     comments = db.relationship("Comment", backref="post", lazy="dynamic")
     likes = db.relationship("Like", backref="post", lazy="dynamic")
+    favorites = db.relationship("Favorite", backref="post", lazy="dynamic")
+
+    def if_favorite(self, user):
+        return self.favorites.filter_by(user_id=user.id).first() is not None
+
+    def favorite(self, user):
+        if not self.if_favorite(user):
+            favorite = Favorite(user=user, post=self)
+            db.session.add(favorite)
+            db.session.commit()
+
+    def unfavorite(self, user):
+        favorite = self.favorites.filter_by(user_id=user.id).first()
+        if favorite:
+            db.session.delete(favorite)
+            db.session.commit()
 
     def is_like(self, user):
         return self.likes.filter_by(user_id=user.id).first() is not None
@@ -182,6 +203,14 @@ class Post(db.Model):
 
 class Like(db.Model):
     __tablename__ = "likes"
+    id = Column(Integer, primary_key=True)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+
+
+class Favorite(db.Model):
+    __tablename__ = "favorites"
     id = Column(Integer, primary_key=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)

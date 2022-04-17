@@ -13,13 +13,15 @@ posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='te
 @posts_bp.route("/", methods=["GET", "POST"])
 @login_required
 def posts():
-    show_followed = False
+    view_mode = 0
     if current_user.is_authenticated:
-        show_followed = bool(request.cookies.get("show_followed", ""))
-    if show_followed:
-        query = current_user.followed_posts
-    else:
+        view_mode = int(request.cookies.get("view_mode", 0))
+    if view_mode == 0:
         query = Post.query
+    if view_mode == 1:
+        query = current_user.followed_posts
+    if view_mode == 2:
+        query = current_user.favorites_posts
 
     page = request.args.get("page", 1, type=int)
     pagination = query.order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
@@ -37,7 +39,7 @@ def posts():
         return redirect(url_for("posts.posts"))
 
     posts = pagination.items
-    return render_template("posts.html", form=form, posts=posts, pagination=pagination, show_followed=show_followed)
+    return render_template("posts.html", form=form, posts=posts, pagination=pagination, view_mode=view_mode)
 
 
 @posts_bp.route("/<id>", methods=["GET", "POST"])
@@ -94,14 +96,22 @@ def delete_post(id: int):
 @login_required
 def show_all():
     resp = make_response(redirect(url_for("posts.posts")))
-    resp.set_cookie("show_followed", "", max_age=30*24*60*60) # 30 days
+    resp.set_cookie("view_mode", "0", max_age=30*24*60*60) # 30 days
     return resp
 
 @posts_bp.route("/show_followed", methods=["GET","POST"])
 @login_required
 def show_followed():
     resp = make_response(redirect(url_for("posts.posts")))
-    resp.set_cookie("show_followed", "1", max_age=30*24*60*60) # 30 days
+    resp.set_cookie("view_mode", "1", max_age=30*24*60*60) # 30 days
+    return resp
+
+
+@posts_bp.route("/show_favorite", methods=["GET","POST"])
+@login_required
+def show_favorite():
+    resp = make_response(redirect(url_for("posts.posts")))
+    resp.set_cookie("view_mode", "2", max_age=30*24*60*60) # 30 days
     return resp
 
 @posts_bp.route("/moderate/comment", methods=["GET", "POST"])
@@ -151,4 +161,20 @@ def unlike_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
     post.unlike(current_user)
     flash("Post eliminado de likes", category="success")
+    return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/favorite/<id>", methods=["GET","POST"])
+@login_required
+def favorite_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.favorite(current_user)
+    flash("Post agregado a favoritos", category="success")
+    return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/unfavorite/<id>", methods=["GET","POST"])
+@login_required
+def unfavorite_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.unfavorite(current_user)
+    flash("Post eliminado de favoritos", category="success")
     return redirect(url_for("posts.get_post", id=id))
