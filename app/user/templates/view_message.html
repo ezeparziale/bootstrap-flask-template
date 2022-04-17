@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+    {% include "navbar.html" %}
+{% endblock %}
+
+{% block title %} Mensaje {% endblock %}
+
+{% block content %}
+
+    <div class="list-group">
+        <a href="{{ url_for('posts.get_post', id=1) }}" class="list-group-item list-group-item-action" aria-current="true">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">De: {{ message.author.username }}</h5>
+            <small>{{ moment(message.created_at).fromNow() }}</small>
+        </div>
+        <h5 class="mb-1">Para: {{ message.recipient.username }}</h5>
+        <p class="mb-1">{{ message.message }}</p>
+        </a>
+    </div>
+
+{% endblock %}

@@ -54,6 +54,13 @@ class User(db.Model, UserMixin):
     rol_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
     likes = db.relationship("Like", backref="user", lazy="dynamic")
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
+    messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="author", lazy="dynamic")
+    messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
+
+    def send_message(self, recipient, message):
+        msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
+        db.session.add(msg)
+        db.session.commit()
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -284,3 +291,13 @@ class Permission:
 @app.context_processor
 def inject_permission():
     return dict(Permission=Permission)
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = Column(Integer, primary_key=True)
+    message = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    read = Column(BOOLEAN, default=False)

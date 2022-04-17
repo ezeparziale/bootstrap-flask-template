@@ -12,9 +12,12 @@
             <a class="nav-link active" aria-current="page" href="{{ url_for('home.home_view') }}">Home</a>
           </li>
           {% if current_user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">Posts</a>
-          </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">Posts</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{{ url_for('user.messages') }}">Mensajes</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('account.account') }}">Account</a>
             </li>
