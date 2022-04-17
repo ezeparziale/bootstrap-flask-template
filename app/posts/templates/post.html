@@ -20,13 +20,20 @@
                 <p class="mb-1">{{ post.content }}</p>
                 <div class="d-flex w-100 justify-content-between">
                     <span class="badge bg-secondary">Comentarios: {{ post.comments.count() }}</span>
+                    <span class="badge bg-secondary">Likes: {{ post.likes.count() }}</span>
+
                 </div>
             </div>
         </div>
         {% if current_user == post.author %}
             <a class="btn btn-primary" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a>
             <a class="btn btn-danger" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a>
-        {% endif %}   
+        {% endif %}
+        {% if post.is_like(current_user) %}
+            <a class="btn btn-danger" href="{{ url_for('posts.unlike_post', id=post.id) }}" role="button">Unlike</a>
+        {% else %}
+            <a class="btn btn-primary" href="{{ url_for('posts.like_post', id=post.id) }}" role="button">Like</a>
+        {% endif %}
         
         <h2>Comentarios</h2>
 

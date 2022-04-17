@@ -52,6 +52,7 @@ class User(db.Model, UserMixin):
     )
     comments = db.relationship("Comment", backref="author", lazy="dynamic")
     rol_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
+    likes = db.relationship("Like", backref="user", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -161,6 +162,30 @@ class Post(db.Model):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     comments = db.relationship("Comment", backref="post", lazy="dynamic")
+    likes = db.relationship("Like", backref="post", lazy="dynamic")
+
+    def is_like(self, user):
+        return self.likes.filter_by(user_id=user.id).first() is not None
+
+    def like(self, user):
+        if not self.is_like(user):
+            like = Like(user=user, post=self)
+            db.session.add(like)
+            db.session.commit()
+
+    def unlike(self, user):
+        like = self.likes.filter_by(user_id=user.id).first()
+        if like:
+            db.session.delete(like)
+            db.session.commit()
+
+
+class Like(db.Model):
+    __tablename__ = "likes"
+    id = Column(Integer, primary_key=True)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
 
 class Comment(db.Model):
     __tablename__ = "comments"

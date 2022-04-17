@@ -135,3 +135,20 @@ def comment_disable(id: int):
     page = request.args.get("page", 1, type=int)
     flash("Comentario deshabilitado", category="success")
     return redirect(url_for("posts.moderate_comment", page=page))
+
+
+@posts_bp.route("/like/<id>", methods=["GET","POST"])
+@login_required
+def like_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.like(current_user)
+    flash("Post agregado a likes", category="success")
+    return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/unlike/<id>", methods=["GET","POST"])
+@login_required
+def unlike_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.unlike(current_user)
+    flash("Post eliminado de likes", category="success")
+    return redirect(url_for("posts.get_post", id=id))
