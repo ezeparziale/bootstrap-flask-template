@@ -30,18 +30,18 @@
             <a class="btn btn-danger" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a>
         {% endif %}
         {% if post.is_like(current_user) %}
-            <a class="btn btn-danger" href="{{ url_for('posts.unlike_post', id=post.id) }}" role="button">Unlike</a>
+            <a class="btn btn-danger" href="{{ url_for('posts.unlike_post', id=post.id) }}" role="button"><i class="bi bi-hand-thumbs-up"></i> Unlike</a>
         {% else %}
-            <a class="btn btn-primary" href="{{ url_for('posts.like_post', id=post.id) }}" role="button">Like</a>
+            <a class="btn btn-primary" href="{{ url_for('posts.like_post', id=post.id) }}" role="button"><i class="bi bi-hand-thumbs-up-fill"></i> Like</a>
         {% endif %}
         
         {% if post.if_favorite(current_user) %}
-            <a class="btn btn-danger" href="{{ url_for('posts.unfavorite_post', id=post.id) }}" role="button">Unfavorite</a>
+            <a class="btn btn-danger" href="{{ url_for('posts.unfavorite_post', id=post.id) }}" role="button"><i class="bi bi-star"></i> Unfavorite</a>
         {% else %}
-            <a class="btn btn-primary" href="{{ url_for('posts.favorite_post', id=post.id) }}" role="button">Favorite</a>
+            <a class="btn btn-primary" href="{{ url_for('posts.favorite_post', id=post.id) }}" role="button"><i class="bi bi-star-fill"></i> Favorite</a>
         {% endif %}
 
-        <h2>Comentarios</h2>
+        <h2><i class="bi bi-chat-left-fill"></i> Comentarios</h2>
 
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
