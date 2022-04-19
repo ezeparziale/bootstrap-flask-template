@@ -8,7 +8,7 @@
 
 {% block content %}
 
-    <br>
+    <legend class="border-bottom mb-4">Mensajes</legend>
 
     <ul class="nav nav-tabs">
         <li class="nav-item">
@@ -19,11 +19,16 @@
         </li>
     </ul>
 
-    <div class="list-group">
+    <div class="list-group list-group-flush">
         {% for message in messages %}
             <a href="{{ url_for('user.view_message', id=message.id) }}" class="list-group-item list-group-item-action" aria-current="true">
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
+                    {% if not message.read and view_message == 0 %}
+                        <i class="bi bi-envelope"></i>
+                    {% else %}
+                        <i class="bi bi-envelope-open"></i>
+                    {% endif %}
                     {% if view_message == 0 %} {{ message.author.username }} {% else %} {{ message.recipient.username }} {% endif %}
                     {% if not message.read and view_message == 0 %}
                         <span class="badge bg-secondary">Nuevo</span>
