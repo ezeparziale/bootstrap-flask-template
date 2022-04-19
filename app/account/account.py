@@ -26,7 +26,7 @@ def account():
     if current_user.details:
             form.firstname.data = current_user.details.firstname
             form.lastname.data = current_user.details.lastname
-    image_url = url_for("static", filename="img/profiles/" + current_user.image_file)
+    image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
     return render_template("account.html", form=form, image_url=image_url)
     
 
@@ -63,5 +63,5 @@ def edit_account():
         if current_user.details:
             form.firstname.data = current_user.details.firstname
             form.lastname.data = current_user.details.lastname
-    image_url = url_for("static", filename="img/profiles/" + current_user.image_file)
+    image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
     return render_template("edit_account.html", form=form, image_url=image_url)

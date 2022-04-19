@@ -77,7 +77,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         encrypted_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
-        user = User(username=form.username.data,email=form.email.data,password=encrypted_password)
+        user = User(username=form.username.data,email=form.email.data,password=encrypted_password, image_file=User.generate_avatar())
         db.session.add(user)
         db.session.commit()
         flash(f"Cuenta creada exitosamente", category="success")

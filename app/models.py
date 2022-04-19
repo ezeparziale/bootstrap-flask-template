@@ -6,6 +6,7 @@ from sqlalchemy.sql.expression import text
 from flask_login import UserMixin, AnonymousUserMixin
 import jwt
 from datetime import datetime, timedelta, timezone
+import random
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -56,6 +57,14 @@ class User(db.Model, UserMixin):
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
     messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="author", lazy="dynamic")
     messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
+
+
+    @staticmethod
+    def generate_avatar():
+        img = []
+        for i in range(1, 16):
+            img.append(f"avatar{i}.png")
+        return img[random.randint(0,14)]
 
     def send_message(self, recipient, message):
         msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
