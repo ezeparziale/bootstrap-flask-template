@@ -7,6 +7,7 @@
   --global-btn-p2: #529852;
   --global-btn-p3: #b27db2;
   --global-white: #ffffff;
+  --global-gray: #e5e5e5;
 
 }
 
@@ -90,4 +91,26 @@ a:hover {
 .navbar-app-green .navbar-nav .dropdown-item:focus {
     color: var(--global-white);
     background-color: var(--global-btn-p2);
+}
+
+/* Image post*/
+.image-posts {
+    max-width: 50px;
+}
+
+/* Tabs */
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    border-top: var(--global-white);
+    border-right: var(--global-white);
+    border-left: var(--global-white);
+    border-bottom: 3px solid var(--global-btn);
+}
+
+.nav-link {
+    color: var(--global-btn);
+}
+
+/* Small tag */
+.small {
+    color: var(--global-btn-p3);
 }
