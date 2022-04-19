@@ -24,12 +24,13 @@
             <a href="{{ url_for('user.view_message', id=message.id) }}" class="list-group-item list-group-item-action" aria-current="true">
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
-                    {% if not message.read and view_message == 0 %}
-                        <i class="bi bi-envelope"></i>
+                    {% if view_message == 0 %} 
+                        <img src="{{ url_for('static', filename='img/avatars/' ~ message.author.image_file) }}" class="image-posts" alt="{{ message.author.username }}">
+                        {{ message.author.username }} 
                     {% else %}
-                        <i class="bi bi-envelope-open"></i>
+                        <img src="{{ url_for('static', filename='img/avatars/' ~ message.recipient.image_file) }}" class="image-posts" alt="{{ message.recipient.username }}">
+                        {{ message.recipient.username }} 
                     {% endif %}
-                    {% if view_message == 0 %} {{ message.author.username }} {% else %} {{ message.recipient.username }} {% endif %}
                     {% if not message.read and view_message == 0 %}
                         <span class="badge bg-secondary">Nuevo</span>
                     {% endif %}
