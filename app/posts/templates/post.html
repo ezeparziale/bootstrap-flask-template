@@ -18,10 +18,9 @@
                     <small>{{ moment(post.created_at).fromNow() }}</small>
                 </div>
                 <p class="mb-1">{{ post.content }}</p>
-                <div class="d-flex w-100 justify-content-between">
-                    <span class="badge bg-secondary">Comentarios: {{ post.comments.count() }}</span>
-                    <span class="badge bg-secondary">Likes: {{ post.likes.count() }}</span>
-
+                <div class="text-muted">
+                    <small><i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios</small>
+                    <small><i class="bi bi-star"></i> {{ post.likes.count() }} Me gusta</small>
                 </div>
             </div>
         </div>
