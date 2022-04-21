@@ -92,7 +92,13 @@
                     {% else %}
                         <p class="mb-1">{{ comment.content }}</p>
                     {% endif %}
-                    {{ moderate }}
+                    {% if current_user.is_moderate %}
+                        {% if comment.disabled %}
+                            <a class="btn btn-primary btn-sm" href="{{url_for('posts.comment_enable', id=comment.id, page=pagination.page)}}" role="button">Habilitar</a>
+                        {% else %}
+                            <a class="btn btn-danger btn-sm" href="{{url_for('posts.comment_disable', id=comment.id, page=pagination.page)}}" role="button">Deshabilitar</a>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
