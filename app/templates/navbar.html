@@ -9,36 +9,63 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ url_for('home.home_view') }}">Home</a>
+            <a class="nav-link active" aria-current="page" href="{{ url_for('home.home_view') }}">
+              <i class="bi bi-house"></i> Home
+            </a>
           </li>
           {% if current_user.is_authenticated %}
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">Posts</a>
+              <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">
+                <i class="bi bi-stickies"></i> Posts
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('user.messages') }}">Mensajes 
+              <a class="nav-link active" aria-current="page" href="{{ url_for('user.messages') }}">
+                <i class="bi bi-chat"></i> Mensajes 
                 {% set count_messages = current_user.new_messages() %}
                 <span id="messages_unread" class="badge bg-secondary">{{ count_messages if count_messages else "" }}</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('account.account') }}">Account</a>
-            </li>
+
             {% if current_user.is_moderate() %}
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('posts.moderate_comment') }}">Moderate</a>
             {% endif %}
           {% endif %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('about.about_view') }}">About</a>
-          </li>
+          
         </ul>
+
+        
 
         <ul class="navbar-nav justify-content-end">
           {% if current_user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('auth.logout') }}">Logout</a>
-            </li>
+            <div class="dropdown text-end">
+              <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="mdo" width="32" height="32" class="rounded-circle">
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownUser">
+                <li>
+                  <a class="nav-link active" aria-current="page" href="{{ url_for('account.account') }}">
+                    <i class="bi bi-person"></i> Perfil
+                  </a>
+                </li>
+                <li>
+                  <a class="nav-link active" aria-current="page" href="{{ url_for('account.account') }}">
+                    <i class="bi bi-gear"></i> Configuración
+                  </a>
+                </li>
+                <li>
+                  <a class="nav-link" href="{{ url_for('about.about_view') }}">
+                    <i class="bi bi-info-circle"></i> About
+                  </a>
+                </li>               
+                <li>
+                  <a class="nav-link active" aria-current="page" href="{{ url_for('auth.logout') }}">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
           {% else %}
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('auth.register') }}">Sign Up</a>
