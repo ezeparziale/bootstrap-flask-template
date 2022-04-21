@@ -15,6 +15,7 @@ body {
     font-family: 'Lato', sans-serif;
     color: var(--global-body-color);
     background-color: var(--global-body-bg);
+    padding-top: 60px;
 }
   
 .btn-primary {
@@ -93,6 +94,24 @@ a:hover {
     background-color: var(--global-btn-p2);
 }
 
+
+/* Hamburger icon */
+.navbar-app-green .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+  
+.navbar-app-green .navbar-toggler {
+    border-color: none;
+}
+
+.navbar-toggler:focus,
+.navbar-toggler:active,
+.navbar-toggler-icon:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+
 /* Image post*/
 .image-posts {
     max-width: 50px;
@@ -119,3 +138,51 @@ a:hover {
 .small {
     color: var(--global-btn-p3);
 }
+
+/* Button outline */
+.btn-outline-primary {
+    color: var(--global-white);
+    border-color: var(--global-white);
+    background: transparent;
+  }
+  .btn-outline-primary:hover {
+    color: var(--global-btn);
+    background-color: var(--global-white);
+    border-color: var(--global-white);
+    box-shadow: 0 0.125rem 0.25rem 0 rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+  }
+  .btn-check:focus + .btn-outline-primary, .btn-outline-primary:focus {
+    color: var(--global-btn);
+    background-color: var(--global-white);
+    border-color: var(--global-white);
+    box-shadow: none;
+    transform: translateY(0);
+  }
+  .btn-check:checked + .btn-outline-primary, .btn-check:active + .btn-outline-primary, .btn-outline-primary:active, .btn-outline-primary.active, .btn-outline-primary.dropdown-toggle.show {
+    color: var(--global-btn);
+    background-color: var(--global-white);
+    border-color: var(--global-white);
+  }
+  .btn-check:checked + .btn-outline-primary:focus, .btn-check:active + .btn-outline-primary:focus, .btn-outline-primary:active:focus, .btn-outline-primary.active:focus, .btn-outline-primary.dropdown-toggle.show:focus {
+    box-shadow: none;
+  }
+  .btn-outline-primary.disabled, .btn-outline-primary:disabled {
+    box-shadow: none;
+  }
+  
+  .btn-outline-primary .badge {
+    background: var(--global-white);
+    border-color: var(--global-white);
+    color: var(--global-btn);
+  }
+  
+  .btn-outline-primary:hover .badge,
+  .btn-outline-primary:focus:hover .badge,
+  .btn-outline-primary:active .badge,
+  .btn-outline-primary.active .badge,
+  .show > .btn-outline-primary.dropdown-toggle .badge {
+    background: var(--global-btn);
+    border-color: var(--global-btn);
+    color: var(--global-white);
+  }
