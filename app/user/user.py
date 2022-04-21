@@ -1,46 +1,54 @@
-from flask import Blueprint, make_response, redirect, render_template, request, url_for, flash
+from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for, flash
 from flask_login import current_user, login_required
 from app.config import settings
-from app.user.forms import MessageForm
-from ..models import Message, User
+from app.user.forms import EmptyForm, MessageForm
+from ..models import Message, Notification, User
 from app import db
+from datetime import datetime
 
 user_bp = Blueprint("user", __name__, url_prefix="/user", template_folder='templates')
 
 @user_bp.route("/<username>", methods=["GET", "POST"])
 @login_required
 def user(username: str):
+    form = EmptyForm()
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template("user.html", user=user)
+    return render_template("user.html", user=user, form=form)
 
 
-@user_bp.route("/follow/<username>", methods=["GET"])
+@user_bp.route("/follow/<username>", methods=["POST"])
 @login_required
 def follow(username: str):
-    user = User.query.filter_by(username=username).first_or_404()
-    if user == current_user:
-        flash("No te puede auto seguir", category="info")
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=username).first_or_404()
+        if user == current_user:
+            flash("No te puede auto seguir", category="info")
+            return redirect(url_for("user.user", username=username))
+        if current_user.is_following(user):
+            flash("Ya estás siguiendo a este usuario", category="info")
+            return redirect(url_for("user.user", username=username))
+        current_user.follow(user)
+        flash(f"Estas siguiendo a {username}", category="success")
         return redirect(url_for("user.user", username=username))
-    if current_user.is_following(user):
-        flash("Ya estás siguiendo a este usuario", category="info")
-        return redirect(url_for("user.user", username=username))
-    current_user.follow(user)
-    flash(f"Estas siguiendo a {username}", category="success")
-    return redirect(url_for("user.user", username=username))
+    return render_template("user.user", username=username)
 
 
-@user_bp.route("/unfollow/<username>", methods=["GET"])
+@user_bp.route("/unfollow/<username>", methods=["POST"])
 @login_required
 def unfollow(username: str):
-    user = User.query.filter_by(username=username).first_or_404()
-    if user == current_user:
-        flash("No te puedes auto seguir", category="info")
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=username).first_or_404()
+        if user == current_user:
+            flash("No te puede auto seguir", category="info")
+            return redirect(url_for("user.user", username=username))
+        if not current_user.is_following(user):
+            flash("No estás siguiendo a este usuario", category="info")
+            return redirect(url_for("user.user", username=username))
+        current_user.unfollow(user)
+        flash(f"Ya no sigues a {username}", category="success")
         return redirect(url_for("user.user", username=username))
-    if not current_user.is_following(user):
-        flash("No estás siguiendo a este usuario", category="info")
-        return redirect(url_for("user.user", username=username))
-    current_user.unfollow(user)
-    flash(f"Ya no sigues a {username}", category="success")
     return redirect(url_for("user.user", username=username))
 
 
@@ -77,6 +85,7 @@ def send_message(username: str):
     if form.validate_on_submit():
         message = form.message.data
         current_user.send_message(recipient, message)
+        recipient.add_notification("unread_message_count", recipient.new_messages())
         flash("Mensaje enviado", category="success")
         return redirect(url_for("user.show_messages_sent"))
     return render_template("send_message.html", form=form, recipient=recipient)
@@ -85,6 +94,9 @@ def send_message(username: str):
 @user_bp.route("/messages", methods=["GET"])
 @login_required
 def messages():
+    current_user.last_message_read_time = datetime.utcnow()
+    current_user.add_notification("unread_message_count", 0)
+    db.session.commit()
     view_message = 0
     if current_user.is_authenticated:
         view_message = int(request.cookies.get("view_message", 0))
@@ -123,3 +135,14 @@ def view_message(id: int):
     message.read = True
     db.session.commit()
     return render_template("view_message.html", message=message)
+
+@user_bp.route("/notifications", methods=["GET"])
+@login_required
+def notifications():
+    since = request.args.get("since", 0.0, type=float)
+    notifications = current_user.get_notifications(since)
+    return jsonify([{
+        "name": n.name,
+        "data": n.get_data(),
+        "timestamp": n.timestamp
+    } for n in notifications])

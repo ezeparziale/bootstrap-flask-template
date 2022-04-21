@@ -7,6 +7,7 @@ from flask_login import UserMixin, AnonymousUserMixin
 import jwt
 from datetime import datetime, timedelta, timezone
 import random
+import json
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -57,7 +58,8 @@ class User(db.Model, UserMixin):
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
     messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="author", lazy="dynamic")
     messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
-
+    last_message_read_time = db.Column(TIMESTAMP)
+    notifications = db.relationship("Notification", backref="user", lazy="dynamic")
 
     @staticmethod
     def generate_avatar():
@@ -154,6 +156,18 @@ class User(db.Model, UserMixin):
     def is_moderate(self):
         return self.can(Permission.MODERATE)
 
+    def add_notification(self, name, data):
+        self.notifications.filter_by(name=name).delete()
+        n = Notification(name=name, payload_json=json.dumps(data), user=self)
+        db.session.add(n)
+        db.session.commit()
+
+    def new_messages(self):
+        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+        return Message.query.filter_by(recipient=self).filter(Message.created_at > last_read_time).count()
+
+    def get_notifications(self, since):
+        return self.notifications.filter(Notification.timestamp > datetime.utcfromtimestamp(since)).order_by(Notification.timestamp.asc())
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, perm):
@@ -310,3 +324,14 @@ class Message(db.Model):
     sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     read = Column(BOOLEAN, default=False)
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(128), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    timestamp = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    payload_json = Column(Text, nullable=False)
+
+    def get_data(self):
+        return json.loads(str(self.payload_json))

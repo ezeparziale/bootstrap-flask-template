@@ -16,7 +16,10 @@
               <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">Posts</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('user.messages') }}">Mensajes</a>
+              <a class="nav-link active" aria-current="page" href="{{ url_for('user.messages') }}">Mensajes 
+                {% set count_messages = current_user.new_messages() %}
+                <span id="messages_unread" class="badge bg-secondary">{{ count_messages if count_messages else "" }}</span>
+              </a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('account.account') }}">Account</a>
