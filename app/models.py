@@ -60,6 +60,8 @@ class User(db.Model, UserMixin):
     messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
     last_message_read_time = db.Column(TIMESTAMP)
     notifications = db.relationship("Notification", backref="user", lazy="dynamic")
+    views = db.relationship("View", backref="user", lazy="dynamic")
+    report = db.relationship("Report", backref="user", lazy="dynamic")
 
     @staticmethod
     def generate_avatar():
@@ -169,6 +171,7 @@ class User(db.Model, UserMixin):
     def get_notifications(self, since):
         return self.notifications.filter(Notification.timestamp > datetime.utcfromtimestamp(since)).order_by(Notification.timestamp.asc())
 
+
 class AnonymousUser(AnonymousUserMixin):
     def can(self, perm):
         return False
@@ -199,6 +202,12 @@ class Post(db.Model):
     comments = db.relationship("Comment", backref="post", lazy="dynamic")
     likes = db.relationship("Like", backref="post", lazy="dynamic")
     favorites = db.relationship("Favorite", backref="post", lazy="dynamic")
+    views = db.relationship("View", backref="post", lazy="dynamic")
+    report = db.relationship("Report", backref="post", lazy="dynamic")
+
+    def add_visit(self):
+        self.visits += 1
+        db.session.commit()
 
     def if_favorite(self, user):
         return self.favorites.filter_by(user_id=user.id).first() is not None
@@ -229,6 +238,31 @@ class Post(db.Model):
         if like:
             db.session.delete(like)
             db.session.commit()
+
+    def get_views(self):
+        return self.views.distinct(View.user_id).count()
+
+    def add_view(self, user):
+        view = View(user_id=user.id, post_id=self.id)
+        db.session.add(view)
+        db.session.commit()
+
+    def add_report(self, user):
+        report = Report(user_id=user.id, post_id=self.id)
+        db.session.add(report)
+        db.session.commit()
+
+    def get_reports(self):
+        return self.report.distinct(Report.user_id).count()
+
+    def delete_report(self, user):
+        report = self.report.filter_by(user_id=user.id).first()
+        if report:
+            db.session.delete(report)
+            db.session.commit()
+    
+    def is_report(self, user):
+        return self.report.filter_by(user_id=user.id).first() is not None
 
 
 class Like(db.Model):
@@ -335,3 +369,17 @@ class Notification(db.Model):
 
     def get_data(self):
         return json.loads(str(self.payload_json))
+
+class View(db.Model):
+    __tablename__ = "views"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+class Report(db.Model):
+    __tablename__ = "reports"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)

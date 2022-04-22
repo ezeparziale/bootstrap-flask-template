@@ -62,6 +62,7 @@ def get_post(id: int):
     pagination = post.comments.order_by(Comment.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
 
     comments = pagination.items
+    post.add_view(current_user)
     return render_template("post.html", form=form, post=post, username=post.author.username, comments=comments, pagination=pagination)
 
 @posts_bp.route("/edit/<id>", methods=["GET","POST"])
@@ -152,7 +153,7 @@ def comment_disable(id: int):
 def like_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
     post.like(current_user)
-    flash("Post agregado a likes", category="success")
+    # flash("Post agregado a likes", category="success")
     return redirect(url_for("posts.get_post", id=id))
 
 @posts_bp.route("/unlike/<id>", methods=["GET","POST"])
@@ -160,7 +161,7 @@ def like_post(id: int):
 def unlike_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
     post.unlike(current_user)
-    flash("Post eliminado de likes", category="success")
+    # flash("Post eliminado de likes", category="success")
     return redirect(url_for("posts.get_post", id=id))
 
 @posts_bp.route("/favorite/<id>", methods=["GET","POST"])
@@ -168,7 +169,7 @@ def unlike_post(id: int):
 def favorite_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
     post.favorite(current_user)
-    flash("Post agregado a favoritos", category="success")
+    # flash("Post agregado a favoritos", category="success")
     return redirect(url_for("posts.get_post", id=id))
 
 @posts_bp.route("/unfavorite/<id>", methods=["GET","POST"])
@@ -176,5 +177,21 @@ def favorite_post(id: int):
 def unfavorite_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
     post.unfavorite(current_user)
-    flash("Post eliminado de favoritos", category="success")
+    # flash("Post eliminado de favoritos", category="success")
+    return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/report/<id>", methods=["GET","POST"])
+@login_required
+def report_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.add_report(current_user)
+    # flash("Post agregado a reportes", category="success")
+    return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/unreport/<id>", methods=["GET","POST"])
+@login_required
+def unreport_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.delete_report(current_user)
+    # flash("Post eliminado de reportes", category="success")
     return redirect(url_for("posts.get_post", id=id))

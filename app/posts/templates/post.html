@@ -9,45 +9,59 @@
 {% block content %}
     <div class="container">
         <legend class="border-bottom mb-4">Post</legend>
-        Creado por: 
-        <a class="btn btn-primary" href="{{ url_for('user.user', username=username) }}" role="button">{{ username }}</a> 
         <div class="card">
             <div class="card-body">
                 <div class="row">
                     <div class="col-auto">
-                        <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" class="image-posts" alt="{{ post.title }}">
+                        <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" class="image-posts mt-2" alt="{{ post.title }}">
                     </div>
                     <div class="col-sm-11">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{ post.title }}</h5>
-                            <small>{{ moment(post.created_at).fromNow() }}</small>
+                        <div class="row">
+                            <div class="d-flex w-100 justify-content-between">
+                                <small class="text-muted"> Creado por: <a class="text-muted" type="button" href="{{ url_for('user.user', username=username) }}" role="button"> {{ username }}</a></small>
+                                <small>{{ moment(post.created_at).fromNow() }}</small>
+                            </div>
                         </div>
+                        <h5 class="mb-1">{{ post.title }}</h5>
                         <p class="mb-1">{{ post.content }}</p>
                         <div class="text-muted">
-                            <small><i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios</small>
-                            <small><i class="bi bi-star"></i> {{ post.likes.count() }} Me gusta</small>
+                            <small>
+                                <i class="bi bi-eye"></i> {{ post.get_views() }} Visitas
+                                <i class="bi bi-chat ms-2"></i> {{ post.comments.count() }} Comentarios
+                                {% if post.is_like(current_user) %}
+                                    <a class="text-muted ms-2 me-2" type="button" href="{{ url_for('posts.unlike_post', id=post.id) }}" role="button"><i class="bi bi-star-fill"></i> {{ post.likes.count() }} Me gusta</a>
+                                {% else %}
+                                    <a class="text-muted ms-2 me-2" type="button" href="{{ url_for('posts.like_post', id=post.id) }}" role="button"><i class="bi bi-star"></i>  {{ post.likes.count() }} Me gusta</a>
+                                {% endif %}
+                                {% if post.if_favorite(current_user) %}
+                                    <a class="text-muted me-2" href="{{ url_for('posts.unfavorite_post', id=post.id) }}" role="button"><i class="bi bi-bookmark-fill"></i> Favorito</a>
+                                {% else %}
+                                    <a class="text-muted me-2" href="{{ url_for('posts.favorite_post', id=post.id) }}" role="button"><i class="bi bi-bookmark"></i> Favorito</a>
+                                {% endif %}
+                                {% if current_user != post.author %}
+                                    {% if post.is_report(current_user) %}
+                                        <a class="text-muted me-2" href="{{ url_for('posts.unreport_post', id=post.id) }}" role="button"><i class="bi bi-flag-fill"></i> Reportar</a>
+                                    {% else %}
+                                        <a class="text-muted me-2" href="{{ url_for('posts.report_post', id=post.id) }}" role="button"><i class="bi bi-flag"></i> Reportar</a>
+                                    {% endif %}
+                                {% endif %}
+                                {% if current_user == post.author %}
+                                <div class="btn-group">
+                                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a></li>
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </small>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            
         </div>
-        {% if current_user == post.author %}
-            <a class="btn btn-primary" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a>
-            <a class="btn btn-danger" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a>
-        {% endif %}
-        {% if post.is_like(current_user) %}
-            <a class="btn btn-danger" href="{{ url_for('posts.unlike_post', id=post.id) }}" role="button"><i class="bi bi-star-fill"></i> Unlike</a>
-        {% else %}
-            <a class="btn btn-primary" href="{{ url_for('posts.like_post', id=post.id) }}" role="button"><i class="bi bi-star"></i> Like</a>
-        {% endif %}
-        
-        {% if post.if_favorite(current_user) %}
-            <a class="btn btn-danger" href="{{ url_for('posts.unfavorite_post', id=post.id) }}" role="button"><i class="bi bi-bookmark-fill"></i> Unfavorite</a>
-        {% else %}
-            <a class="btn btn-primary" href="{{ url_for('posts.favorite_post', id=post.id) }}" role="button"><i class="bi bi-bookmark"></i> Favorite</a>
-        {% endif %}
 
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
@@ -75,7 +89,7 @@
         <div class="list-group-item list-group-item-action">
             <div class="row">
                 <div class="col-auto">
-                    <img src="{{ url_for('static', filename='img/avatars/' ~ comment.author.image_file) }}" class="image-posts" alt="{{ post.title }}">
+                    <img src="{{ url_for('static', filename='img/avatars/' ~ comment.author.image_file) }}" class="image-posts mt-2" alt="{{ post.title }}">
                 </div>
                 <div class="col-sm-11">
                     <div class="d-flex w-100 justify-content-between">
