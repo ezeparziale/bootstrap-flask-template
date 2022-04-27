@@ -55,11 +55,11 @@ def get_post(id: int):
         )
         db.session.add(comment)
         db.session.commit()
-        flash("Comentario creado", category="success")
+        # flash("Comentario creado", category="success")
         return redirect(url_for("posts.get_post", id=id))
     
     page = request.args.get("page", 1, type=int)
-    pagination = post.comments.order_by(Comment.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+    pagination = post.comments.filter_by(parent_id=None).order_by(Comment.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
 
     comments = pagination.items
     post.add_view(current_user)
@@ -77,7 +77,7 @@ def edit_post(id: int):
         post.content = form.content.data
         db.session.commit()
         flash("Post actualizado", category="success")
-        return redirect(url_for("posts.posts"))
+        return redirect(url_for("posts.get_post", id=id))
     form.title.data = post.title
     form.content.data = post.content
     return render_template("edit_post.html", form=form)
@@ -195,3 +195,76 @@ def unreport_post(id: int):
     post.delete_report(current_user)
     # flash("Post eliminado de reportes", category="success")
     return redirect(url_for("posts.get_post", id=id))
+
+
+@posts_bp.route("/reply_comment/<id>", methods=["POST"])
+@login_required
+def reply_comment(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    if request.method == 'POST':
+        comment = Comment(
+            content=request.form["comment"],
+            author=current_user,
+            parent_id=id,
+            parent=comment,
+            post=comment.post,
+        )
+        db.session.add(comment)
+        db.session.commit()
+        # flash("Comentario agregado", category="success")
+        return redirect(url_for("posts.get_post", id=comment.post.id))
+    return redirect(url_for("posts.get_post", id=comment.post.id))
+
+
+@posts_bp.route("/post/close/<id>", methods=["GET","POST"])
+@login_required
+def close_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    if post.author == current_user:
+        post.close()
+        # flash("Post cerrado", category="success")
+        return redirect(url_for("posts.get_post", id=id))
+    return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/post/open/<id>", methods=["GET","POST"])
+@login_required
+def open_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    if post.author == current_user:
+        post.open()
+        # flash("Post abierto", category="success")
+        return redirect(url_for("posts.get_post", id=id))
+    return redirect(url_for("posts.get_post", id=id))
+
+
+@posts_bp.route("/comment/report/<id>", methods=["GET","POST"])
+@login_required
+def report_comment(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment.add_report(current_user)
+    # flash("Comentario agregado a reportes", category="success")
+    return redirect(url_for("posts.get_post", id=comment.post.id))
+
+@posts_bp.route("/comment/unreport/<id>", methods=["GET","POST"])
+@login_required
+def unreport_comment(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment.delete_report(current_user)
+    # flash("Comentario eliminado de reportes", category="success")
+    return redirect(url_for("posts.get_post", id=comment.post.id))
+
+@posts_bp.route("/comment/like/<id>", methods=["GET","POST"])
+@login_required
+def like_comment(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment.like(current_user)
+    # flash("Comentario agregado a likes", category="success")
+    return redirect(url_for("posts.get_post", id=comment.post.id))
+
+@posts_bp.route("/comment/unlike/<id>", methods=["GET","POST"])
+@login_required
+def unlike_comment(id: int):
+    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment.unlike(current_user)
+    # flash("Comentario eliminado de likes", category="success")
+    return redirect(url_for("posts.get_post", id=comment.post.id))

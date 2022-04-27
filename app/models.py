@@ -62,6 +62,8 @@ class User(db.Model, UserMixin):
     notifications = db.relationship("Notification", backref="user", lazy="dynamic")
     views = db.relationship("View", backref="user", lazy="dynamic")
     report = db.relationship("Report", backref="user", lazy="dynamic")
+    comments_reported = db.relationship("CommentReport", backref="user", lazy="dynamic")
+    comments_liked = db.relationship("CommentLike", backref="user", lazy="dynamic")
 
     @staticmethod
     def generate_avatar():
@@ -199,11 +201,12 @@ class Post(db.Model):
     content = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    comments = db.relationship("Comment", backref="post", lazy="dynamic")
-    likes = db.relationship("Like", backref="post", lazy="dynamic")
-    favorites = db.relationship("Favorite", backref="post", lazy="dynamic")
-    views = db.relationship("View", backref="post", lazy="dynamic")
-    report = db.relationship("Report", backref="post", lazy="dynamic")
+    comments = db.relationship("Comment", backref="post", cascade="all, delete-orphan", lazy="dynamic")
+    likes = db.relationship("Like", backref="post", cascade="all, delete-orphan", lazy="dynamic")
+    favorites = db.relationship("Favorite", backref="post", cascade="all, delete-orphan", lazy="dynamic")
+    views = db.relationship("View", backref="post", cascade="all, delete-orphan", lazy="dynamic")
+    reports = db.relationship("Report", backref="post", cascade="all, delete-orphan", lazy="dynamic")
+    closed = Column(BOOLEAN, default=False)
 
     def add_visit(self):
         self.visits += 1
@@ -253,16 +256,30 @@ class Post(db.Model):
         db.session.commit()
 
     def get_reports(self):
-        return self.report.distinct(Report.user_id).count()
+        return self.reports.distinct(Report.user_id).count()
 
     def delete_report(self, user):
-        report = self.report.filter_by(user_id=user.id).first()
+        report = self.reports.filter_by(user_id=user.id).first()
         if report:
             db.session.delete(report)
             db.session.commit()
     
     def is_report(self, user):
-        return self.report.filter_by(user_id=user.id).first() is not None
+        return self.reports.filter_by(user_id=user.id).first() is not None
+
+    def is_reported(self):
+        return self.reports.count() > 0
+
+    def close(self):
+        self.closed = True
+        db.session.commit()
+
+    def open(self):
+        self.closed = False
+        db.session.commit()
+
+    def is_closed(self):
+        return self.closed
 
 
 class Like(db.Model):
@@ -288,6 +305,56 @@ class Comment(db.Model):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    parent_id = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
+    childrens = db.relationship("Comment", backref=db.backref("parent", remote_side=[id]))
+    level = Column(Integer, default=0)
+    reports = db.relationship("CommentReport", backref="comment", cascade="all, delete-orphan", lazy="dynamic")
+    likes = db.relationship("CommentLike", backref="comment", cascade="all, delete-orphan", lazy="dynamic")
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.parent:
+            self.level = self.parent.level + 1
+
+    def __repr__(self) -> str:
+        return f"id={self.id} content={self.content}"
+
+    def add_report(self, user):
+        if not self.is_report(user):
+            report = CommentReport(user_id=user.id, comment_id=self.id)
+            db.session.add(report)
+            db.session.commit()
+
+    def delete_report(self, user):
+        report = self.reports.filter_by(user_id=user.id).first()
+        if report:
+            db.session.delete(report)
+            db.session.commit()
+
+    def is_report(self, user):
+        return self.reports.filter_by(user_id=user.id).first() is not None
+
+    def is_reported(self):
+        return self.reports.count() > 0
+
+    def get_reports(self):
+        return self.reports.distinct(CommentReport.user_id).count()
+
+    def is_like(self, user):
+        return self.likes.filter_by(user_id=user.id).first() is not None
+
+    def like(self, user):
+        if not self.is_like(user):
+            like = CommentLike(user=user, comment=self)
+            db.session.add(like)
+            db.session.commit()
+
+    def unlike(self, user):
+        like = self.likes.filter_by(user_id=user.id).first()
+        if like:
+            db.session.delete(like)
+            db.session.commit()
 
 class Role(db.Model):
     __tablename__ = "roles"
@@ -383,3 +450,23 @@ class Report(db.Model):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+class CommentReport(db.Model):
+    __tablename__ = "comment_reports"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    comment_id = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"id={self.id} user_id={self.user_id} comment_id={self.comment_id}"
+
+class CommentLike(db.Model):
+    __tablename__ = "comment_likes"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    comment_id = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"id={self.id} user_id={self.user_id} comment_id={self.comment_id}"

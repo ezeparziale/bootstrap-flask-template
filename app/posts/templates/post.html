@@ -9,16 +9,31 @@
 {% block content %}
     <div class="container">
         <legend class="border-bottom mb-4">Post</legend>
+
+        {% if post.is_closed() %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Este post ha sido cerrado</strong>
+        </div>
+        {% endif %}
+
         <div class="card">
             <div class="card-body">
                 <div class="row">
                     <div class="col-auto">
-                        <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" class="image-posts mt-2" alt="{{ post.title }}">
+                        <a class="me-3" href="{{ url_for('user.user', username=post.author.username) }}">
+                            <img class="rounded-circle"
+                                src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" alt="avatar" width="65"
+                                height="65" />
+                        </a>
                     </div>
                     <div class="col-sm-11">
                         <div class="row">
                             <div class="d-flex w-100 justify-content-between">
-                                <small class="text-muted"> Creado por: <a class="text-muted" type="button" href="{{ url_for('user.user', username=username) }}" role="button"> {{ username }}</a></small>
+                                <small class="text-muted"> Creado por: 
+                                    <a class="text-muted" type="button" href="{{ url_for('user.user', username=username) }}" role="button">
+                                        {{ username }}
+                                    </a>
+                                </small>
                                 <small>{{ moment(post.created_at).fromNow() }}</small>
                             </div>
                         </div>
@@ -53,6 +68,11 @@
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a></li>
                                         <li><a class="dropdown-item" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a></li>
+                                        {% if post.is_closed() %}
+                                            <li><a class="dropdown-item" href="{{ url_for('posts.open_post', id=post.id) }}" role="button">Abrir</a></li>
+                                        {% else %}
+                                            <li><a class="dropdown-item" href="{{ url_for('posts.close_post', id=post.id) }}" role="button">Cerrar</a></li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                                 {% endif %}
@@ -63,84 +83,273 @@
             </div>
         </div>
 
+        {% if not post.is_closed() %}
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
-            <fieldset>
-                {{ form.comment.label(class="form-control-label") }}
-                {% if form.comment.errors %}
-                    {{ form.title(class="form-control form-control-lg is-invalid") }}
-                        {% for error in form.title.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor%}
-                {% else %}
-                    {{ form.comment(class="form-control form-control-lg") }}
-                {% endif %} 
-            </fieldset>
-            <div class="form-group mt-3">
-                {{ form.submit(class="btn btn-primary") }}
+            <div class="card-footer py-3 border-0 bg-light">
+                <div class="d-flex flex-start w-100">
+                    <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
+                        <img class="rounded-circle"
+                            src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
+                            height="40" />
+                    </a>    
+                    <div class="form-outline w-100">
+                        <fieldset>
+                            <!-- {{ form.comment.label(class="form-control-label") }} -->
+                            {% if form.comment.errors %}
+                                {{ form.title(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.title.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.comment(class="form-control form-control-lg") }}
+                            {% endif %} 
+                        </fieldset>
+                        <div class="float-end mt-2 pt-1">
+                            {{ form.submit(class="btn btn-primary btn-sm") }}
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
+        {% endif %}
 
         <br>
-            
-        <h5><i class="bi bi-chat"></i> Comentarios</h5>
+        
+        {% if comments %}
+            <h5><i class="bi bi-chat"></i> Comentarios</h5>
 
-        {% for comment in comments %}
-        <div class="list-group-item list-group-item-action">
-            <div class="row">
-                <div class="col-auto">
-                    <img src="{{ url_for('static', filename='img/avatars/' ~ comment.author.image_file) }}" class="image-posts mt-2" alt="{{ post.title }}">
-                </div>
-                <div class="col-sm-11">
-                    <div class="d-flex w-100 justify-content-between">
-                        <div class="d-flex">
-                            <h5 class="mb-1">{{ comment.author.username }}</h5>
+            <!-- <div class="container"> -->
+                <!-- <div class="row d-flex justify-content-center"> -->
+                    <!-- <div class="col-md-12 col-lg-10 col-xl-8"> -->
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- <h4 class="text-center mb-4 pb-2">Comentarios</h4> -->
+                                <div class="row">
+                                    <div class="col">
+
+                                        {% for comment in comments %}
+
+                                            <div class="d-flex flex-start mt-2">
+                                                <a class="me-3" href="{{ url_for('user.user', username=comment.author.username) }}">
+                                                    <img class="rounded-circle"
+                                                        src="{{ url_for('static', filename='img/avatars/' ~ comment.author.image_file) }}" alt="avatar" width="65"
+                                                        height="65" />
+                                                </a>
+                                                <div class="flex-grow-1 flex-shrink-1">
+                                                    <div>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <p class="mb-1">
+                                                                {{ comment.author.username }}
+                                                            </p>
+                                                            <span class="small text-muted"> {{ moment(comment.created_at).fromNow() }}</span>
+                                                        </div>
+                                                        <p class="small mb-0">
+                                                            {% if comment.disabled %}
+                                                                <span class="badge bg-warning">Comentario deshabilitado</span>
+                                                            {% else %}
+                                                                <p class="mb-1">{{ comment.content }}</p>
+                                                            {% endif %}
+                                                            <div class="text-muted">
+                                                                <small>
+
+                                                                    <i class="bi bi-chat-text ms-2"></i> {{ comment.childrens|length }} Respuestas
+
+                                                                    {% if not post.is_closed() %}
+                                                                    <a class="text-muted ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample{{ comment.id }}" aria-expanded="false" aria-controls="collapseExample">
+                                                                        <i class="bi bi-chat"></i> Responder
+                                                                    </a>
+                                                                    {% endif %}
+
+                                                                    {% if comment.is_like(current_user) %}
+                                                                        <a class="text-muted ms-2" type="button" href="{{ url_for('posts.unlike_comment', id=comment.id) }}" role="button"><i class="bi bi-star-fill"></i> {{ comment.likes.count() }} Me gusta</a>
+                                                                    {% else %}
+                                                                        <a class="text-muted ms-2" type="button" href="{{ url_for('posts.like_comment', id=comment.id) }}" role="button"><i class="bi bi-star"></i>  {{ comment.likes.count() }} Me gusta</a>
+                                                                    {% endif %}
+                                                                    
+                                                                    {% if not post.is_closed() %}
+                                                                    <div class="collapse" id="collapseExample{{ comment.id }}">
+                                                                        <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">
+                                                                            <div class="card-footer py-3 border-0" style="background-color: #f4f8fA;">
+                                                                                <div class="d-flex flex-start w-100">
+                                                                                    <img class="rounded-circle shadow-1-strong me-3"
+                                                                                    src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
+                                                                                    height="40" />
+                                                                                    <div class="form-outline w-100">
+                                                                                        <textarea class="form-control" id="textAreaExample"  name="comment" rows="4"
+                                                                                            style="background: #fff;"></textarea>
+                                                                                        <label class="form-label" for="textAreaExample">Mensaje</label>
+                                                                                        <div class="float-end mt-2 pt-1">
+                                                                                            <button type="submit" class="btn btn-primary btn-sm">Responder</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                    {% endif %}
+
+                                                                    {% if current_user.id != comment.author_id %}
+                                                                        {% if comment.is_report(current_user) %}
+                                                                            <a class="text-muted ms-2" href="{{ url_for('posts.unreport_comment', id=comment.id) }}" role="button"><i class="bi bi-flag-fill"></i> Reportar</a>
+                                                                        {% else %}
+                                                                            <a class="text-muted ms-2" href="{{ url_for('posts.report_comment', id=comment.id) }}" role="button"><i class="bi bi-flag"></i> Reportar</a>
+                                                                        {% endif %}
+                                                                    {% endif %}
+
+                                                                    {% if current_user.is_moderate() %}
+
+                                                                        <i class="bi bi-exclamation-triangle ms-2"></i> {{ comment.get_reports() }} Reportado
+
+                                                                        {% if comment.disabled %}
+                                                                            <a class="text-muted ms-2"  type="button" href="{{url_for('posts.comment_enable', id=comment.id, page=pagination.page)}}" role="button">
+                                                                                <i class="bi bi-exclamation-circle"></i> Habilitar
+                                                                            </a>
+                                                                        {% else %}
+                                                                            <a class="text-muted ms-2"  type="button" href="{{url_for('posts.comment_disable', id=comment.id, page=pagination.page)}}" role="button">
+                                                                                <i class="bi bi-exclamation-circle"></i> Deshabilitar
+                                                                            </a>
+                                                                        {% endif %}
+                                                                    {% endif %}
+
+                                                                </small>
+                                                            </div>
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    {% for children in comment.childrens|reverse %}
+
+                                                        <div class="d-flex flex-start mt-2">
+                                                            <a class="me-3" href="{{ url_for('user.user', username=children.author.username) }}">
+                                                                <img class="rounded-circle"
+                                                                    src="{{ url_for('static', filename='img/avatars/' ~ children.author.image_file) }}" alt="avatar" width="40"
+                                                                    height="40" />
+                                                            </a>
+                                                            <div class="flex-grow-1 flex-shrink-1">
+                                                                <div>
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <p class="mb-1">
+                                                                            {{ children.author.username }}
+                                                                        </p>
+                                                                        <span class="small text-muted">{{ moment(children.created_at).fromNow() }}</span>
+                                                                    </div>
+                                                                    <p class="small mb-0">
+                                                                        {% if children.disabled %}
+                                                                            <span class="badge bg-warning">Comentario deshabilitado</span>
+                                                                        {% else %}
+                                                                            <p class="mb-1">{{ children.content }}</p>
+                                                                        {% endif %}
+                                                                        <div class="text-muted">
+                                                                            <small>
+
+                                                                                <i class="bi bi-chat-text ms-2"></i> {{ children.childrens|length }} Respuestas
+
+                                                                                {% if not post.is_closed() %}
+                                                                                <a class="text-muted ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample{{ children.id }}" aria-expanded="false" aria-controls="collapseExample">
+                                                                                    <i class="bi bi-chat"></i> Responder
+                                                                                </a>
+                                                                                {% endif %}
+
+                                                                                {% if children.is_like(current_user) %}
+                                                                                    <a class="text-muted ms-2" type="button" href="{{ url_for('posts.unlike_comment', id=children.id) }}" role="button"><i class="bi bi-star-fill"></i> {{ children.likes.count() }} Me gusta</a>
+                                                                                {% else %}
+                                                                                    <a class="text-muted ms-2" type="button" href="{{ url_for('posts.like_comment', id=children.id) }}" role="button"><i class="bi bi-star"></i>  {{ children.likes.count() }} Me gusta</a>
+                                                                                {% endif %}
+                                                                                                
+                                                                                {% if not post.is_closed() %}
+                                                                                <div class="collapse" id="collapseExample{{ children.id }}">
+                                                                                    <form action="{{ url_for('posts.reply_comment', id=children.id) }}" method="POST">
+                                                                                        <div class="card-footer py-3 border-0" style="background-color: #f4f8fA;">
+                                                                                            <div class="d-flex flex-start w-100">
+                                                                                                <img class="rounded-circle shadow-1-strong me-3"
+                                                                                                src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
+                                                                                                height="40" />
+                                                                                                <div class="form-outline w-100">
+                                                                                                    <textarea class="form-control" id="textAreaExample"  name="comment" rows="4"
+                                                                                                        style="background: #fff;"></textarea>
+                                                                                                    <label class="form-label" for="textAreaExample">Mensaje</label>
+                                                                                                    <div class="float-end mt-2 pt-1">
+                                                                                                        <button type="submit" class="btn btn-primary btn-sm">Responder</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </form>
+                                                                                </div>
+                                                                                {% endif %}
+
+                                                                                {% if current_user.id != children.author_id %}
+                                                                                    {% if children.is_report(current_user) %}
+                                                                                        <a class="text-muted me-2" href="{{ url_for('posts.unreport_comment', id=children.id) }}" role="button"><i class="bi bi-flag-fill"></i> Reportar</a>
+                                                                                    {% else %}
+                                                                                        <a class="text-muted me-2" href="{{ url_for('posts.report_comment', id=children.id) }}" role="button"><i class="bi bi-flag"></i> Reportar</a>
+                                                                                    {% endif %}
+                                                                                {% endif %}
+
+                                                                                {% if current_user.is_moderate() %}
+                                                                                {% endif %}
+
+                                                                                {% if current_user.is_moderate() %}
+                                                                                
+                                                                                    <i class="bi bi-exclamation-triangle ms-2"></i> {{ children.get_reports() }} Reportado
+
+                                                                                    {% if children.disabled %}
+                                                                                        <a class="text-muted ms-2"  type="button" href="{{url_for('posts.comment_enable', id=children.id, page=pagination.page)}}" role="button">
+                                                                                            <i class="bi bi-exclamation-circle"></i> Habilitar
+                                                                                        </a>
+                                                                                    {% else %}
+                                                                                        <a class="text-muted ms-2"  type="button" href="{{url_for('posts.comment_disable', id=children.id, page=pagination.page)}}" role="button">
+                                                                                            <i class="bi bi-exclamation-circle"></i> Deshabilitar
+                                                                                        </a>
+                                                                                    {% endif %}
+                                                                                {% endif %}
+
+                                                                            </small>
+                                                                        </div>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    {% endfor %}
+                            
+                                                </div>
+                                            </div>
+
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <small>{{ moment(comment.created_at).fromNow() }}</small>
-                    </div>
-                    <div class="text-muted">
-                        
-                    </div>
-                    {% if comment.disabled %}
-                        <span class="badge bg-warning">Comentario deshabilitado</span>
-                    {% else %}
-                        <p class="mb-1">{{ comment.content }}</p>
-                    {% endif %}
-                    {% if current_user.is_moderate %}
-                        {% if comment.disabled %}
-                            <a class="btn btn-primary btn-sm" href="{{url_for('posts.comment_enable', id=comment.id, page=pagination.page)}}" role="button">Habilitar</a>
-                        {% else %}
-                            <a class="btn btn-danger btn-sm" href="{{url_for('posts.comment_disable', id=comment.id, page=pagination.page)}}" role="button">Deshabilitar</a>
-                        {% endif %}
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-                
-        {% endfor %}
+                    <!-- </div> -->
+                <!-- </div> -->
+            <!-- </div> -->
 
-        {% if pagination.pages > 1 %}
-            <nav aria-label="Posts list">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item {% if not pagination.has_prev %} disabled {% endif %}">
-                        <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=pagination.prev_num) }}" aria-label="Previous">Anterior</a>
-                    </li>
-                    {% for page in pagination.iter_pages() %}
-                        {% if page %}
-                            <li class="page-item {% if pagination.page == page %} active {% endif %}">
-                                <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=page) }}">{{ page }}</a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    <li class="page-item {% if not pagination.has_next %} disabled {% endif %}">
-                        <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=pagination.next_num) }}" aria-label="Next">Siguiente</a>
-                    </li>
-                </ul>
-            </nav>
+
+            {% if pagination.pages > 1 %}
+                <nav aria-label="Posts list">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not pagination.has_prev %} disabled {% endif %}">
+                            <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=pagination.prev_num) }}" aria-label="Previous">Anterior</a>
+                        </li>
+                        {% for page in pagination.iter_pages() %}
+                            {% if page %}
+                                <li class="page-item {% if pagination.page == page %} active {% endif %}">
+                                    <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=page) }}">{{ page }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if not pagination.has_next %} disabled {% endif %}">
+                            <a class="page-link" href="{{ url_for('posts.get_post', id=post.id, page=pagination.next_num) }}" aria-label="Next">Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+
         {% endif %}
         
 
