@@ -30,28 +30,6 @@
                     <a class="text-muted ms-2" type="button" href="{{ url_for('posts.like_comment', id=comment.id) }}" role="button"><i class="bi bi-star"></i>  {{ comment.likes.count() }} Me gusta</a>
                 {% endif %}
                 
-                {% if not post.is_closed() %}
-                <div class="collapse" id="collapseExample{{ comment.id }}">
-                    <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">
-                        <div class="card-footer py-3 border-0" style="background-color: #f4f8fA;">
-                            <div class="d-flex flex-start w-100">
-                                <img class="rounded-circle shadow-1-strong me-3"
-                                src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
-                                height="40" />
-                                <div class="form-outline w-100">
-                                    <textarea class="form-control" id="textAreaExample"  name="comment" rows="4"
-                                        style="background: #fff;"></textarea>
-                                    <label class="form-label" for="textAreaExample">Mensaje</label>
-                                    <div class="float-end mt-2 pt-1">
-                                        <button type="submit" class="btn btn-primary btn-sm">Responder</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                {% endif %}
-
                 {% if current_user.id != comment.author_id %}
                     {% if comment.is_report(current_user) %}
                         <a class="text-muted ms-2" href="{{ url_for('posts.unreport_comment', id=comment.id) }}" role="button"><i class="bi bi-flag-fill"></i> Reportar</a>
@@ -73,6 +51,28 @@
                             <i class="bi bi-exclamation-circle"></i> Deshabilitar
                         </a>
                     {% endif %}
+                {% endif %}
+
+                {% if not post.is_closed() %}
+                <div class="collapse" id="collapseExample{{ comment.id }}">
+                    <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">
+                        <div class="card-footer py-3 border-0" style="background-color: #f4f8fA;">
+                            <div class="d-flex flex-start w-100">
+                                <img class="rounded-circle shadow-1-strong me-3"
+                                src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
+                                height="40" />
+                                <div class="form-outline w-100">
+                                    <textarea class="form-control" id="textAreaExample"  name="comment" rows="4"
+                                        style="background: #fff;"></textarea>
+                                    <label class="form-label" for="textAreaExample">Mensaje</label>
+                                    <div class="float-end mt-2 pt-1">
+                                        <button type="submit" class="btn btn-primary btn-sm">Responder</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
                 {% endif %}
 
             </small>
