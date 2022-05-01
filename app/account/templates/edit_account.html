@@ -8,10 +8,18 @@
 
 {% block content %}
     <div class="container">
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('account.account') }}">Perfil</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Editar</li>
+            </ol>
+        </nav>
+
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset>
-                <legend class="border-bottom mb-4">Cuenta</legend>
                 <div class="form-group">
                     <div class="row align-items-center">
                         <div class="col-2">

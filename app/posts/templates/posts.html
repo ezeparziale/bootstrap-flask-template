@@ -8,6 +8,13 @@
 
 {% block content %}
 
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Posts</li>
+        </ol>
+    </nav>
+
     <div class="container">
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}

@@ -8,16 +8,23 @@
 
 {% block content %}
 
-    <legend class="border-bottom mb-4">Mensajes</legend>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Mensajes</li>
+        </ol>
+    </nav>
 
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link {% if view_message == 0 %} active {% endif %}" aria-current="page" href="{{ url_for('user.show_messages_received') }}"><i class="bi bi-inbox"></i> Recibidos</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {% if view_message == 1 %} active {% endif %}" href="{{ url_for('user.show_messages_sent') }}"><i class="bi bi-send"></i> Enviados</a>
-        </li>
-    </ul>
+    <div class="nav-align-top">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link {% if view_message == 0 %} active {% endif %}" aria-current="page" href="{{ url_for('user.show_messages_received') }}"><i class="bi bi-inbox"></i> Recibidos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if view_message == 1 %} active {% endif %}" href="{{ url_for('user.show_messages_sent') }}"><i class="bi bi-send"></i> Enviados</a>
+            </li>
+        </ul>
+    </div>
 
     <div class="list-group list-group-flush">
         {% for message in messages %}
