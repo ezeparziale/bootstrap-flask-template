@@ -2,7 +2,7 @@ from flask import Blueprint, abort, make_response, redirect, render_template, ur
 
 from app.decorators import permission_required
 from .forms import PostCommentForm, PostForm, PostViewForm
-from ..models import Comment, Post, Permission
+from ..models import Comment, Post, Permission, Report
 from flask_login import current_user, login_required
 from app import db
 from ..config import settings
@@ -115,6 +115,12 @@ def show_favorite():
     resp.set_cookie("view_mode", "2", max_age=30*24*60*60) # 30 days
     return resp
 
+@posts_bp.route("/moderate", methods=["GET", "POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate():
+    return render_template("moderate.html")
+
 @posts_bp.route("/moderate/comment", methods=["GET", "POST"])
 @login_required
 @permission_required(Permission.MODERATE)
@@ -123,6 +129,15 @@ def moderate_comment():
     pagination = Comment.query.order_by(Comment.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
     comments = pagination.items
     return render_template("moderate_comment.html", comments=comments, pagination=pagination)
+
+@posts_bp.route("/moderate/post", methods=["GET", "POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate_post():
+    page = request.args.get("page", 1, type=int)
+    pagination = Post.query.join(Report, Report.post_id==Post.id).order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+    posts = pagination.items
+    return render_template("moderate_post.html", posts=posts, pagination=pagination)
 
 @posts_bp.route("/moderate/post/enable/<id>", methods=["GET","POST"])
 @login_required
@@ -145,6 +160,7 @@ def post_disable(id: int):
     page = request.args.get("page", 1, type=int)
     flash("Post deshabilitado", category="success")
     return redirect(url_for("posts.moderate_post", page=page))
+
 @posts_bp.route("/moderate/comment/enable/<id>", methods=["GET","POST"])
 @login_required
 @permission_required(Permission.MODERATE)
