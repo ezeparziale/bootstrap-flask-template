@@ -18,7 +18,7 @@
 
                 <i class="bi bi-chat-text ms-2"></i> {{ comment.childrens|length }} Respuestas
 
-                {% if not post.is_closed() %}
+                {% if not post.is_closed() and not post.is_disabled() %}
                 <a class="text-muted ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample{{ comment.id }}" aria-expanded="false" aria-controls="collapseExample">
                     <i class="bi bi-chat"></i> Responder
                 </a>
@@ -53,7 +53,7 @@
                     {% endif %}
                 {% endif %}
 
-                {% if not post.is_closed() %}
+                {% if not post.is_closed() and not post.is_disabled() %}
                 <div class="collapse" id="collapseExample{{ comment.id }}">
                     <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">
                         <div class="card-footer py-3 border-0" style="background-color: #f4f8fA;">
