@@ -124,6 +124,27 @@ def moderate_comment():
     comments = pagination.items
     return render_template("moderate_comment.html", comments=comments, pagination=pagination)
 
+@posts_bp.route("/moderate/post/enable/<id>", methods=["GET","POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def post_enable(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.disabled = False
+    db.session.commit()
+    page = request.args.get("page", 1, type=int)
+    flash("Post habilitado", category="success")
+    return redirect(url_for("posts.moderate_post", page=page))
+
+@posts_bp.route("/moderate/post/disable/<id>", methods=["GET","POST"])
+@login_required
+@permission_required(Permission.MODERATE)
+def post_disable(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    post.disabled = True
+    db.session.commit()
+    page = request.args.get("page", 1, type=int)
+    flash("Post deshabilitado", category="success")
+    return redirect(url_for("posts.moderate_post", page=page))
 @posts_bp.route("/moderate/comment/enable/<id>", methods=["GET","POST"])
 @login_required
 @permission_required(Permission.MODERATE)

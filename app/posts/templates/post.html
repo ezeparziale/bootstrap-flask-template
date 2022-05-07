@@ -26,6 +26,12 @@
         </div>
         {% endif %}
 
+        {% if post.is_disabled() %}
+        <div class="alert alert-warning" role="alert">
+            <strong>Este post ha sido desabilitado por el admin por infringir las normas</strong>
+        </div>
+        {% endif %}
+
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -70,7 +76,14 @@
                                         <a class="text-muted me-2" href="{{ url_for('posts.report_post', id=post.id) }}" role="button"><i class="bi bi-flag"></i> Reportar</a>
                                     {% endif %}
                                 {% endif %}
-                                {% if current_user == post.author %}
+                                {% if current_user.is_admin() %}
+                                    {% if post.disabled %}
+                                            <a class="text-muted me-2" href="{{url_for('posts.post_enable', id=post.id, page=pagination.page)}}" role="button"><i class="bi bi-exclamation-circle"></i> Habilitar</a>
+                                    {% else %}
+                                            <a class="text-muted me-2" href="{{url_for('posts.post_disable', id=post.id, page=pagination.page)}}" role="button"><i class="bi bi-exclamation-circle"></i> Deshabilitar</a>
+                                    {% endif %}
+                                {% endif %}
+                                {% if current_user == post.author or current_user.is_admin() %}
                                 <div class="btn-group">
                                     <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="bi bi-three-dots"></i>
@@ -93,7 +106,7 @@
             </div>
         </div>
 
-        {% if not post.is_closed() %}
+        {% if not post.is_closed() and not post.is_disabled() %}
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <div class="card-footer py-3 border-0 bg-light">

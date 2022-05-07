@@ -207,6 +207,8 @@ class Post(db.Model):
     views = db.relationship("View", backref="post", cascade="all, delete-orphan", lazy="dynamic")
     reports = db.relationship("Report", backref="post", cascade="all, delete-orphan", lazy="dynamic")
     closed = Column(BOOLEAN, default=False)
+    disabled = Column(BOOLEAN, default=False)
+
 
     def add_visit(self):
         self.visits += 1
@@ -280,6 +282,9 @@ class Post(db.Model):
 
     def is_closed(self):
         return self.closed
+
+    def is_disabled(self):
+        return self.disabled
 
 
 class Like(db.Model):
