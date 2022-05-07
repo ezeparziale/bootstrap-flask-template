@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% import "macro_message.html" as macros %}
+{% import "macro_pagination.html" as widget %}
+
 
 {% block navbar %}
     {% include "navbar.html" %}
@@ -18,5 +21,46 @@
         <p class="mb-1">{{ message.message }}</p>
         </a>
     </div>
+
+    <div class="container">
+        <form method="post" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <div class="form-group">
+                    {{ form.message.label(class="form-control-label") }}
+                    {% if form.message.errors %}
+                        {{ form.message(class="form-control form-control-lg is-invalid") }}
+                            {% for error in form.message.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                    {% else %}
+                        {{ form.message(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mt-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    {% for message in message_childrens %}
+                        <div class="d-flex flex-start mt-2">
+                            {{ macros.print_avatar_message(message, 60)}}
+                            <div class="flex-grow-1 flex-shrink-1">
+                                {{ macros.print_message(message, moment) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ widget.pagination(pagination, 'user.view_message', name="pagination.user.view_message", id=message.id) }}
 
 {% endblock %}

@@ -101,9 +101,9 @@ def messages():
     if current_user.is_authenticated:
         view_message = int(request.cookies.get("view_message", 0))
     if view_message == 0:
-        query = current_user.messages_received.order_by(Message.created_at.desc())
+        query = current_user.messages_received.filter(Message.level==0).order_by(Message.created_at.desc())
     if view_message == 1:
-        query = current_user.messages_sent.order_by(Message.created_at.desc())
+        query = current_user.messages_sent.filter(Message.level==0).order_by(Message.created_at.desc())
 
     page = request.args.get("page", 1, type=int)
     pagination = query.paginate(page, settings.POSTS_PER_PAGE, False)
@@ -125,16 +125,35 @@ def show_messages_sent():
     resp.set_cookie("view_message", "1", max_age=30*24*60*60) # 30 days
     return resp
 
-@user_bp.route("/view_message/<id>", methods=["GET"])
+@user_bp.route("/view_message/<id>", methods=["GET", "POST"])
 @login_required
 def view_message(id: int):
-    message = Message.query.get_or_404(id)
+    message = Message.query.filter_by(id=id, level=0).first()
+    if message is None:
+        flash("Mensaje invalido", category="info")
+        return redirect(url_for("user.messages"))
     if message.recipient != current_user and message.author != current_user:
         flash("No puedes ver este mensaje", category="info")
         return redirect(url_for("user.messages"))
     message.read = True
     db.session.commit()
-    return render_template("view_message.html", message=message)
+    form = MessageForm()
+    if form.validate_on_submit():
+        if current_user.id == message.sender_id:
+            sender_id = message.sender_id
+            recipient_id = message.recipient_id
+        else:
+            sender_id = message.recipient_id
+            recipient_id = message.sender_id
+        message.reply(form.message.data, sender_id, recipient_id)
+        flash("Respuesta enviada", category="success")
+        return redirect(url_for("user.view_message", id=message.id))
+    
+    page = request.args.get("page", 1, type=int)
+    pagination = message.childrens.order_by(Message.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+
+    message_childrens = pagination.items
+    return render_template("view_message.html", form=form, message=message, message_childrens=message_childrens, pagination=pagination)
 
 @user_bp.route("/notifications", methods=["GET"])
 @login_required

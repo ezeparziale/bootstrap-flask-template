@@ -425,6 +425,23 @@ class Message(db.Model):
     sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     read = Column(BOOLEAN, default=False)
+    parent_id = Column(Integer, ForeignKey("messages.id", ondelete="CASCADE"), nullable=True)
+    childrens = db.relationship("Message", backref=db.backref("parent", remote_side=[id]), lazy="dynamic")
+    level = Column(Integer, default=0)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.parent:
+            self.level = self.parent.level + 1
+
+    def reply(self, message, sender_id, recipient_id):
+        if self.parent:
+            raise Exception("This message is already a reply")
+            
+        reply = Message(message=message, parent=self, sender_id=sender_id, recipient_id=recipient_id)
+        reply.level = self.level + 1
+        db.session.add(reply)
+        db.session.commit()
 
 class Notification(db.Model):
     __tablename__ = "notifications"
