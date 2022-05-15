@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "macro_comment.html" as macros %}
 {% import "macro_pagination.html" as widget %}
+{% import "macro_modal.html" as modals %}
 
 
 {% block navbar %}
@@ -90,7 +91,7 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a></li>
-                                        <li><a class="dropdown-item" href="{{ url_for('posts.delete_post', id=post.id) }}" role="button">Eliminar</a></li>
+                                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#confirmDeletePostModal" role="button" data-bs-whatever="@getbootstrap">Eliminar</a></li>
                                         {% if post.is_closed() %}
                                             <li><a class="dropdown-item" href="{{ url_for('posts.open_post', id=post.id) }}" role="button">Abrir</a></li>
                                         {% else %}
@@ -173,5 +174,7 @@
         
 
     </div>
-  
+
+    {{ modals.confirm_delete_post(post.id) }}
+
 {% endblock %}
