@@ -153,7 +153,12 @@ def view_message(id: int):
     pagination = message.childrens.order_by(Message.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
 
     message_childrens = pagination.items
-    return render_template("view_message.html", form=form, message=message, message_childrens=message_childrens, pagination=pagination)
+
+    if current_user.id == message.sender_id:
+        message_type = "Enviados"
+    else:
+        message_type = "Recibidos"
+    return render_template("view_message.html", form=form, current_user=current_user, message=message, message_childrens=message_childrens, pagination=pagination, message_type=message_type)
 
 @user_bp.route("/notifications", methods=["GET"])
 @login_required
