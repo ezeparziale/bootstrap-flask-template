@@ -4,6 +4,9 @@
     <div class="d-flex justify-content-between align-items-center">
         <p class="mb-1">
             {{ comment.author.username }}
+            {% if comment.author.username == post.author.username %}
+                <span class="badge bg-success">Autor</span>
+            {% endif %}
         </p>
         <span class="small text-muted"> {{ moment(comment.created_at).fromNow() }}</span>
     </div>
