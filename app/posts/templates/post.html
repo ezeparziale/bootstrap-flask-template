@@ -39,8 +39,8 @@
                     <div class="col-auto">
                         <a class="me-3" href="{{ url_for('user.user', username=post.author.username) }}">
                             <img class="rounded-circle"
-                                src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" alt="avatar" width="65"
-                                height="65" />
+                                src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" alt="avatar" width="50"
+                                height="50" />
                         </a>
                     </div>
                     <div class="col-sm-11">
@@ -90,13 +90,14 @@
                                         <i class="bi bi-three-dots"></i>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button">Editar</a></li>
-                                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#confirmDeletePostModal" role="button" data-bs-whatever="@getbootstrap">Eliminar</a></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button"><i class="bi bi-pencil"></i> Editar</a></li>
                                         {% if post.is_closed() %}
-                                            <li><a class="dropdown-item" href="{{ url_for('posts.open_post', id=post.id) }}" role="button">Abrir</a></li>
+                                            <li><a class="dropdown-item dropdown-item-success" href="{{ url_for('posts.open_post', id=post.id) }}" role="button"><i class="bi bi-door-open"></i> Abrir</a></li>
                                         {% else %}
-                                            <li><a class="dropdown-item" href="{{ url_for('posts.close_post', id=post.id) }}" role="button">Cerrar</a></li>
+                                            <li><a class="dropdown-item dropdown-item-warning" href="{{ url_for('posts.close_post', id=post.id) }}" role="button"><i class="bi bi-x-circle"></i> Cerrar</a></li>
                                         {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal" data-bs-target="#confirmDeletePostModal" role="button" data-bs-whatever="@getbootstrap"><i class="bi bi-trash"></i> Eliminar</a></li>
                                     </ul>
                                 </div>
                                 {% endif %}
@@ -112,12 +113,12 @@
             {{ form.hidden_tag() }}
             <div class="card-footer py-3 border-0 bg-light">
                 <div class="d-flex flex-start w-100">
-                    <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
+                    <a class="mx-3" href="{{ url_for('user.user', username=current_user.username) }}">
                         <img class="rounded-circle"
                             src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
                             height="40" />
                     </a>    
-                    <div class="form-outline w-100">
+                    <div class="form-outline w-100 me-3">
                         <fieldset>
                             <!-- {{ form.comment.label(class="form-control-label") }} -->
                             {% if form.comment.errors %}
@@ -141,7 +142,14 @@
         <br>
         
         {% if comments %}
-            <h5><i class="bi bi-chat"></i> Comentarios</h5>
+
+            <div class="nav-align-top">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page"><i class="bi bi-chat-fill"></i> Comentarios</a>
+                    </li>
+                </ul>
+            </div>
 
             <div class="card">
                 <div class="card-body">

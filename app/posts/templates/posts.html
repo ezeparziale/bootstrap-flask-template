@@ -71,7 +71,8 @@
             <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action" aria-current="true">
                 <div class="row">
                     <div class="col-auto">
-                        <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" class="image-posts" alt="{{ post.title }}">
+                        <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }} " class="image-posts" alt="{{ post.title }}" width="50"
+                        height="50">
                     </div>
                     <div class="col-sm-11">
                         <div class="d-flex w-100 justify-content-between">

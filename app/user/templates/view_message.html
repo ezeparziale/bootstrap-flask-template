@@ -59,12 +59,12 @@
         {{ form.hidden_tag() }}
         <div class="card-footer py-3 border-0 bg-light">
             <div class="d-flex flex-start w-100">
-                <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
+                <a class="mx-3" href="{{ url_for('user.user', username=current_user.username) }}">
                     <img class="rounded-circle"
                         src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
                         height="40" />
                 </a>    
-                <div class="form-outline w-100">
+                <div class="form-outline w-100 me-3">
                     <fieldset>
                         {% if form.message.errors %}
                             {{ form.message(class="form-control form-control-lg is-invalid") }}
