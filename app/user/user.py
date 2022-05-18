@@ -6,7 +6,13 @@ from ..models import Message, Notification, User
 from app import db
 from datetime import datetime
 
-user_bp = Blueprint("user", __name__, url_prefix="/user", template_folder='templates')
+user_bp = Blueprint(
+    "user", 
+    __name__, 
+    url_prefix="/user", 
+    template_folder="templates",
+    static_folder="static"
+)
 
 @user_bp.route("/<username>", methods=["GET", "POST"])
 @login_required

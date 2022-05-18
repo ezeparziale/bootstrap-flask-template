@@ -8,7 +8,12 @@ from app import db
 from ..config import settings
 
 
-posts_bp = Blueprint("posts", __name__, url_prefix="/posts", template_folder='templates')
+posts_bp = Blueprint(
+    "posts", 
+    __name__, 
+    url_prefix="/posts", 
+    template_folder="templates",
+    static_folder="static")
 
 @posts_bp.route("/", methods=["GET", "POST"])
 @login_required

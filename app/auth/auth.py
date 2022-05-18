@@ -7,8 +7,13 @@ import pprint
 from flask_mail import Message
 from threading import Thread
 
-auth_bp = Blueprint("auth", __name__, url_prefix="/auth", template_folder='templates')
-
+auth_bp = Blueprint(
+    "auth", 
+    __name__, 
+    url_prefix="/auth", 
+    template_folder="templates",
+    static_folder="static"
+)
 
 @auth_bp.before_app_request
 def before_request():
