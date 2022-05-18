@@ -29,66 +29,64 @@
     </nav>
 
     <div class="card">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-auto">
-                    <a class="me-3" href="{{ url_for('user.user', username=user.username) }}">
-                        <img class="rounded-circle"
-                            src="{{ url_for('static', filename='img/avatars/' ~ user.image_file) }}" alt="avatar" width="65"
-                            height="65" />
-                    </a>
+        <div class="d-flex flex-start w-100">                   
+            <a class="mt-3 ms-3" href="{{ url_for('user.user', username=user.username) }}">
+                <img class="rounded-circle"
+                    src="{{ url_for('static', filename='img/avatars/' ~ user.image_file) }}" alt="avatar" width="40"
+                    height="40" />
+            </a>
+            <div class="card-body">
+                <div class="row">
+                    <div class="d-flex w-100 justify-content-between">
+                        <small class="text-muted"> {{ type }}
+                            <a class="text-muted mb-1" type="button" href="{{ url_for('user.user', username=user.username) }}" role="button">
+                                {{ user.username }}
+                            </a>
+                        </small>
+                        <small class="text-muted mb-1">{{ moment(message.created_at).fromNow() }}</small>
+                    </div>
                 </div>
-                <div class="col-sm-11">
-                    <div class="row">
-                        <div class="d-flex w-100 justify-content-between">
-                            <small class="text-muted"> {{ type }}
-                                <a class="text-muted" type="button" href="{{ url_for('user.user', username=user.username) }}" role="button">
-                                    {{ user.username }}
-                                </a>
-                            </small>
-                            <small>{{ moment(message.created_at).fromNow() }}</small>
+                <p class="mb-1">{{ message.message }}</p>
+            </div>
+        </div>
+
+        <form method="post" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="card-footer py-3 border-0 bg-light">
+                <div class="d-flex flex-start w-100">
+                    <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
+                        <img class="rounded-circle"
+                            src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
+                            height="40" />
+                    </a>    
+                    <div class="form-outline w-100 me-3">
+                        <fieldset>
+                            {% if form.message.errors %}
+                                {{ form.title(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.title.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.message(class="form-control form-control-lg") }}
+                            {% endif %} 
+                        </fieldset>
+                        <div class="float-end mt-2 pt-1">
+                            {{ form.submit(class="btn btn-primary btn-sm") }}
                         </div>
                     </div>
-                    <p class="mb-1">{{ message.message }}</p>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
-    <form method="post" action="" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <div class="card-footer py-3 border-0 bg-light">
-            <div class="d-flex flex-start w-100">
-                <a class="mx-3" href="{{ url_for('user.user', username=current_user.username) }}">
-                    <img class="rounded-circle"
-                        src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
-                        height="40" />
-                </a>    
-                <div class="form-outline w-100 me-3">
-                    <fieldset>
-                        {% if form.message.errors %}
-                            {{ form.message(class="form-control form-control-lg is-invalid") }}
-                                {% for error in form.title.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor%}
-                        {% else %}
-                            {{ form.message(class="form-control form-control-lg") }}
-                        {% endif %} 
-                    </fieldset>
-                    <div class="float-end mt-2 pt-1">
-                        {{ form.submit(class="btn btn-primary btn-sm") }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+    
 
     <div class="card mt-3">
         <div class="card-body">
             <div class="row">
                 <div class="col">
                     {% for message in message_childrens %}
-                        <div class="d-flex flex-start mt-2">
+                        <div class="d-flex flex-start">
                             {{ macros.print_avatar_message(message, 40)}}
                             <div class="flex-grow-1 flex-shrink-1">
                                 {{ macros.print_message(message, moment) }}

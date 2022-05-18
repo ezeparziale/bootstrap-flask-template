@@ -2,13 +2,13 @@
 
 <div>
     <div class="d-flex justify-content-between align-items-center">
-        <p class="mb-1">
+        <p class="text-muted mb-1">
             {{ comment.author.username }}
             {% if comment.author.username == post.author.username %}
                 <span class="badge bg-success">Autor</span>
             {% endif %}
         </p>
-        <span class="small text-muted"> {{ moment(comment.created_at).fromNow() }}</span>
+        <span class="small text-muted mb-1"> {{ moment(comment.created_at).fromNow() }}</span>
     </div>
     <p class="small mb-0">
         {% if comment.disabled %}

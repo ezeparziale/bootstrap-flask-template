@@ -26,16 +26,18 @@
         </ul>
     </div>
 
-    <div class="list-group list-group-flush">
+    <div class="list-group">
         {% for message in messages %}
             <a href="{{ url_for('user.view_message', id=message.id) }}" class="list-group-item list-group-item-action" aria-current="true">
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
                     {% if view_message == 0 %} 
-                        <img src="{{ url_for('static', filename='img/avatars/' ~ message.author.image_file) }}" class="image-posts" alt="{{ message.author.username }}">
+                        <img src="{{ url_for('static', filename='img/avatars/' ~ message.author.image_file) }}" class="image-posts" alt="{{ message.author.username }}" width="40"
+                        height="40" >
                         {{ message.author.username }} 
                     {% else %}
-                        <img src="{{ url_for('static', filename='img/avatars/' ~ message.recipient.image_file) }}" class="image-posts" alt="{{ message.recipient.username }}">
+                        <img src="{{ url_for('static', filename='img/avatars/' ~ message.recipient.image_file) }}" class="image-posts" alt="{{ message.recipient.username }}" width="40"
+                        height="40" >
                         {{ message.recipient.username }} 
                     {% endif %}
                     {% if not message.read and view_message == 0 %}

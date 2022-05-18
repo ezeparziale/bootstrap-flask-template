@@ -1,12 +1,12 @@
 {% macro print_message(message, moment) %}
     <div>
         <div class="d-flex justify-content-between align-items-center">
-            <small class="text-muted">
+            <small class="text-muted mb-1">
                 <a class="text-muted" type="button" href="{{ url_for('user.user', username=message.author.username) }}" role="button">
                     {{ message.author.username }}
                 </a>
             </small>
-            <small class="text-muted"> {{ moment(message.created_at).fromNow() }}</small>
+            <small class="text-muted mb-1"> {{ moment(message.created_at).fromNow() }}</small>
         </div>
         <p class="small mb-0">
             <p class="mb-1">{{ message.message }}</p>

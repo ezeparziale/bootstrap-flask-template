@@ -7,27 +7,24 @@
 {% block title %} Enviar Mensaje {% endblock %}
 
 {% block content %}
-
-    <div class="container">
-        <form method="post" action="" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            <fieldset>
-                <legend class="border-bottom mb-4">Enviar mensaje: {{ recipient.username }}</legend>
-                <div class="form-group">
-                    {{ form.message.label(class="form-control-label") }}
-                    {% if form.message.errors %}
-                        {{ form.message(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.message.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.message(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-            </fieldset>
-            <div class="form-group mt-3">
-                {{ form.submit(class="btn btn-primary") }}
+    <form method="post" action="" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <fieldset>
+            <legend class="border-bottom mb-4">Enviar mensaje: {{ recipient.username }}</legend>
+            <div class="form-group">
+                {{ form.message.label(class="form-control-label") }}
+                {% if form.message.errors %}
+                    {{ form.message(class="form-control form-control-lg is-invalid") }}
+                        {% for error in form.message.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor%}
+                {% else %}
+                    {{ form.message(class="form-control form-control-lg") }}
+                {% endif %}
             </div>
-        </form>
-    </div>
+        </fieldset>
+        <div class="form-group mt-3">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
 {% endblock %}
