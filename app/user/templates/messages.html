@@ -15,18 +15,16 @@
         </ol>
     </nav>
 
-    <div class="nav-align-top">
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link {% if view_message == 0 %} active {% endif %}" aria-current="page" href="{{ url_for('user.show_messages_received') }}"><i class="bi bi-inbox"></i> Recibidos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if view_message == 1 %} active {% endif %}" href="{{ url_for('user.show_messages_sent') }}"><i class="bi bi-send"></i> Enviados</a>
-            </li>
-        </ul>
+    <div class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link {% if view_message == 0 %} active {% endif %}" aria-current="page" href="{{ url_for('user.show_messages_received') }}"><i class="bi bi-inbox"></i> Recibidos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if view_message == 1 %} active {% endif %}" href="{{ url_for('user.show_messages_sent') }}"><i class="bi bi-send"></i> Enviados</a>
+        </li>
     </div>
 
-    <div class="list-group">
+    <div class="list-group mt-3">
         {% for message in messages %}
             <a href="{{ url_for('user.view_message', id=message.id) }}" class="list-group-item list-group-item-action" aria-current="true">
             <div class="d-flex w-100 justify-content-between">
@@ -46,7 +44,6 @@
                 </h5>
                 <small>{{ moment(message.created_at).fromNow() }}</small>
             </div>
-            <!-- <p class="mb-1">{{ message.message }}</p> -->
             </a>
         {% endfor %}
     </div>
