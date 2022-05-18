@@ -2,12 +2,14 @@
 
 <div>
     <div class="d-flex justify-content-between align-items-center">
-        <p class="text-muted mb-1">
-            {{ comment.author.username }}
+        <small class="text-muted mb-1">
+            <a class="text-muted" type="button" href="{{ url_for('user.user', username=comment.author.username) }}" role="button">
+                {{ comment.author.username }}
+            </a>
             {% if comment.author.username == post.author.username %}
                 <span class="badge bg-success">Autor</span>
             {% endif %}
-        </p>
+        </small>
         <span class="small text-muted mb-1"> {{ moment(comment.created_at).fromNow() }}</span>
     </div>
     <p class="small mb-0">
@@ -22,7 +24,7 @@
                 <i class="bi bi-chat-text ms-2"></i> {{ comment.childrens|length }} Respuestas
 
                 {% if not post.is_closed() and not post.is_disabled() %}
-                <a class="text-muted ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample{{ comment.id }}" aria-expanded="false" aria-controls="collapseExample">
+                <a class="text-muted ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMessage{{ comment.id }}" aria-expanded="false" aria-controls="collapseMessage">
                     <i class="bi bi-chat"></i> Responder
                 </a>
                 {% endif %}
@@ -57,17 +59,17 @@
                 {% endif %}
 
                 {% if not post.is_closed() and not post.is_disabled() %}
-                <div class="collapse" id="collapseExample{{ comment.id }}">
+                <div class="collapse" id="collapseMessage{{ comment.id }}">
                     <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">
-                        <div class="card-footer py-3 border-0" style="background-color: #f4f8fA;">
+                        <div class="card-footer py-3 border-0 mt-1 bg-light" style="background-color: #f4f8fA;">
                             <div class="d-flex flex-start w-100">
                                 <img class="rounded-circle shadow-1-strong me-3"
                                 src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
                                 height="40" />
                                 <div class="form-outline w-100">
-                                    <textarea class="form-control" id="textAreaExample"  name="comment" rows="4"
+                                    <textarea class="form-control" id="textAreaMessage"  name="comment" rows="4"
                                         style="background: #fff;"></textarea>
-                                    <label class="form-label" for="textAreaExample">Mensaje</label>
+                                    <label class="form-label" for="textAreaMessage">Mensaje</label>
                                     <div class="float-end mt-2 pt-1">
                                         <button type="submit" class="btn btn-primary btn-sm">Responder</button>
                                     </div>

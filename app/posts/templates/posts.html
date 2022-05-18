@@ -44,8 +44,10 @@
             </div>
         </fieldset>
         <div class="form-group mt-3">
+            <div class="text-end">
                 {{ form.submit(class="btn btn-primary") }}
             </div>
+        </div>
     </form>
 
     <br>
@@ -61,8 +63,7 @@
         </li>
     </div>
 
-    <div class="list-group "> 
-        <!-- list-group-flush -->
+    <div class="list-group mt-3"> 
         {% for post in posts %}
             <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action" aria-current="true">
                 <div class="row">

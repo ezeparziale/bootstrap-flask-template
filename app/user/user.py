@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for, flash
 from flask_login import current_user, login_required
 from app.config import settings
-from app.user.forms import EmptyForm, MessageForm
+from app.user.forms import EmptyForm, SendMessageForm, ReplyMessageForm
 from ..models import Message, Notification, User
 from app import db
 from datetime import datetime
@@ -87,7 +87,7 @@ def follow_by(username: str):
 @login_required
 def send_message(username: str):
     recipient = User.query.filter_by(username=username).first_or_404()
-    form = MessageForm()
+    form = SendMessageForm()
     if form.validate_on_submit():
         message = form.message.data
         current_user.send_message(recipient, message)
@@ -143,7 +143,7 @@ def view_message(id: int):
         return redirect(url_for("user.messages"))
     message.read = True
     db.session.commit()
-    form = MessageForm()
+    form = ReplyMessageForm()
     if form.validate_on_submit():
         if current_user.id == message.sender_id:
             sender_id = message.sender_id

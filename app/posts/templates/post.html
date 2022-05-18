@@ -41,10 +41,11 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="d-flex w-100 justify-content-between">
-                            <small class="text-muted mb-1"> Creado por: 
+                            <small class="text-muted mb-1">
                                 <a class="text-muted" type="button" href="{{ url_for('user.user', username=username) }}" role="button">
                                     {{ username }}
                                 </a>
+                                <span class="badge bg-success">Autor</span>
                             </small>
                             <small class="text-muted mb-1">{{ moment(post.created_at).fromNow() }}</small>
                         </div>
@@ -135,15 +136,12 @@
         <br>
         
         {% if comments %}
-        <div class="container">
-            <div class="nav-align-top">
-                <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page"><i class="bi bi-chat-fill"></i> Comentarios</a>
-                    </li>
-                </ul>
+            <div class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page"><i class="bi bi-chat-fill"></i> Comentarios</a>
+                </li>
             </div>
-            <div class="card">
+            <div class="card mt-3">
                 <div class="card-body">
                     <div class="row">
                         <div class="col">
@@ -168,12 +166,8 @@
                 </div>
             </div>
             {{ widget.pagination(pagination, 'posts.get_post', name="Comment list", id=post.id) }}
-        </div>
         {% endif %}
         
-
-    </div>
-
     {{ modals.confirm_delete_post(post.id) }}
 
 {% endblock %}

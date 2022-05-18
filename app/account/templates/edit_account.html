@@ -90,11 +90,13 @@
                     {% endif %}
                 </div>
             </fieldset>
-            <div class="form-group mt-3">
-                {{ form.submit(class="btn btn-primary") }}
-                <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button" aria-disabled="true">
-                    Cancelar
-                </a>
+            <div class="text-end">
+                <div class="form-group mt-3">
+                    <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button" aria-disabled="true">
+                        Cancelar
+                    </a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
             </div>
         </form>
     </div>

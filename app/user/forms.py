@@ -3,9 +3,13 @@ from wtforms import SubmitField, TextAreaField, StringField
 from wtforms.validators import DataRequired, Length
 
 
-class MessageForm(FlaskForm):
+class SendMessageForm(FlaskForm):
     message = TextAreaField(label="Mensaje", validators=[DataRequired(), Length(min=10)])
-    submit = SubmitField(label="Reponder")
+    submit = SubmitField(label="Enviar")
+
+class ReplyMessageForm(FlaskForm):
+    message = TextAreaField(label="Mensaje", validators=[DataRequired(), Length(min=10)])
+    submit = SubmitField(label="Responder")
 
 class EmptyForm(FlaskForm):
     submit = SubmitField(label="Reponder")
