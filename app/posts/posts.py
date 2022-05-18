@@ -74,7 +74,7 @@ def get_post(id: int):
 @login_required
 def edit_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    if current_user != post.author:
+    if current_user != post.author and not current_user.is_admin():
         abort(404)
     form = PostForm()
     if form.validate_on_submit():
@@ -91,7 +91,7 @@ def edit_post(id: int):
 @login_required
 def delete_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    if current_user != post.author:
+    if current_user != post.author and not current_user.is_admin():
         abort(404)
     db.session.delete(post)
     db.session.commit()
@@ -262,7 +262,7 @@ def reply_comment(id: int):
 @login_required
 def close_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    if post.author == current_user:
+    if post.author == current_user or current_user.is_admin():
         post.close()
         # flash("Post cerrado", category="success")
         return redirect(url_for("posts.get_post", id=id))
@@ -272,7 +272,7 @@ def close_post(id: int):
 @login_required
 def open_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    if post.author == current_user:
+    if post.author == current_user or current_user.is_admin():
         post.open()
         # flash("Post abierto", category="success")
         return redirect(url_for("posts.get_post", id=id))
