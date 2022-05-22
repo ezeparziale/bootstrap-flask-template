@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% import "macro_message.html" as macros %}
+{% import "macro_pagination.html" as widget %}
+
+
+{% block navbar %}
+    {% include "navbar.html" %}
+{% endblock %}
+
+{% block title %} Mensaje {% endblock %}
+
+{% block content %}
+
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('user.show_rooms') }}">Mensajes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Sala</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <form method="post" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="card-footer py-3 border-0 bg-light">
+                <div class="d-flex flex-start w-100">
+                    <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
+                        <img class="rounded-circle"
+                            src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
+                            height="40" />
+                    </a>    
+                    <div class="form-outline w-100 me-3">
+                        <fieldset>
+                            {% if form.message.errors %}
+                                {{ form.title(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.title.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.message(class="form-control form-control-lg") }}
+                            {% endif %} 
+                        </fieldset>
+                        <div class="float-end mt-2 pt-1">
+                            {{ form.submit(class="btn btn-primary btn-sm") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    {% for message in messages %}
+                        <div class="d-flex flex-start">
+                            {{ macros.print_avatar_message(message, 40)}}
+                            <div class="flex-grow-1 flex-shrink-1">
+                                {{ macros.print_message(message, moment) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ widget.pagination(pagination, 'user.show_messages_room', room_id=room_id) }}
+
+{% endblock %}

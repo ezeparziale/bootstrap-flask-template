@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for, flash
+from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for, flash, abort
 from flask_login import current_user, login_required
 from app.config import settings
 from app.user.forms import EmptyForm, SendMessageForm, ReplyMessageForm
-from ..models import Message, Notification, User
+from ..models import Message, Notification, Participant, User, Room, RoomMessage
 from app import db
 from datetime import datetime
 
@@ -176,3 +176,48 @@ def notifications():
         "data": n.get_data(),
         "timestamp": n.timestamp
     } for n in notifications])
+
+
+@user_bp.route("/send_menssage_room/<username>", methods=["GET", "POST"])
+@login_required
+def send_menssage_room(username: str):
+    recipient = User.query.filter_by(username=username).first_or_404()
+    
+    form = SendMessageForm()
+
+    if form.validate_on_submit():
+        message = form.message.data
+        room_id = current_user.get_room_id(recipient)
+        current_user.send_message_to_room(room_id, message)
+        return redirect(url_for("user.show_messages_room", room_id=room_id))
+    
+    return render_template("send_message_room.html", form=form, recipient=recipient)
+
+
+@user_bp.route("/show_messages_room/<room_id>", methods=["GET","POST"])
+@login_required
+def show_messages_room(room_id: int):
+    room = Room.query.filter_by(id=room_id).first_or_404()
+    is_participant = Participant.query.filter(Participant.room_id==room.id, Participant.user_id==current_user.id).all()
+    if is_participant:
+        form = ReplyMessageForm()
+        if form.validate_on_submit():
+            message = form.message.data
+            current_user.send_message_to_room(room_id, message)
+
+        messages = RoomMessage.query.filter_by(room_id=room.id).order_by(RoomMessage.created_at.desc())
+        page = request.args.get("page", 1, type=int)
+        pagination = messages.paginate(page, settings.POSTS_PER_PAGE, False)
+        messages = pagination.items
+        return render_template("show_message_room.html", form=form, messages=messages, pagination=pagination, room_id=room_id)
+    else:
+        abort(401)
+
+@user_bp.route("/show_rooms", methods=["GET","POST"])
+@login_required
+def show_rooms():
+    rooms = []
+    for item in current_user.participant:
+        user_2 = Participant.query.filter(Participant.room_id==item.room_id, Participant.user_id!=item.user_id).first()
+        rooms.append((item.room_id, user_2.user))
+    return render_template("show_rooms.html", rooms=rooms)
