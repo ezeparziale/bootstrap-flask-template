@@ -64,6 +64,8 @@ class User(db.Model, UserMixin):
     report = db.relationship("Report", backref="user", lazy="dynamic")
     comments_reported = db.relationship("CommentReport", backref="user", lazy="dynamic")
     comments_liked = db.relationship("CommentLike", backref="user", lazy="dynamic")
+    participant = db.relationship("Participant", backref="user", lazy="dynamic")
+    room_messages = db.relationship("RoomMessage", backref="author", lazy="dynamic")
 
     @staticmethod
     def generate_avatar():
@@ -172,6 +174,34 @@ class User(db.Model, UserMixin):
 
     def get_notifications(self, since):
         return self.notifications.filter(Notification.timestamp > datetime.utcfromtimestamp(since)).order_by(Notification.timestamp.asc())
+
+    def get_room_id(self, recipient):
+        room_id = None
+        for participate in self.participant:
+            user_to_participant = Participant.query.filter(Participant.room_id==participate.room_id, Participant.user_id!=participate.user_id).first()
+            user_to = User.query.filter(User.id==user_to_participant.user_id).first()
+            if user_to.username == recipient.username:
+                room_id = participate.room_id
+                break
+
+        if room_id is None:
+            room = Room(name=f"{self.username}-{recipient.username}")
+            db.session.add(room)
+            db.session.commit()
+            participant = Participant(user_id=self.id, room_id=room.id)
+            db.session.add(participant)
+            db.session.commit()
+            participant = Participant(user_id=recipient.id, room_id=room.id)
+            db.session.add(participant)
+            db.session.commit()
+            room_id = room.id
+
+        return room_id
+
+    def send_message_to_room(self, room_id, message):
+        msg = RoomMessage(message=message, user_id=self.id, room_id=room_id)
+        db.session.add(msg)
+        db.session.commit()
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -492,3 +522,35 @@ class CommentLike(db.Model):
 
     def __repr__(self) -> str:
         return f"id={self.id} user_id={self.user_id} comment_id={self.comment_id}"
+
+class Participant(db.Model):
+    __tablename__ = "participants"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    room_id = Column(Integer, ForeignKey("rooms.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"id={self.id} user_id={self.user_id} room_id={self.room_id}"
+
+class Room(db.Model):
+    __tablename__ = "rooms"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(128), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    participants = db.relationship("Participant", backref=db.backref("room", remote_side=[id]), lazy="dynamic")
+    messages = db.relationship("RoomMessage", backref=db.backref("room", remote_side=[id]), lazy="dynamic")
+
+    def __repr__(self) -> str:
+        return f"id={self.id} name={self.name}"
+
+class RoomMessage(db.Model):
+    __tablename__ = "room_messages"
+    id = Column(Integer, primary_key=True)
+    message = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    room_id = Column(Integer, ForeignKey("rooms.id", ondelete="CASCADE"), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"id={self.id} message={self.message} user_id={self.user_id} room_id={self.room_id}"
