@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macro_pagination.html" as widget %}
 
 {% block navbar %}
     {% include "navbar.html" %}
@@ -17,18 +18,20 @@
 
     <div class="list-group mt-3">
         {% for message in rooms %}
-            <a href="{{ url_for('user.show_messages_room', room_id=message[0]) }}" class="list-group-item list-group-item-action" aria-current="true">
+            <a href="{{ url_for('user.show_messages_room', room_id=message.room_id) }}" class="list-group-item list-group-item-action" aria-current="true">
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
-                    <img src="{{ url_for('static', filename='img/avatars/' ~ message[1].image_file) }}" class="image-posts" alt="{{ message[1].username }}" width="40"
+                    <img src="{{ url_for('static', filename='img/avatars/' ~ message.user.image_file) }}" class="image-posts" alt="{{ message.user.username }}" width="40"
                         height="40" >
-                    {{ message[1].username }} 
+                    {{ message.user.username }} 
                     
                 </h5>
             </div>
             </a>
         {% endfor %}
     </div>
+
+    {{ widget.pagination(pagination, 'user.show_rooms') }}
 
 
 {% endblock %}
