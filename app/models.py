@@ -69,10 +69,7 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def generate_avatar():
-        img = []
-        for i in range(1, 16):
-            img.append(f"avatar{i}.png")
-        return img[random.randint(0,14)]
+        return f"avatar{random.randint(0,14)}.png"
 
     def send_message(self, recipient, message):
         msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
@@ -200,8 +197,16 @@ class User(db.Model, UserMixin):
 
     def send_message_to_room(self, room_id, message):
         msg = RoomMessage(message=message, user_id=self.id, room_id=room_id)
+        room = Room.query.filter_by(id=room_id).first()
+        room.last_message_at = datetime.utcnow()
         db.session.add(msg)
         db.session.commit()
+
+    def get_room_messages(self, room_id):
+        participant = Participant.query.filter(Participant.room_id==room_id, Participant.user_id==self.id).first()
+        room = Room.query.filter_by(id=room_id).first()
+        messages = RoomMessage.query.filter(RoomMessage.room_id==room_id, RoomMessage.created_at>participant.last_access_at).order_by(RoomMessage.created_at.asc()).count()
+        return messages
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -529,6 +534,8 @@ class Participant(db.Model):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     room_id = Column(Integer, ForeignKey("rooms.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    last_access_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    last_message_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
     def __repr__(self) -> str:
         return f"id={self.id} user_id={self.user_id} room_id={self.room_id}"
@@ -540,6 +547,7 @@ class Room(db.Model):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
     participants = db.relationship("Participant", backref=db.backref("room", remote_side=[id]), lazy="dynamic")
     messages = db.relationship("RoomMessage", backref=db.backref("room", remote_side=[id]), lazy="dynamic")
+    last_message_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
     def __repr__(self) -> str:
         return f"id={self.id} name={self.name}"
