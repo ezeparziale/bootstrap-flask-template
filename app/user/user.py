@@ -197,15 +197,17 @@ def send_menssage_room(username: str):
 @user_bp.route("/show_messages_room/<room_id>", methods=["GET","POST"])
 @login_required
 def show_messages_room(room_id: int):
-    room = Room.query.filter_by(id=room_id).first_or_404()
-    is_participant = Participant.query.filter(Participant.room_id==room.id, Participant.user_id==current_user.id).first()
-    if is_participant:
+    participant = Participant.query.filter(Participant.room_id==room_id, Participant.user_id==current_user.id).first_or_404()
+    if participant:
         form = ReplyMessageForm()
         if form.validate_on_submit():
             message = form.message.data
             current_user.send_message_to_room(room_id, message)
+            participant.last_message_at = datetime.utcnow()
 
-        messages = RoomMessage.query.filter_by(room_id=room.id).order_by(RoomMessage.created_at.desc())
+        participant.last_access_at = datetime.utcnow()
+        db.session.commit()
+        messages = RoomMessage.query.filter_by(room_id=room_id).order_by(RoomMessage.created_at.desc())
         page = request.args.get("page", 1, type=int)
         pagination = messages.paginate(page, settings.POSTS_PER_PAGE, False)
         messages = pagination.items
@@ -221,4 +223,4 @@ def show_rooms():
     page = request.args.get("page", 1, type=int)
     pagination = rooms.paginate(page, settings.POSTS_PER_PAGE, False)
     rooms = pagination.items
-    return render_template("show_rooms.html", rooms=rooms, pagination=pagination)
+    return render_template("show_rooms.html", rooms=rooms, pagination=pagination, current_user=current_user)
