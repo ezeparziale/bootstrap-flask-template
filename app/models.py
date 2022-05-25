@@ -56,8 +56,8 @@ class User(db.Model, UserMixin):
     rol_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
     likes = db.relationship("Like", backref="user", lazy="dynamic")
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
-    messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="author", lazy="dynamic")
-    messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
+    # messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="author", lazy="dynamic")
+    # messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
     last_message_read_time = db.Column(TIMESTAMP)
     notifications = db.relationship("Notification", backref="user", lazy="dynamic")
     views = db.relationship("View", backref="user", lazy="dynamic")
@@ -71,10 +71,10 @@ class User(db.Model, UserMixin):
     def generate_avatar():
         return f"avatar{random.randint(0,14)}.png"
 
-    def send_message(self, recipient, message):
-        msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
-        db.session.add(msg)
-        db.session.commit()
+    # def send_message(self, recipient, message):
+    #     msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
+    #     db.session.add(msg)
+    #     db.session.commit()
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -166,8 +166,12 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
     def new_messages(self):
-        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
-        return Message.query.filter_by(recipient=self).filter(Message.created_at > last_read_time).count()
+        subquery = db.select([Participant.room_id]).filter_by(user_id=self.id)
+        rooms = Participant.query.filter(Participant.room_id.in_(subquery), Participant.user_id!=self.id).order_by(Participant.created_at.desc())
+        unread_messages = 0
+        for room in rooms:
+            unread_messages += self.get_room_messages(room.room_id)
+        return unread_messages
 
     def get_notifications(self, since):
         return self.notifications.filter(Notification.timestamp > datetime.utcfromtimestamp(since)).order_by(Notification.timestamp.asc())
@@ -475,31 +479,31 @@ def inject_permission():
     return dict(Permission=Permission)
 
 
-class Message(db.Model):
-    __tablename__ = "messages"
-    id = Column(Integer, primary_key=True)
-    message = Column(Text, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
-    sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    read = Column(BOOLEAN, default=False)
-    parent_id = Column(Integer, ForeignKey("messages.id", ondelete="CASCADE"), nullable=True)
-    childrens = db.relationship("Message", backref=db.backref("parent", remote_side=[id]), lazy="dynamic")
-    level = Column(Integer, default=0)
+# class Message(db.Model):
+#     __tablename__ = "messages"
+#     id = Column(Integer, primary_key=True)
+#     message = Column(Text, nullable=False)
+#     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+#     sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+#     recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+#     read = Column(BOOLEAN, default=False)
+#     parent_id = Column(Integer, ForeignKey("messages.id", ondelete="CASCADE"), nullable=True)
+#     childrens = db.relationship("Message", backref=db.backref("parent", remote_side=[id]), lazy="dynamic")
+#     level = Column(Integer, default=0)
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.parent:
-            self.level = self.parent.level + 1
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         if self.parent:
+#             self.level = self.parent.level + 1
 
-    def reply(self, message, sender_id, recipient_id):
-        if self.parent:
-            raise Exception("This message is already a reply")
+#     def reply(self, message, sender_id, recipient_id):
+#         if self.parent:
+#             raise Exception("This message is already a reply")
             
-        reply = Message(message=message, parent=self, sender_id=sender_id, recipient_id=recipient_id)
-        reply.level = self.level + 1
-        db.session.add(reply)
-        db.session.commit()
+#         reply = Message(message=message, parent=self, sender_id=sender_id, recipient_id=recipient_id)
+#         reply.level = self.level + 1
+#         db.session.add(reply)
+#         db.session.commit()
 
 class Notification(db.Model):
     __tablename__ = "notifications"
