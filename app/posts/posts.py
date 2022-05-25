@@ -2,7 +2,7 @@ from flask import Blueprint, abort, make_response, redirect, render_template, ur
 
 from app.decorators import permission_required
 from .forms import PostCommentForm, PostForm, PostViewForm
-from ..models import Comment, Post, Permission, Report
+from ..models import Comment, Post, Permission, PostTag, Report, Tag
 from flask_login import current_user, login_required
 from app import db
 from ..config import settings
@@ -15,9 +15,11 @@ posts_bp = Blueprint(
     template_folder="templates",
     static_folder="static")
 
-@posts_bp.route("/", methods=["GET", "POST"])
+@posts_bp.route("/", methods=["GET"])
 @login_required
 def posts():
+    form = PostForm()
+
     view_mode = 0
     if current_user.is_authenticated:
         view_mode = int(request.cookies.get("view_mode", 0))
@@ -30,19 +32,6 @@ def posts():
 
     page = request.args.get("page", 1, type=int)
     pagination = query.order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
-
-    form = PostForm()
-    if form.validate_on_submit():
-        post = Post(
-            title=form.title.data,
-            content=form.content.data,
-            author=current_user
-        )
-        db.session.add(post)
-        db.session.commit()
-        flash("Post creado", category="success")
-        return redirect(url_for("posts.posts"))
-
     posts = pagination.items
     return render_template("posts.html", form=form, posts=posts, pagination=pagination, view_mode=view_mode)
 
@@ -70,6 +59,34 @@ def get_post(id: int):
     post.add_view(current_user)
     return render_template("post.html", form=form, post=post, username=post.author.username, comments=comments, pagination=pagination)
 
+@posts_bp.route("/create", methods=["GET", "POST"])
+@login_required
+def create_post():
+    form = PostForm()
+    print(form.tags.data)
+    print(form.content.data)
+    print(form.title.data)    
+    if form.validate_on_submit():
+
+        post = Post(
+            title=form.title.data,
+            content=form.content.data,
+            author=current_user
+        )
+        db.session.add(post)
+        db.session.commit()
+
+        for tag in form.tags.data:
+            post_tags = PostTag(post_id=post.id, tag_id=tag)
+            db.session.add(post_tags)
+
+        db.session.commit()
+
+        flash("Post creado", category="success")
+        return redirect(url_for("posts.posts"))
+    return render_template("create_post.html", form=form)
+
+
 @posts_bp.route("/edit/<id>", methods=["GET","POST"])
 @login_required
 def edit_post(id: int):
@@ -80,11 +97,18 @@ def edit_post(id: int):
     if form.validate_on_submit():
         post.title = form.title.data
         post.content = form.content.data
+        post_tags = PostTag.query.filter_by(post_id=post.id).all()
+        for tag in post_tags:
+            db.session.delete(tag)
+        for tag in form.tags.data:
+            post_tag = PostTag(post_id=post.id, tag_id=tag)
+            db.session.add(post_tag)
         db.session.commit()
         flash("Post actualizado", category="success")
         return redirect(url_for("posts.get_post", id=id))
     form.title.data = post.title
     form.content.data = post.content
+    form.tags.data = [tag.tag_id for tag in post.tags]
     return render_template("edit_post.html", form=form)
 
 @posts_bp.route("/delete/<id>", methods=["GET","POST"])
