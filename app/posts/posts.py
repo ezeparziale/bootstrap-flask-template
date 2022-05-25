@@ -1,8 +1,8 @@
 from flask import Blueprint, abort, make_response, redirect, render_template, url_for, flash, request
 
 from app.decorators import permission_required
-from .forms import PostCommentForm, PostForm, PostViewForm
-from ..models import Comment, Post, Permission, PostTag, Report, Tag
+from .forms import PostCommentForm, CreatePostForm, EditPostForm
+from ..models import Comment, Post, Permission, PostTag, Report
 from flask_login import current_user, login_required
 from app import db
 from ..config import settings
@@ -18,8 +18,6 @@ posts_bp = Blueprint(
 @posts_bp.route("/", methods=["GET"])
 @login_required
 def posts():
-    form = PostForm()
-
     view_mode = 0
     if current_user.is_authenticated:
         view_mode = int(request.cookies.get("view_mode", 0))
@@ -33,7 +31,7 @@ def posts():
     page = request.args.get("page", 1, type=int)
     pagination = query.order_by(Post.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
     posts = pagination.items
-    return render_template("posts.html", form=form, posts=posts, pagination=pagination, view_mode=view_mode)
+    return render_template("posts.html", posts=posts, pagination=pagination, view_mode=view_mode)
 
 
 @posts_bp.route("/<id>", methods=["GET", "POST"])
@@ -62,7 +60,7 @@ def get_post(id: int):
 @posts_bp.route("/create", methods=["GET", "POST"])
 @login_required
 def create_post():
-    form = PostForm()
+    form = CreatePostForm()
     print(form.tags.data)
     print(form.content.data)
     print(form.title.data)    
@@ -93,7 +91,7 @@ def edit_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
     if current_user != post.author and not current_user.is_admin():
         abort(404)
-    form = PostForm()
+    form = EditPostForm()
     if form.validate_on_submit():
         post.title = form.title.data
         post.content = form.content.data
