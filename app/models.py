@@ -228,6 +228,24 @@ class UserDetail(db.Model):
     def __repr__(self) -> str:
         return f"{self.firstname} {self.lastname}"
 
+class PostTag(db.Model):
+    __tablename__ = "post_tags"
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"id={self.id} post_id={self.post_id} tag_id={self.tag_id}"
+
+class Tag(db.Model):
+    __tablename__ = "tags"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(128), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    posts = db.relationship("PostTag", backref=db.backref("tag", remote_side=[id]), lazy="dynamic")
+
+    def __repr__(self) -> str:
+        return f"id={self.id} name={self.name}"
 
 class Post(db.Model):
     __tablename__ = "posts"
@@ -243,8 +261,8 @@ class Post(db.Model):
     reports = db.relationship("Report", backref="post", cascade="all, delete-orphan", lazy="dynamic")
     closed = Column(BOOLEAN, default=False)
     disabled = Column(BOOLEAN, default=False)
-
-
+    tags = db.relationship("PostTag", backref=db.backref("post", remote_side=[id]), lazy="dynamic")
+    
     def add_visit(self):
         self.visits += 1
         db.session.commit()
