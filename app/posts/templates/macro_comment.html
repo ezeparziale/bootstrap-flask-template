@@ -10,7 +10,7 @@
                 <span class="badge bg-success">Autor</span>
             {% endif %}
         </small>
-        <span class="small text-muted mb-1"> {{ moment(comment.created_at).fromNow() }}</span>
+        <span class="small text-muted mb-1"><i class="bi bi-clock"></i>  {{ moment(comment.created_at).fromNow() }}</span>
     </div>
     <p class="small mb-0">
         {% if comment.disabled %}

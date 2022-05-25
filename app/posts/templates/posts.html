@@ -47,7 +47,7 @@
                                 <h6> <span class="badge bg-danger ms-2">Cerrado</span></h6>
                                 {% endif %}
                             </div>
-                            <small>{{ moment(post.created_at).fromNow() }}</small>
+                            <small><i class="bi bi-clock"></i> {{ moment(post.created_at).fromNow() }}</small>
                         </div>
                         <div class="text-muted">
                             <small><i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios</small>
