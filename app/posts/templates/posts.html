@@ -11,47 +11,12 @@
 
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Posts</li>
+            <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Posts</li>
         </ol>
     </nav>
 
-    <form method="post" action="" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <fieldset>
-            <legend class="border-bottom mb-4">Crear post</legend>
-            <div class="form-group">
-                {{ form.title.label(class="form-control-label") }}
-                {% if form.title.errors %}
-                    {{ form.title(class="form-control form-control-lg is-invalid") }}
-                        {% for error in form.title.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor%}
-                {% else %}
-                    {{ form.title(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.content.label(class="form-control-label") }}
-                {% if form.content.errors %}
-                    {{ form.content(class="form-control form-control-lg is-invalid") }}
-                        {% for error in form.content.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor%}
-                {% else %}
-                    {{ form.content(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-        </fieldset>
-        <div class="form-group mt-3">
-            <div class="text-end">
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </div>
-    </form>
-
-    <br>
-    <div class="nav nav-pills">
+    <div class="nav nav-pills red">
         <li class="nav-item">
             <a class="nav-link {% if view_mode == 0 %} active {% endif %}" aria-current="page" href="{{ url_for('posts.show_all') }}"><i class="bi bi-clipboard2-fill"></i> Ver todos</a>
         </li>
@@ -60,6 +25,9 @@
         </li>
         <li class="nav-item">
             <a class="nav-link {% if view_mode == 2 %} active {% endif %}" href="{{ url_for('posts.show_favorite') }}"><i class="bi bi-bookmark-fill"></i> Favoritos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('posts.create_post') }}"><i class="bi bi-file-earmark-fill"></i> Crear</a>
         </li>
     </div>
 
