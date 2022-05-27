@@ -85,10 +85,10 @@ def create_post():
     return render_template("create_post.html", form=form)
 
 
-@posts_bp.route("/edit/<id>", methods=["GET","POST"])
+@posts_bp.route("/edit/<post_id>", methods=["GET","POST"])
 @login_required
-def edit_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+def edit_post(post_id: int):
+    post = Post.query.filter_by(id=post_id).first_or_404()
     if current_user != post.author and not current_user.is_admin():
         abort(404)
     form = EditPostForm()
@@ -103,11 +103,11 @@ def edit_post(id: int):
             db.session.add(post_tag)
         db.session.commit()
         flash("Post actualizado", category="success")
-        return redirect(url_for("posts.get_post", id=id))
+        return redirect(url_for("posts.get_post", id=post_id))
     form.title.data = post.title
     form.content.data = post.content
     form.tags.data = [tag.tag_id for tag in post.tags]
-    return render_template("edit_post.html", form=form)
+    return render_template("edit_post.html", form=form, post_id=post_id)
 
 @posts_bp.route("/delete/<id>", methods=["GET","POST"])
 @login_required
