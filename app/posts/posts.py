@@ -81,7 +81,7 @@ def create_post():
         db.session.commit()
 
         flash("Post creado", category="success")
-        return redirect(url_for("posts.posts"))
+        return redirect(url_for("posts.get_post", id=post.id))
     return render_template("create_post.html", form=form)
 
 
