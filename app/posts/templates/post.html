@@ -11,6 +11,7 @@
 {% block title %} Post {% endblock %}
 
 {% block content %}
+
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
@@ -86,7 +87,7 @@
                                     <i class="bi bi-three-dots"></i>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', id=post.id) }}" role="button"><i class="bi bi-pencil"></i> Editar</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', post_id=post.id) }}" role="button"><i class="bi bi-pencil"></i> Editar</a></li>
                                     {% if post.is_closed() %}
                                         <li><a class="dropdown-item dropdown-item-success" href="{{ url_for('posts.open_post', id=post.id) }}" role="button"><i class="bi bi-door-open"></i> Abrir</a></li>
                                     {% else %}
@@ -98,6 +99,14 @@
                             </div>
                             {% endif %}
                         </small>
+                    </div>
+                    <div class="text-muted mt-1">
+                        {% for post_tag in post.tags %}
+                            {% if loop.index == 1 %}
+                                <i class="bi bi-tag"></i> Tags:
+                            {% endif %}
+                            <span class="badge bg-secondary">{{ post_tag.tag.name }}</span>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
