@@ -11,7 +11,13 @@ class PostViewForm(FlaskForm):
 class PostForm(FlaskForm):
     title = StringField(label="Titulo", validators=[DataRequired(), Length(min=5, max=40)])
     content = TextAreaField(label="Contenido", validators=[DataRequired(), Length(min=10)])
-    tags = SelectMultipleField(label="Tags", validators=[DataRequired()], choices=[(tag.id, tag.name) for tag in Tag.query.all()], coerce=int)
+    tags = SelectMultipleField(
+        label="Tags", 
+        validators=[DataRequired()], 
+        choices=[(tag.id, tag.name) for tag in Tag.query.all()], 
+        coerce=int,
+        render_kw={"data-placeholder":"Seleccione una o más tags"}
+        )
 
 class CreatePostForm(PostForm):
     submit = SubmitField(label="Publicar")
