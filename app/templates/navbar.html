@@ -29,7 +29,7 @@
 
           {% if current_user.is_moderate() %}
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('posts.moderate_comment') }}">
+              <a class="nav-link active" aria-current="page" href="{{ url_for('posts.moderate') }}">
                 <strong>Moderate</strong>
               </a>
           {% endif %}
