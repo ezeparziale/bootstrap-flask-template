@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand fixed-top bg-light">
+<nav class="navbar navbar-expand fixed-top navbar-dark bg-primary">
   <div class="container-xl">
     <a class="navbar-brand" href="#"><i class="bi bi-stack"></i> Navbar</a>
       
@@ -68,10 +68,10 @@
         </div>
       {% else %}
         <li class="nav-item">
-          <a class="btn btn-secondary me-1" aria-current="page" href="{{ url_for('auth.register') }}">Sign Up</a>
+          <a class="btn btn-outline-light  me-1" href="{{ url_for('auth.login') }}">Login</a>
         </li>
         <li class="nav-item">
-          <a class="btn btn-outline-primary me-1" href="{{ url_for('auth.login') }}">Login</a>
+          <a class="btn btn-primary  me-1" aria-current="page" href="{{ url_for('auth.register') }}">Sign Up</a>
         </li>
       {% endif %}
       </ul>
