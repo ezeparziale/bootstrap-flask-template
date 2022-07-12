@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
     POSTS_PER_PAGE: int
+    # SQLALCHEMY_ECHO = True
+
+    SITE_NAME: str
 
     class Config:
         env_file = ".env"
