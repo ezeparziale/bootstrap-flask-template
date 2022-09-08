@@ -1,9 +1,10 @@
 from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
+
 from .config import settings
 
 # Flask
@@ -20,9 +21,7 @@ bcrypt = Bcrypt(app)
 # Login Manager
 login_manager = LoginManager(app)
 login_manager.refresh_view = "auth.login"
-login_manager.needs_refresh_message = (
-    "Por favor vuelva a loguearse!!!"
-)
+login_manager.needs_refresh_message = "Por favor vuelva a loguearse!!!"
 login_manager.needs_refresh_message_category = "info"
 
 # Mail
@@ -53,9 +52,9 @@ app.register_blueprint(user.user_bp)
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template("404.html"), 404
 
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template('500.html'), 500
+    return render_template("500.html"), 500

@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Length, EqualTo, Email
+from flask_wtf.file import FileAllowed, FileField, FileRequired
+from wtforms import BooleanField, PasswordField, StringField, SubmitField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
+
 
 class AccountInfoForm(FlaskForm):
     firstname = StringField(label="Nombre")
@@ -11,10 +12,20 @@ class AccountInfoForm(FlaskForm):
     picture = FileField(label="Foto de perfil")
     submit = SubmitField(label="Editar")
 
+
 class AccountUpdateForm(FlaskForm):
-    firstname = StringField(label="Nombre", validators=[DataRequired(), Length(min=3, max=20)])
-    lastname = StringField(label="Apellido", validators=[DataRequired(), Length(min=3, max=20)])
-    username = StringField(label="Usuario", validators=[DataRequired(), Length(min=3, max=20)])
+    firstname = StringField(
+        label="Nombre", validators=[DataRequired(), Length(min=3, max=20)]
+    )
+    lastname = StringField(
+        label="Apellido", validators=[DataRequired(), Length(min=3, max=20)]
+    )
+    username = StringField(
+        label="Usuario", validators=[DataRequired(), Length(min=3, max=20)]
+    )
     email = StringField(label="Email", validators=[DataRequired(), Email()])
-    picture = FileField(label="Selecciona foto de perfil", validators=[FileAllowed(["jpg", "png"], "Images only!")])
+    picture = FileField(
+        label="Selecciona foto de perfil",
+        validators=[FileAllowed(["jpg", "png"], "Images only!")],
+    )
     submit = SubmitField(label="Actualizar")

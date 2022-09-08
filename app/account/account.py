@@ -1,11 +1,17 @@
-from flask import Blueprint, redirect, render_template, request, url_for, flash
-from flask_login import current_user, fresh_login_required, login_required
-from .forms import AccountInfoForm, AccountUpdateForm
-from app import db, app
 import os
-from ..models import UserDetail
 
-account_bp = Blueprint("account", __name__, url_prefix="/account", template_folder='templates')
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, fresh_login_required, login_required
+
+from app import app, db
+
+from ..models import UserDetail
+from .forms import AccountInfoForm, AccountUpdateForm
+
+account_bp = Blueprint(
+    "account", __name__, url_prefix="/account", template_folder="templates"
+)
+
 
 def save_image(picture_file):
     picture_name = picture_file.filename
@@ -24,11 +30,11 @@ def account():
     form.email.data = current_user.email
     form.username.data = current_user.username
     if current_user.details:
-            form.firstname.data = current_user.details.firstname
-            form.lastname.data = current_user.details.lastname
+        form.firstname.data = current_user.details.firstname
+        form.lastname.data = current_user.details.lastname
     image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
     return render_template("account.html", form=form, image_url=image_url)
-    
+
 
 @account_bp.route("/edit", methods=["GET", "POST"])
 @login_required
@@ -44,20 +50,21 @@ def edit_account():
         current_user.email = form.email.data
 
         if current_user.details:
-            current_user.details.firstname=form.firstname.data
-            current_user.details.lastname=form.lastname.data
+            current_user.details.firstname = form.firstname.data
+            current_user.details.lastname = form.lastname.data
         else:
             user_details = UserDetail(
-                firstname=form.firstname.data, 
-                lastname=form.lastname.data, 
-                user_id=current_user.id)
+                firstname=form.firstname.data,
+                lastname=form.lastname.data,
+                user_id=current_user.id,
+            )
             db.session.add(user_details)
 
         # current_user.details = user_details
         db.session.commit()
         flash(f"Cuenta actualizada", category="success")
         return redirect(url_for("account.account"))
-    elif request.method=="GET":
+    elif request.method == "GET":
         form.email.data = current_user.email
         form.username.data = current_user.username
         if current_user.details:

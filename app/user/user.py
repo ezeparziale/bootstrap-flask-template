@@ -1,18 +1,32 @@
-from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for, flash, abort
-from flask_login import current_user, login_required
-from app.config import settings
-from app.user.forms import EmptyForm, SendMessageForm, ReplyMessageForm
-from ..models import Notification, Participant, User, RoomMessage
-from app import db
 from datetime import datetime
 
-user_bp = Blueprint(
-    "user", 
-    __name__, 
-    url_prefix="/user", 
-    template_folder="templates",
-    static_folder="static"
+from flask import (
+    Blueprint,
+    abort,
+    flash,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
+from flask_login import current_user, login_required
+
+from app import db
+from app.config import settings
+from app.user.forms import EmptyForm, ReplyMessageForm, SendMessageForm
+
+from ..models import Notification, Participant, RoomMessage, User
+
+user_bp = Blueprint(
+    "user",
+    __name__,
+    url_prefix="/user",
+    template_folder="templates",
+    static_folder="static",
+)
+
 
 @user_bp.route("/<username>", methods=["GET", "POST"])
 @login_required
@@ -68,7 +82,10 @@ def followers(username: str):
     page = request.args.get("page", 1, type=int)
     pagination = user.followers.paginate(page, settings.POSTS_PER_PAGE, False)
     followers = pagination.items
-    return render_template("followers.html", followers=followers, pagination=pagination, user=user)
+    return render_template(
+        "followers.html", followers=followers, pagination=pagination, user=user
+    )
+
 
 @user_bp.route("/follow_by/<username>", methods=["GET"])
 @login_required
@@ -80,7 +97,9 @@ def follow_by(username: str):
     page = request.args.get("page", 1, type=int)
     pagination = user.followed.paginate(page, settings.POSTS_PER_PAGE, False)
     followed = pagination.items
-    return render_template("followed_by.html", followed=followed, pagination=pagination, user=user)
+    return render_template(
+        "followed_by.html", followed=followed, pagination=pagination, user=user
+    )
 
 
 # @user_bp.route("/send_message/<username>", methods=["GET", "POST"])
@@ -154,7 +173,7 @@ def follow_by(username: str):
 #         message.reply(form.message.data, sender_id, recipient_id)
 #         flash("Respuesta enviada", category="success")
 #         return redirect(url_for("user.view_message", id=message.id))
-    
+
 #     page = request.args.get("page", 1, type=int)
 #     pagination = message.childrens.order_by(Message.created_at.desc()).paginate(page, settings.POSTS_PER_PAGE, error_out=True)
 
@@ -166,23 +185,25 @@ def follow_by(username: str):
 #         message_type = "Recibidos"
 #     return render_template("view_message.html", form=form, current_user=current_user, message=message, message_childrens=message_childrens, pagination=pagination, message_type=message_type)
 
+
 @user_bp.route("/notifications", methods=["GET"])
 @login_required
 def notifications():
     since = request.args.get("since", 0.0, type=float)
     notifications = current_user.get_notifications(since)
-    return jsonify([{
-        "name": n.name,
-        "data": n.get_data(),
-        "timestamp": n.timestamp
-    } for n in notifications])
+    return jsonify(
+        [
+            {"name": n.name, "data": n.get_data(), "timestamp": n.timestamp}
+            for n in notifications
+        ]
+    )
 
 
 @user_bp.route("/send_menssage_room/<username>", methods=["GET", "POST"])
 @login_required
 def send_menssage_room(username: str):
     recipient = User.query.filter_by(username=username).first_or_404()
-    
+
     form = SendMessageForm()
 
     if form.validate_on_submit():
@@ -191,14 +212,16 @@ def send_menssage_room(username: str):
         current_user.send_message_to_room(room_id, message)
         recipient.add_notification("unread_message_count", recipient.new_messages())
         return redirect(url_for("user.show_messages_room", room_id=room_id))
-    
+
     return render_template("send_message_room.html", form=form, recipient=recipient)
 
 
-@user_bp.route("/show_messages_room/<room_id>", methods=["GET","POST"])
+@user_bp.route("/show_messages_room/<room_id>", methods=["GET", "POST"])
 @login_required
 def show_messages_room(room_id: int):
-    participant = Participant.query.filter(Participant.room_id==room_id, Participant.user_id==current_user.id).first_or_404()
+    participant = Participant.query.filter(
+        Participant.room_id == room_id, Participant.user_id == current_user.id
+    ).first_or_404()
     if participant:
         form = ReplyMessageForm()
         if form.validate_on_submit():
@@ -208,23 +231,124 @@ def show_messages_room(room_id: int):
 
         participant.last_access_at = datetime.utcnow()
         db.session.commit()
-        messages = RoomMessage.query.filter_by(room_id=room_id).order_by(RoomMessage.created_at.desc())
+        messages = RoomMessage.query.filter_by(room_id=room_id).order_by(
+            RoomMessage.created_at.desc()
+        )
         page = request.args.get("page", 1, type=int)
         pagination = messages.paginate(page, settings.POSTS_PER_PAGE, False)
         messages = pagination.items
-        return render_template("show_message_room.html", form=form, messages=messages, pagination=pagination, room_id=room_id)
+        return render_template(
+            "show_message_room.html",
+            form=form,
+            messages=messages,
+            pagination=pagination,
+            room_id=room_id,
+        )
     else:
         abort(401)
 
-@user_bp.route("/show_rooms", methods=["GET","POST"])
+
+@user_bp.route("/show_rooms", methods=["GET", "POST"])
 @login_required
 def show_rooms():
     current_user.last_message_read_time = datetime.utcnow()
     current_user.add_notification("unread_message_count", 0)
     db.session.commit()
     subquery = db.select([Participant.room_id]).filter_by(user_id=current_user.id)
-    rooms = Participant.query.filter(Participant.room_id.in_(subquery), Participant.user_id!=current_user.id).order_by(Participant.created_at.desc())
+    rooms = Participant.query.filter(
+        Participant.room_id.in_(subquery), Participant.user_id != current_user.id
+    ).order_by(Participant.created_at.desc())
     page = request.args.get("page", 1, type=int)
     pagination = rooms.paginate(page, settings.POSTS_PER_PAGE, False)
     rooms = pagination.items
-    return render_template("show_rooms.html", rooms=rooms, pagination=pagination, current_user=current_user)
+    return render_template(
+        "show_rooms.html", rooms=rooms, pagination=pagination, current_user=current_user
+    )
+
+
+@user_bp.route("/list_users", methods=["GET", "POST"])
+@login_required
+def list_users():
+    query = User.query
+
+    filters = None
+    if request.method == "POST":
+        filters = request.get_json()
+        print(filters)
+    if filters:
+        if filters.get("confirmed"):
+            query = query.filter_by(confirmed=filters.get("confirmed"))
+
+    headers = ["username", "email", "confirmed"]
+
+    page = request.args.get("page", 1, type=int)
+    pagination = query.paginate(page, settings.POSTS_PER_PAGE, False)
+    users = pagination.items
+
+    print(pagination.total)
+    return render_template(
+        "list_users.html", users=users, headers=headers, pagination=pagination
+    )
+
+
+@user_bp.route("/api/data", methods=["GET", "POST"])
+@login_required
+def data():
+    query = User.query
+
+    # search filter
+    search = request.args.get("search[value]")
+    username_filter = request.args.get("columns[0][search][value]")
+    print(request.args)
+    print(username_filter)
+    if username_filter:
+        query = query.filter(User.username.regexp_match(f"{username_filter}"))
+    if search:
+        query = query.filter(
+            db.or_(
+                User.username.like(f"%{search}%"),
+                User.email.like(f"%{search}%"),
+            )
+        )
+    total_filtered = query.count()
+
+    # sorting
+    order = []
+    i = 0
+    while True:
+        col_index = request.args.get(f"order[{i}][column]")
+        if col_index is None:
+            break
+        col_name = request.args.get(f"columns[{col_index}][data]")
+        if col_name not in ["username", "email"]:
+            col_name = "username"
+        descending = request.args.get(f"order[{i}][dir]") == "desc"
+        col = getattr(User, col_name)
+        if descending:
+            col = col.desc()
+        order.append(col)
+        i += 1
+    if order:
+        query = query.order_by(*order)
+
+    # pagination
+    start = request.args.get("start", type=int)
+    length = request.args.get("length", type=int)
+    query = query.offset(start).limit(length)
+
+    # print(query.all())
+    # response
+    return {
+        "data": [
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "confirmed": user.confirmed,
+            }
+            for user in query
+        ],
+        "recordsFiltered": total_filtered,
+        "recordsTotal": User.query.count(),
+        "draw": request.args.get("draw", type=int),
+    }
