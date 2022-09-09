@@ -15,6 +15,11 @@ class PostViewForm(FlaskForm):
 
 
 class PostForm(FlaskForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.tags.choices = [(tag.id, tag.name) for tag in Tag.query.all()]
+
     title = StringField(
         label="Titulo", validators=[DataRequired(), Length(min=5, max=40)]
     )
@@ -24,10 +29,11 @@ class PostForm(FlaskForm):
     tags = SelectMultipleField(
         label="Tags",
         validators=[DataRequired()],
-        choices=[(tag.id, tag.name) for tag in Tag.query.all()],
         coerce=int,
         render_kw={"data-placeholder": "Seleccione una o más tags"},
     )
+
+
 
 
 class CreatePostForm(PostForm):
