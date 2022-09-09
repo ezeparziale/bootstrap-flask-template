@@ -9,11 +9,6 @@ python -m venv env
 ```
 
 ```bash
-$env:FLASK_APP="app"
-$env:FLASK_ENV="development"
-```
-
-```bash
 env/scripts/activate
 ```
 
@@ -28,7 +23,7 @@ pip install -r requirements.txt
 ## :runner: Run
 
 ```bash
-flask run
+flask --debug run
 ```
 
 ## :pushpin: Funciones
