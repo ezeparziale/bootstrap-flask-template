@@ -31,22 +31,22 @@ mail = Mail(app)
 moment = Moment(app)
 
 # Blueprints
-from .home import home
+from app.views.home import home
 app.register_blueprint(home.home_bp)
 
-from .about import about
+from app.views.about import about
 app.register_blueprint(about.about_bp)
 
-from .auth import auth
+from app.views.auth import auth
 app.register_blueprint(auth.auth_bp)
 
-from .account import account
+from app.views.account import account
 app.register_blueprint(account.account_bp)
 
-from .posts import posts
+from app.views.posts import posts
 app.register_blueprint(posts.posts_bp)
 
-from .user import user
+from app.views.user import user
 app.register_blueprint(user.user_bp)
 
 

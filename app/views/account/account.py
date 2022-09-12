@@ -5,7 +5,7 @@ from flask_login import current_user, fresh_login_required, login_required
 
 from app import app, db
 
-from ..models import UserDetail
+from ...models import UserDetail
 from .forms import AccountInfoForm, AccountUpdateForm
 
 account_bp = Blueprint(

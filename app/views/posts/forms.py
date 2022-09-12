@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import SelectMultipleField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Length
 
-from ..models import Tag
+from ...models import Tag
 
 
 class PostViewForm(FlaskForm):

@@ -13,8 +13,8 @@ from flask_login import current_user, login_required
 from app import db
 from app.decorators import permission_required
 
-from ..config import settings
-from ..models import Comment, Permission, Post, PostTag, Report
+from app.config import settings
+from ...models import Comment, Permission, Post, PostTag, Report
 from .forms import CreatePostForm, EditPostForm, PostCommentForm
 
 posts_bp = Blueprint(

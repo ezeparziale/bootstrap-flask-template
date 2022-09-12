@@ -15,9 +15,9 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.config import settings
-from app.user.forms import EmptyForm, ReplyMessageForm, SendMessageForm
+from .forms import EmptyForm, ReplyMessageForm, SendMessageForm
 
-from ..models import Notification, Participant, RoomMessage, User
+from ...models import Notification, Participant, RoomMessage, User
 
 user_bp = Blueprint(
     "user",
