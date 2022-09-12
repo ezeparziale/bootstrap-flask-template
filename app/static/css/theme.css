@@ -326,6 +326,10 @@
   .link-primary {
     color: var(--bs-primary) !important;
   }
+
+  .link-dark {
+    color: #fff !important;
+  }
   
   .text-muted {
     --bs-text-opacity: 1;
