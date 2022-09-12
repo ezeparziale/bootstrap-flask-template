@@ -10,18 +10,18 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="{{ url_for('home.home_view') }}">
-            <strong>Home</strong>
+            Home
           </a>
         </li>
         {% if current_user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">
-              <strong>Posts</strong>
+              Posts
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="{{ url_for('user.show_rooms') }}">
-              <strong>Mensajes</strong>
+              Mensajes
               {% set count_messages = current_user.new_messages() %}
               <span id="messages_unread" class="badge bg-secondary">{{ count_messages if count_messages else "" }}</span>
             </a>
@@ -30,7 +30,7 @@
           {% if current_user.is_moderate() %}
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('posts.moderate') }}">
-                <strong>Moderate</strong>
+                Moderate
               </a>
           {% endif %}
         {% endif %}  
