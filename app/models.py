@@ -362,11 +362,11 @@ class Post(db.Model):
         self.visits += 1
         db.session.commit()
 
-    def if_favorite(self, user):
+    def is_favorite(self, user):
         return self.favorites.filter_by(user_id=user.id).first() is not None
 
     def favorite(self, user):
-        if not self.if_favorite(user):
+        if not self.is_favorite(user):
             favorite = Favorite(user=user, post=self)
             db.session.add(favorite)
             db.session.commit()
@@ -434,6 +434,13 @@ class Post(db.Model):
     def is_disabled(self):
         return self.disabled
 
+    def enable(self):
+        self.disabled = False
+        db.session.commit()
+
+    def disable(self):
+        self.disabled = True
+        db.session.commit()
 
 class Like(db.Model):
     __tablename__ = "likes"
@@ -540,6 +547,14 @@ class Comment(db.Model):
         if like:
             db.session.delete(like)
             db.session.commit()
+
+    def disable(self):
+        self.disabled = True
+        db.session.commit()
+
+    def enable(self):
+        self.disabled = False
+        db.session.commit()
 
 
 class Role(db.Model):
