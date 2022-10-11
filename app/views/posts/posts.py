@@ -7,6 +7,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    jsonify
 )
 from flask_login import current_user, login_required
 
@@ -201,6 +202,16 @@ def moderate_post():
     posts = pagination.items
     return render_template("moderate_post.html", posts=posts, pagination=pagination)
 
+@posts_bp.route("/moderate/post/enable_disable/<id>", methods=["GET"])
+@login_required
+def enable_disable_post(id: int):
+    post = Post.query.filter_by(id=id).first_or_404()
+    if post.is_disabled():
+        post.enable()
+        return jsonify({"disable": False, "icon": "bi bi-star-fill"})
+    else:
+        post.disable()
+        return jsonify({"disable": True, "icon": "bi bi-star"})
 
 @posts_bp.route("/moderate/post/enable/<id>", methods=["GET", "POST"])
 @login_required
@@ -226,82 +237,127 @@ def post_disable(id: int):
     return redirect(url_for("posts.moderate_post", page=page))
 
 
-@posts_bp.route("/moderate/comment/enable/<id>", methods=["GET", "POST"])
+@posts_bp.route("/moderate/comment/disable/<id>", methods=["GET"])
 @login_required
 @permission_required(Permission.MODERATE)
-def comment_enable(id: int):
+def moderate_comment_disable(id: int):
     comment = Comment.query.filter_by(id=id).first_or_404()
-    comment.disabled = False
-    db.session.commit()
-    page = request.args.get("page", 1, type=int)
-    flash("Comentario habilitado", category="success")
-    return redirect(url_for("posts.moderate_comment", page=page))
+    if comment.disabled:
+        comment.enable()
+        return jsonify({"disable": False, "text": " Deshabilitar",  "content": comment.content})
+    else:
+        comment.disable()
+        return jsonify({"disable": True, "text": " Habilitar"})
+
+# @posts_bp.route("/moderate/comment/enable/<id>", methods=["GET", "POST"])
+# @login_required
+# @permission_required(Permission.MODERATE)
+# def comment_enable(id: int):
+#     comment = Comment.query.filter_by(id=id).first_or_404()
+#     comment.disabled = False
+#     db.session.commit()
+#     page = request.args.get("page", 1, type=int)
+#     flash("Comentario habilitado", category="success")
+#     return redirect(url_for("posts.moderate_comment", page=page))
 
 
-@posts_bp.route("/moderate/comment/disable/<id>", methods=["GET", "POST"])
-@login_required
-@permission_required(Permission.MODERATE)
-def comment_disable(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
-    comment.disabled = True
-    db.session.commit()
-    page = request.args.get("page", 1, type=int)
-    flash("Comentario deshabilitado", category="success")
-    return redirect(url_for("posts.moderate_comment", page=page))
+# @posts_bp.route("/moderate/comment/disable/<id>", methods=["GET", "POST"])
+# @login_required
+# @permission_required(Permission.MODERATE)
+# def comment_disable(id: int):
+#     comment = Comment.query.filter_by(id=id).first_or_404()
+#     comment.disabled = True
+#     db.session.commit()
+#     page = request.args.get("page", 1, type=int)
+#     flash("Comentario deshabilitado", category="success")
+#     return redirect(url_for("posts.moderate_comment", page=page))
 
 
-@posts_bp.route("/like/<id>", methods=["GET", "POST"])
+# @posts_bp.route("/like/<id>", methods=["GET", "POST"])
+# @login_required
+# def like_post(id: int):
+#     post = Post.query.filter_by(id=id).first_or_404()
+#     post.like(current_user)
+#     # flash("Post agregado a likes", category="success")
+#     return redirect(url_for("posts.get_post", id=id))
+
+@posts_bp.route("/like_post/<id>", methods=["GET"])
 @login_required
 def like_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    post.like(current_user)
-    # flash("Post agregado a likes", category="success")
-    return redirect(url_for("posts.get_post", id=id))
+    if post.is_like(current_user):
+        post.unlike(current_user)
+        return jsonify({"likes": post.likes.count(), "icon": "bi bi-star"})
+    else:
+        post.like(current_user)
+        return jsonify({"likes": post.likes.count(), "icon": "bi bi-star-fill"})
+
+# @posts_bp.route("/unlike/<id>", methods=["GET", "POST"])
+# @login_required
+# def unlike_post(id: int):
+#     post = Post.query.filter_by(id=id).first_or_404()
+#     post.unlike(current_user)
+#     # flash("Post eliminado de likes", category="success")
+#     return redirect(url_for("posts.get_post", id=id))
 
 
-@posts_bp.route("/unlike/<id>", methods=["GET", "POST"])
-@login_required
-def unlike_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
-    post.unlike(current_user)
-    # flash("Post eliminado de likes", category="success")
-    return redirect(url_for("posts.get_post", id=id))
-
-
-@posts_bp.route("/favorite/<id>", methods=["GET", "POST"])
+@posts_bp.route("/favorite_post/<id>", methods=["GET"])
 @login_required
 def favorite_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    post.favorite(current_user)
-    # flash("Post agregado a favoritos", category="success")
-    return redirect(url_for("posts.get_post", id=id))
+    if post.is_favorite(current_user):
+        post.unfavorite(current_user)
+        return jsonify({"favorite": False, "icon": "bi bi-bookmark"})
+    else:
+        post.favorite(current_user)
+        return jsonify({"favorite": True, "icon": "bi bi-bookmark-fill"})
+
+# @posts_bp.route("/favorite/<id>", methods=["GET", "POST"])
+# @login_required
+# def favorite_post(id: int):
+#     post = Post.query.filter_by(id=id).first_or_404()
+#     post.favorite(current_user)
+#     # flash("Post agregado a favoritos", category="success")
+#     return redirect(url_for("posts.get_post", id=id))
 
 
-@posts_bp.route("/unfavorite/<id>", methods=["GET", "POST"])
-@login_required
-def unfavorite_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
-    post.unfavorite(current_user)
-    # flash("Post eliminado de favoritos", category="success")
-    return redirect(url_for("posts.get_post", id=id))
+# @posts_bp.route("/unfavorite/<id>", methods=["GET", "POST"])
+# @login_required
+# def unfavorite_post(id: int):
+#     post = Post.query.filter_by(id=id).first_or_404()
+#     post.unfavorite(current_user)
+#     # flash("Post eliminado de favoritos", category="success")
+#     return redirect(url_for("posts.get_post", id=id))
 
 
-@posts_bp.route("/report/<id>", methods=["GET", "POST"])
+@posts_bp.route("/report_post/<id>", methods=["GET"])
 @login_required
 def report_post(id: int):
     post = Post.query.filter_by(id=id).first_or_404()
-    post.add_report(current_user)
-    # flash("Post agregado a reportes", category="success")
-    return redirect(url_for("posts.get_post", id=id))
+    if post.is_report(current_user):
+        post.delete_report(current_user)
+        return jsonify({"report": False, "icon": "bi bi-flag"})
+    else:
+        post.add_report(current_user)
+        return jsonify({"report": True, "icon": "bi bi-flag-fill"})
 
 
-@posts_bp.route("/unreport/<id>", methods=["GET", "POST"])
-@login_required
-def unreport_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
-    post.delete_report(current_user)
-    # flash("Post eliminado de reportes", category="success")
-    return redirect(url_for("posts.get_post", id=id))
+# @posts_bp.route("/report/<id>", methods=["GET", "POST"])
+# @login_required
+# def report_post(id: int):
+#     post = Post.query.filter_by(id=id).first_or_404()
+#     post.add_report(current_user)
+#     # flash("Post agregado a reportes", category="success")
+#     return redirect(url_for("posts.get_post", id=id))
+
+
+# @posts_bp.route("/unreport/<id>", methods=["GET", "POST"])
+# @login_required
+# def unreport_post(id: int):
+#     post = Post.query.filter_by(id=id).first_or_404()
+#     post.delete_report(current_user)
+#     # flash("Post eliminado de reportes", category="success")
+#     return redirect(url_for("posts.get_post", id=id))
 
 
 @posts_bp.route("/reply_comment/<id>", methods=["POST"])
@@ -344,38 +400,60 @@ def open_post(id: int):
         return redirect(url_for("posts.get_post", id=id))
     return redirect(url_for("posts.get_post", id=id))
 
-
-@posts_bp.route("/comment/report/<id>", methods=["GET", "POST"])
+@posts_bp.route("/report_comment/<id>", methods=["GET"])
 @login_required
 def report_comment(id: int):
     comment = Comment.query.filter_by(id=id).first_or_404()
-    comment.add_report(current_user)
-    # flash("Comentario agregado a reportes", category="success")
-    return redirect(url_for("posts.get_post", id=comment.post.id))
+    if comment.is_report(current_user):
+        comment.delete_report(current_user)
+        return jsonify({"reports": comment.reports.count(), "icon": "bi bi-flag"})
+    else:
+        comment.add_report(current_user)
+        return jsonify({"reports": comment.reports.count(), "icon": "bi bi-flag-fill"})
+
+# @posts_bp.route("/comment/report/<id>", methods=["GET", "POST"])
+# @login_required
+# def report_comment(id: int):
+#     comment = Comment.query.filter_by(id=id).first_or_404()
+#     comment.add_report(current_user)
+#     # flash("Comentario agregado a reportes", category="success")
+#     return redirect(url_for("posts.get_post", id=comment.post.id))
 
 
-@posts_bp.route("/comment/unreport/<id>", methods=["GET", "POST"])
-@login_required
-def unreport_comment(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
-    comment.delete_report(current_user)
-    # flash("Comentario eliminado de reportes", category="success")
-    return redirect(url_for("posts.get_post", id=comment.post.id))
+# @posts_bp.route("/comment/unreport/<id>", methods=["GET", "POST"])
+# @login_required
+# def unreport_comment(id: int):
+#     comment = Comment.query.filter_by(id=id).first_or_404()
+#     comment.delete_report(current_user)
+#     # flash("Comentario eliminado de reportes", category="success")
+#     return redirect(url_for("posts.get_post", id=comment.post.id))
 
 
-@posts_bp.route("/comment/like/<id>", methods=["GET", "POST"])
+
+@posts_bp.route("/like_comment/<id>", methods=["GET"])
 @login_required
 def like_comment(id: int):
     comment = Comment.query.filter_by(id=id).first_or_404()
-    comment.like(current_user)
-    # flash("Comentario agregado a likes", category="success")
-    return redirect(url_for("posts.get_post", id=comment.post.id))
+    if comment.is_like(current_user):
+        comment.unlike(current_user)
+        return jsonify({"likes": comment.likes.count(), "icon": "bi bi-star"})
+    else:
+        comment.like(current_user)
+        return jsonify({"likes": comment.likes.count(), "icon": "bi bi-star-fill"})
+
+# @posts_bp.route("/comment/like/<id>", methods=["GET", "POST"])
+# @login_required
+# def like_comment(id: int):
+#     comment = Comment.query.filter_by(id=id).first_or_404()
+#     comment.like(current_user)
+#     # flash("Comentario agregado a likes", category="success")
+#     return redirect(url_for("posts.get_post", id=comment.post.id))
 
 
-@posts_bp.route("/comment/unlike/<id>", methods=["GET", "POST"])
-@login_required
-def unlike_comment(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
-    comment.unlike(current_user)
-    # flash("Comentario eliminado de likes", category="success")
-    return redirect(url_for("posts.get_post", id=comment.post.id))
+# @posts_bp.route("/comment/unlike/<id>", methods=["GET", "POST"])
+# @login_required
+# def unlike_comment(id: int):
+#     comment = Comment.query.filter_by(id=id).first_or_404()
+#     comment.unlike(current_user)
+#     # flash("Comentario eliminado de likes", category="success")
+#     return redirect(url_for("posts.get_post", id=comment.post.id))

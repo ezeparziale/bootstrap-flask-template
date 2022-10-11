@@ -14,50 +14,59 @@
     </div>
     <p class="small mb-0">
         {% if comment.disabled %}
-            <span class="badge bg-warning">Comentario deshabilitado</span>
+            <div id="comment-{{ comment.id }}"><span class="badge bg-warning">Comentario deshabilitado</span></div>
         {% else %}
-            <p class="mb-1">{{ comment.content }}</p>
+            <div id="comment-{{ comment.id }}"> <p class="mb-1">{{ comment.content }}</p></div>
         {% endif %}
+        <div class="d-flex flex-row">
+            <div class="small text-muted btn-align">
+                <i class="bi bi-chat-text"></i> <span> {{ comment.childrens|length }} </span><span class="desktop-only"> Respuestas</span>
+            </div>
+            {% if not post.is_closed() and not post.is_disabled() %}
+            <button class="btn btn-sm shadow-none text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMessage{{ comment.id }}" aria-expanded="false" aria-controls="collapseMessage">
+                <i class="bi bi-chat"></i><span class="desktop-only"> Responder</span>
+            </button>
+            {% endif %}
+            <div id="likes-comment-{{comment.id}}-section" class="small text-muted">
+                <button class="btn btn-sm shadow-none text-muted" id="likes-comment-{{comment.id}}-btn" value="{{comment.id}}" onclick="likeComment(this.value)">
+                    {% if comment.is_like(current_user) %}
+                        <i class="bi bi-star-fill" id="likes-comment-{{comment.id}}-icon"></i>
+                    {% else %}
+                        <i class="bi bi-star" id="likes-comment-{{comment.id}}-icon"></i>
+                    {% endif %}
+                    <span id="likes-comment-{{comment.id}}-counts">{{ comment.likes.count() }}</span><span class="desktop-only"> Me gusta</span>
+                </button>
+            </div>
+            {% if current_user.id != comment.author_id %}
+            <div id="report-comment-{{comment.id}}-section" class="small text-muted">
+                <button class="btn btn-sm shadow-none text-muted" id="report-comment-{{comment.id}}-btn" value="{{comment.id}}" onclick="reportComment(this.value)">
+                    {% if comment.is_report(current_user) %}
+                        <i class="bi bi-flag-fill" id="report-comment-{{comment.id}}-icon"></i><span class="desktop-only"> Reportar</span>
+                    {% else %}
+                        <i class="bi bi-flag" id="report-comment-{{comment.id}}-icon"></i><span class="desktop-only"> Reportar</span>
+                    {% endif %}
+                </button>
+            </div>
+            {% endif %}
+            {% if current_user.is_moderate() %}
+                <div class="small text-muted btn-align">
+                    <i class="bi bi-exclamation-triangle"></i><span> {{ comment.get_reports() }} </span><span class="desktop-only"> Reportado</span>
+                </div>
+                <div id="disable-comment-{{comment.id}}-section" class="small text-muted">
+                    <button class="btn btn-sm shadow-none text-muted" id="disable-comment-{{comment.id}}-btn" value="{{comment.id}}" onclick="disableComment(this.value)">
+                        {% if comment.disabled %}
+                            <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Habilitar</span>
+                        {% else %}
+                            <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Deshabilitar</span>
+                        {% endif %}
+                    </button>
+                </div>
+            {% endif %}
+
+        </div>
+
         <div class="text-muted">
             <small>
-
-                <i class="bi bi-chat-text ms-2"></i> {{ comment.childrens|length }} Respuestas
-
-                {% if not post.is_closed() and not post.is_disabled() %}
-                <a class="text-muted ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMessage{{ comment.id }}" aria-expanded="false" aria-controls="collapseMessage">
-                    <i class="bi bi-chat"></i> Responder
-                </a>
-                {% endif %}
-
-                {% if comment.is_like(current_user) %}
-                    <a class="text-muted ms-2" type="button" href="{{ url_for('posts.unlike_comment', id=comment.id) }}" role="button"><i class="bi bi-star-fill"></i> {{ comment.likes.count() }} Me gusta</a>
-                {% else %}
-                    <a class="text-muted ms-2" type="button" href="{{ url_for('posts.like_comment', id=comment.id) }}" role="button"><i class="bi bi-star"></i>  {{ comment.likes.count() }} Me gusta</a>
-                {% endif %}
-                
-                {% if current_user.id != comment.author_id %}
-                    {% if comment.is_report(current_user) %}
-                        <a class="text-muted ms-2" href="{{ url_for('posts.unreport_comment', id=comment.id) }}" role="button"><i class="bi bi-flag-fill"></i> Reportar</a>
-                    {% else %}
-                        <a class="text-muted ms-2" href="{{ url_for('posts.report_comment', id=comment.id) }}" role="button"><i class="bi bi-flag"></i> Reportar</a>
-                    {% endif %}
-                {% endif %}
-
-                {% if current_user.is_moderate() %}
-
-                    <i class="bi bi-exclamation-triangle ms-2"></i> {{ comment.get_reports() }} Reportado
-
-                    {% if comment.disabled %}
-                        <a class="text-muted ms-2"  type="button" href="{{url_for('posts.comment_enable', id=comment.id, page=pagination.page)}}" role="button">
-                            <i class="bi bi-exclamation-circle"></i> Habilitar
-                        </a>
-                    {% else %}
-                        <a class="text-muted ms-2"  type="button" href="{{url_for('posts.comment_disable', id=comment.id, page=pagination.page)}}" role="button">
-                            <i class="bi bi-exclamation-circle"></i> Deshabilitar
-                        </a>
-                    {% endif %}
-                {% endif %}
-
                 {% if not post.is_closed() and not post.is_disabled() %}
                 <div class="collapse" id="collapseMessage{{ comment.id }}">
                     <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">

@@ -41,7 +41,7 @@
                 </a>
                 <div class="card-body">
                     <div class="row">
-                        <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex justify-content-between">
                             <small class="text-muted mb-1">
                                 <a class="text-muted" type="button" href="{{ url_for('user.user', username=username) }}" role="button">
                                     {{ username }}
@@ -53,57 +53,73 @@
                     </div>
                     <h5 class="mb-1">{{ post.title }}</h5>
                     <p class="mb-1">{{ post.content }}</p>
-                    <div class="text-muted">
-                        <small>
-                            <i class="bi bi-eye"></i> {{ post.get_views() }} Visitas
-                            <i class="bi bi-chat ms-2"></i> {{ post.comments.count() }} Comentarios
-                            {% if post.is_like(current_user) %}
-                                <a class="text-muted ms-2 me-2" type="button" href="{{ url_for('posts.unlike_post', id=post.id) }}" role="button"><i class="bi bi-star-fill"></i> {{ post.likes.count() }} Me gusta</a>
-                            {% else %}
-                                <a class="text-muted ms-2 me-2" type="button" href="{{ url_for('posts.like_post', id=post.id) }}" role="button"><i class="bi bi-star"></i>  {{ post.likes.count() }} Me gusta</a>
-                            {% endif %}
-                            {% if post.if_favorite(current_user) %}
-                                <a class="text-muted me-2" href="{{ url_for('posts.unfavorite_post', id=post.id) }}" role="button"><i class="bi bi-bookmark-fill"></i> Favorito</a>
-                            {% else %}
-                                <a class="text-muted me-2" href="{{ url_for('posts.favorite_post', id=post.id) }}" role="button"><i class="bi bi-bookmark"></i> Favorito</a>
-                            {% endif %}
-                            {% if current_user != post.author %}
+                    <div id="actions" class="d-flex flex-row">
+                        <div id="visits-section" class="small text-muted btn-align">
+                            <i class="bi bi-eye"></i> {{ post.get_views() }} <span class="desktop-only">Visitas</span>
+                        </div>
+                        <div id="comments-section" class="small text-muted btn-align">
+                            <i class="bi bi-chat"></i> {{ post.comments.count() }} <span class="desktop-only">Comentarios</span>
+                        </div>
+                        <div id="likes-section" class="small text-muted">
+                            <button class="btn btn-sm shadow-none text-muted" id="likes-btn" value="{{post.id}}" onclick="likePost(this.value)">
+                                {% if post.is_like(current_user) %}
+                                    <i class="bi bi-star-fill" id="likes-icon"></i>
+                                {% else %}
+                                    <i class="bi bi-star" id="likes-icon"></i>
+                                {% endif %}
+                                <span id="likes-counts">{{ post.likes.count() }}</span><span class="desktop-only"> Me gusta</span>
+                            </button>
+                        </div>
+                        <div id="favs-section" class="small text-muted">
+                            <button class="btn btn-sm shadow-none text-muted" id="favs-btn" value="{{post.id}}" onclick="favoritePost(this.value)">
+                                {% if post.is_favorite(current_user) %}
+                                    <i class="bi bi-bookmark-fill" id="favs-icon"></i>
+                                {% else %}
+                                    <i class="bi bi-bookmark" id="favs-icon"></i>
+                                {% endif %}
+                                <span class="desktop-only">Favorito</span>
+                            </button>
+                        </div>
+                        {% if current_user != post.author %}
+                        <div id="report-post-section" class="small text-muted">
+                            <button class="btn btn-sm shadow-none text-muted" id="report-post-btn" value="{{post.id}}" onclick="reportPost(this.value)">
                                 {% if post.is_report(current_user) %}
-                                    <a class="text-muted me-2" href="{{ url_for('posts.unreport_post', id=post.id) }}" role="button"><i class="bi bi-flag-fill"></i> Reportar</a>
+                                    <i class="bi bi-flag-fill" id="report-post-icon"></i><span class="desktop-only"> Reportar</span>
                                 {% else %}
-                                    <a class="text-muted me-2" href="{{ url_for('posts.report_post', id=post.id) }}" role="button"><i class="bi bi-flag"></i> Reportar</a>
+                                    <i class="bi bi-flag" id="report-post-icon"></i><span class="desktop-only"> Reportar</span>
                                 {% endif %}
-                            {% endif %}
-                            {% if current_user.is_admin() %}
-                                {% if post.disabled %}
-                                        <a class="text-muted me-2" href="{{url_for('posts.post_enable', id=post.id, page=pagination.page)}}" role="button"><i class="bi bi-exclamation-circle"></i> Habilitar</a>
+                            </button>
+                        </div>
+                        {% endif %}
+                        {% if current_user == post.author or current_user.is_admin() %}
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', post_id=post.id) }}" role="button"><i class="bi bi-pencil"></i> Editar</a></li>
+                                {% if post.is_closed() %}
+                                    <li><a class="dropdown-item dropdown-item-success" href="{{ url_for('posts.open_post', id=post.id) }}" role="button"><i class="bi bi-door-open"></i> Abrir</a></li>
                                 {% else %}
-                                        <a class="text-muted me-2" href="{{url_for('posts.post_disable', id=post.id, page=pagination.page)}}" role="button"><i class="bi bi-exclamation-circle"></i> Deshabilitar</a>
+                                    <li><a class="dropdown-item dropdown-item-warning" href="{{ url_for('posts.close_post', id=post.id) }}" role="button"><i class="bi bi-x-circle"></i> Cerrar</a></li>
                                 {% endif %}
-                            {% endif %}
-                            {% if current_user == post.author or current_user.is_admin() %}
-                            <div class="btn-group">
-                                <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', post_id=post.id) }}" role="button"><i class="bi bi-pencil"></i> Editar</a></li>
-                                    {% if post.is_closed() %}
-                                        <li><a class="dropdown-item dropdown-item-success" href="{{ url_for('posts.open_post', id=post.id) }}" role="button"><i class="bi bi-door-open"></i> Abrir</a></li>
+                                {% if current_user.is_admin() %}
+                                    {% if post.disabled %}
+                                        <li><a class="dropdown-item" href="{{url_for('posts.post_enable', id=post.id, page=pagination.page)}}" role="button"><i class="bi bi-exclamation-circle"></i> Habilitar</a></li>
                                     {% else %}
-                                        <li><a class="dropdown-item dropdown-item-warning" href="{{ url_for('posts.close_post', id=post.id) }}" role="button"><i class="bi bi-x-circle"></i> Cerrar</a></li>
+                                        <li> <a class="dropdown-item" href="{{url_for('posts.post_disable', id=post.id, page=pagination.page)}}" role="button"><i class="bi bi-exclamation-circle"></i> Deshabilitar</a></li>
                                     {% endif %}
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal" data-bs-target="#confirmDeletePostModal" role="button" data-bs-whatever="@getbootstrap"><i class="bi bi-trash"></i> Eliminar</a></li>
-                                </ul>
-                            </div>
-                            {% endif %}
-                        </small>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal" data-bs-target="#confirmDeletePostModal" role="button" data-bs-whatever="@getbootstrap"><i class="bi bi-trash"></i> Eliminar</a></li>
+                            </ul>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="text-muted mt-1">
                         {% for post_tag in post.tags %}
                             {% if loop.index == 1 %}
-                                <i class="bi bi-tag"></i> Tags:
+                                <i class="bi bi-tag"></i> <span class="desktop-only"> Tags:</span>
                             {% endif %}
                             <span class="badge bg-secondary">{{ post_tag.tag.name }}</span>
                         {% endfor %}
@@ -179,4 +195,8 @@
         
     {{ modals.confirm_delete_post(post.id) }}
 
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('posts.static', filename='js/post.js') }}"></script>
 {% endblock %}
