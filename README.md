@@ -1,8 +1,8 @@
-# :computer: Web utilizando Flask + Bootstrap 5
+# :computer: Website demo with Flask + Bootstrap 5
 
-Demo de sitio web
+Forum website demo
 
-## :floppy_disk: Instalación
+## :floppy_disk: Installation
 
 ```bash
 python -m venv env
@@ -26,8 +26,11 @@ pip install -r requirements.txt
 flask --debug run
 ```
 
-## :pushpin: Funciones
+## :pushpin: Features
 
 - [x] flask
 - [x] blueprints
 - [x] bootstrap 5
+- [X] postgres database
+- [X] alembic
+- [X] docker compose
