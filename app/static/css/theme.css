@@ -357,3 +357,23 @@
   a.linkUsername:active {
     text-decoration: underline;
   }
+
+  .text-bg-success {
+    color: #36434A !important;
+    background-color: RGBA(216, 229, 200, var(--bs-bg-opacity, 1)) !important;
+  }
+
+  .text-bg-warning {
+    color: #36434A !important;
+    background-color: RGBA(255, 233, 189, var(--bs-bg-opacity, 1)) !important;
+  }
+
+  .text-bg-secondary {
+    color: #36434A !important;
+    background-color: RGBA(216, 222, 228, var(--bs-bg-opacity, 1)) !important;
+  }
+
+  .text-bg-danger {
+    color: #fff !important;
+    background-color: RGBA(185, 77, 55, var(--bs-bg-opacity, 1)) !important;
+  }
