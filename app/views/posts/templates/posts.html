@@ -52,7 +52,7 @@
                                 <div class="d-flex">
                                     <h5 class="mb-1">{{ post.title }}</h5>
                                     {% if post.is_closed() %}
-                                    <h6> <span class="badge bg-danger ms-2">Cerrado</span></h6>
+                                    <h6><span class="badge text-bg-danger ms-2">Cerrado</span></h6>
                                     {% endif %}
                                 </div>
                                 <small><i class="bi bi-clock"></i> {{ moment(post.created_at).fromNow() }}</small>

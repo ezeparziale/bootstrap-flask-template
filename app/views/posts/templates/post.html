@@ -43,10 +43,10 @@
                     <div class="row">
                         <div class="d-flex justify-content-between">
                             <small class="text-muted mb-1">
-                                <a class="text-muted" type="button" href="{{ url_for('user.user', username=username) }}" role="button">
+                                <a class="text-muted linkUsername" type="button" href="{{ url_for('user.user', username=username) }}" role="button">
                                     {{ username }}
                                 </a>
-                                <span class="badge bg-success">Autor</span>
+                                <span class="badge text-bg-success">Autor</span>
                             </small>
                             <small class="text-muted mb-1"><i class="bi bi-clock"></i> {{ moment(post.created_at).fromNow() }}</small>
                         </div>
@@ -121,7 +121,7 @@
                             {% if loop.index == 1 %}
                                 <i class="bi bi-tag"></i> <span class="desktop-only"> Tags:</span>
                             {% endif %}
-                            <span class="badge bg-secondary">{{ post_tag.tag.name }}</span>
+                            <span class="badge text-bg-secondary">{{ post_tag.tag.name }}</span>
                         {% endfor %}
                     </div>
                 </div>
