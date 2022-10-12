@@ -347,3 +347,13 @@
       display: none;
     }
   }
+
+  a.linkUsername:link,
+  a.linkUsername:visited {
+    text-decoration: none;
+  }
+
+  a.linkUsername:hover,
+  a.linkUsername:active {
+    text-decoration: underline;
+  }
