@@ -49,6 +49,8 @@ app.register_blueprint(posts.posts_bp)
 from app.views.user import user
 app.register_blueprint(user.user_bp)
 
+from app.views.admin import admin
+app.register_blueprint(admin.admin_bp)
 
 @app.errorhandler(404)
 def page_not_found(e):

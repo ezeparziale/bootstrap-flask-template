@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% import "macro_pagination.html" as widget %}
+
+{% block navbar %}
+    {% include "navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_view') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.tags.tag_view') }}">Tags</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            </ol>
+        </nav>
+
+        <h1>{% block title %} Edit role {% endblock %}</h1>
+
+        <form method="post" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <fieldset>
+                <div class="form-group">
+                    {{ form.name.label(class="form-control-label") }}
+                    {% if form.name.errors %}
+                        {{ form.name(class="form-control is-invalid") }}
+                            {% for error in form.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                    {% else %}
+                        {{ form.name(class="form-control") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="float-end mt-3">
+                <a href="{{ url_for('admin.tags.tag_view') }}" class="btn btn-secondary">Cancel</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+    </div>
+
+{% endblock %}

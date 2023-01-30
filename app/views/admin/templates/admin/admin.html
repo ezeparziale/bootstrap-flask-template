@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "macro_pagination.html" as widget %}
+
+{% block navbar %}
+    {% include "navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Admin</li>
+            </ol>
+        </nav>
+
+        <h3>{% block title %} Admin {% endblock %}</h3>
+
+        <div class="row">
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Tags</h5>
+                  <p class="card-text">All Tags info.</p>
+                  <a href="{{ url_for('admin.tags.tag_view') }}" class="btn btn-primary">Go to tags</a>
+                </div>
+              </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
