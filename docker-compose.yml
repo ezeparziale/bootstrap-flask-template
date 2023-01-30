@@ -13,8 +13,8 @@ services:
       - POSTGRES_USER=flaskuser
       - POSTGRES_PASSWORD=flaskpassword
       - POSTGRES_DB=flaskdb
-    # volumes:
-    #   - postgres-db-dev:/var/lib/postgresql/data
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
     networks:
       - flask_net
 
@@ -29,7 +29,7 @@ services:
       - flask_net
 
 volumes:
-  postgres-db-dev:
+  postgres-db:
 
 networks:
   flask_net:
