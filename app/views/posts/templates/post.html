@@ -111,7 +111,7 @@
                                     {% endif %}
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal" data-bs-target="#confirmDeletePostModal" role="button" data-bs-whatever="@getbootstrap"><i class="bi bi-trash"></i> Eliminar</a></li>
+                                <li><a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal" data-bs-target="#modalDeletePost" role="button" data-bs-url="{{ url_for('posts.delete_post', id=post.id) }}"><i class="bi bi-trash"></i> Eliminar</a></li>
                             </ul>
                         </div>
                         {% endif %}

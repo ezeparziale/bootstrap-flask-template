@@ -21,3 +21,26 @@
 </div>
 
 {% endmacro %}
+
+{% macro confirm_delete_post(post_id) %}
+
+<div class="modal fade" id="modalDeletePost" tabindex="-1" aria-labelledby="modalDeletePostLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalDeletePostLabel">Delete Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this post id: {{ post_id }}?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a href="" type="button" class="btn btn-primary" id="btn-modal-delete">Delete</a>
+
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endmacro %}
