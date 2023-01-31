@@ -2,19 +2,19 @@ from flask import (
     Blueprint,
     abort,
     flash,
+    jsonify,
     make_response,
     redirect,
     render_template,
     request,
     url_for,
-    jsonify
 )
 from flask_login import current_user, login_required
 
 from app import db
+from app.config import settings
 from app.decorators import permission_required
 
-from app.config import settings
 from ...models import Comment, Permission, Post, PostTag, Report
 from .forms import CreatePostForm, EditPostForm, PostCommentForm
 
@@ -202,6 +202,7 @@ def moderate_post():
     posts = pagination.items
     return render_template("moderate_post.html", posts=posts, pagination=pagination)
 
+
 @posts_bp.route("/moderate/post/enable_disable/<id>", methods=["GET"])
 @login_required
 def enable_disable_post(id: int):
@@ -212,6 +213,7 @@ def enable_disable_post(id: int):
     else:
         post.disable()
         return jsonify({"disable": True, "icon": "bi bi-star"})
+
 
 @posts_bp.route("/moderate/post/enable/<id>", methods=["GET", "POST"])
 @login_required
@@ -244,10 +246,13 @@ def moderate_comment_disable(id: int):
     comment = Comment.query.filter_by(id=id).first_or_404()
     if comment.disabled:
         comment.enable()
-        return jsonify({"disable": False, "text": " Deshabilitar",  "content": comment.content})
+        return jsonify(
+            {"disable": False, "text": " Deshabilitar", "content": comment.content}
+        )
     else:
         comment.disable()
         return jsonify({"disable": True, "text": " Habilitar"})
+
 
 # @posts_bp.route("/moderate/comment/enable/<id>", methods=["GET", "POST"])
 # @login_required
@@ -281,6 +286,7 @@ def moderate_comment_disable(id: int):
 #     # flash("Post agregado a likes", category="success")
 #     return redirect(url_for("posts.get_post", id=id))
 
+
 @posts_bp.route("/like_post/<id>", methods=["GET"])
 @login_required
 def like_post(id: int):
@@ -291,6 +297,7 @@ def like_post(id: int):
     else:
         post.like(current_user)
         return jsonify({"likes": post.likes.count(), "icon": "bi bi-star-fill"})
+
 
 # @posts_bp.route("/unlike/<id>", methods=["GET", "POST"])
 # @login_required
@@ -311,6 +318,7 @@ def favorite_post(id: int):
     else:
         post.favorite(current_user)
         return jsonify({"favorite": True, "icon": "bi bi-bookmark-fill"})
+
 
 # @posts_bp.route("/favorite/<id>", methods=["GET", "POST"])
 # @login_required
@@ -400,6 +408,7 @@ def open_post(id: int):
         return redirect(url_for("posts.get_post", id=id))
     return redirect(url_for("posts.get_post", id=id))
 
+
 @posts_bp.route("/report_comment/<id>", methods=["GET"])
 @login_required
 def report_comment(id: int):
@@ -410,6 +419,7 @@ def report_comment(id: int):
     else:
         comment.add_report(current_user)
         return jsonify({"reports": comment.reports.count(), "icon": "bi bi-flag-fill"})
+
 
 # @posts_bp.route("/comment/report/<id>", methods=["GET", "POST"])
 # @login_required
@@ -429,7 +439,6 @@ def report_comment(id: int):
 #     return redirect(url_for("posts.get_post", id=comment.post.id))
 
 
-
 @posts_bp.route("/like_comment/<id>", methods=["GET"])
 @login_required
 def like_comment(id: int):
@@ -440,6 +449,7 @@ def like_comment(id: int):
     else:
         comment.like(current_user)
         return jsonify({"likes": comment.likes.count(), "icon": "bi bi-star-fill"})
+
 
 # @posts_bp.route("/comment/like/<id>", methods=["GET", "POST"])
 # @login_required

@@ -32,25 +32,33 @@ moment = Moment(app)
 
 # Blueprints
 from app.views.home import home
+
 app.register_blueprint(home.home_bp)
 
 from app.views.about import about
+
 app.register_blueprint(about.about_bp)
 
 from app.views.auth import auth
+
 app.register_blueprint(auth.auth_bp)
 
 from app.views.account import account
+
 app.register_blueprint(account.account_bp)
 
 from app.views.posts import posts
+
 app.register_blueprint(posts.posts_bp)
 
 from app.views.user import user
+
 app.register_blueprint(user.user_bp)
 
 from app.views.admin import admin
+
 app.register_blueprint(admin.admin_bp)
+
 
 @app.errorhandler(404)
 def page_not_found(e):

@@ -34,8 +34,6 @@ class PostForm(FlaskForm):
     )
 
 
-
-
 class CreatePostForm(PostForm):
     submit = SubmitField(label="Publicar")
 

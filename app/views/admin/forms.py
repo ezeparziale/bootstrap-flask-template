@@ -7,13 +7,10 @@ from app.models import Tag
 
 
 class CreateTagForm(FlaskForm):
-    name = StringField(
-        "Name", validators=[DataRequired(), Length(min=2, max=30)]
-    )
-    
+    name = StringField("Name", validators=[DataRequired(), Length(min=2, max=30)])
+
     submit = SubmitField("Create")
 
-    
     def validate_name(self, field):
         if Tag.query.filter_by(name=field.data).first():
             raise ValidationError("Tag name already exists.")
@@ -21,13 +18,10 @@ class CreateTagForm(FlaskForm):
 
 class EditTagForm(FlaskForm):
     id = HiddenField()
-    name = StringField(
-        "Name", validators=[DataRequired(), Length(min=2, max=30)]
-    )
-    
+    name = StringField("Name", validators=[DataRequired(), Length(min=2, max=30)])
+
     submit = SubmitField("Update")
 
-   
     def validate(self):
         rv = FlaskForm.validate(self)
         if not rv:
