@@ -342,6 +342,7 @@ class Tag(db.Model):
             "created_at": self.created_at,
         }
 
+
 class Post(db.Model):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True)
@@ -373,7 +374,10 @@ class Post(db.Model):
     closed = Column(BOOLEAN, default=False)
     disabled = Column(BOOLEAN, default=False)
     tags = db.relationship(
-        "PostTag", backref=db.backref("post", remote_side=[id]), lazy="dynamic"
+        "PostTag",
+        backref=db.backref("post", remote_side=[id]),
+        cascade="all, delete-orphan",
+        lazy="dynamic",
     )
 
     def add_visit(self):
@@ -459,6 +463,7 @@ class Post(db.Model):
     def disable(self):
         self.disabled = True
         db.session.commit()
+
 
 class Like(db.Model):
     __tablename__ = "likes"
