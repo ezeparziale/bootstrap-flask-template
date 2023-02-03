@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import or_
 
 from app.decorators import admin_required
-from app.models import Permission, Tag, User
+from app.models import Tag
 
 from .forms import CreateTagForm, EditTagForm
 
@@ -27,7 +27,7 @@ def tag_view():
 @tags_bp.route("/create", methods=["GET", "POST"])
 @login_required
 @admin_required
-def create_role():
+def create_tag():
     form = CreateTagForm()
 
     if form.validate_on_submit():
@@ -43,7 +43,7 @@ def create_role():
 @tags_bp.route("/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 @admin_required
-def edit_role(id):
+def edit_tag(id):
     role = Tag.query.get_or_404(id)
     form = EditTagForm()
 
@@ -108,7 +108,7 @@ def get_data():
 
     # response
     return {
-        "data": [user.to_dict() for user in query],
+        "data": [tag.to_dict() for tag in query],
         "recordsFiltered": total_filtered,
         "recordsTotal": Tag.query.count(),
         "draw": request.args.get("draw", type=int),
