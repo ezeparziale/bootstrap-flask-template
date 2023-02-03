@@ -264,6 +264,27 @@ class User(db.Model, UserMixin):
         )
         return messages
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        self.updated_at = datetime.utcnow()
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "confirmed": self.confirmed,
+            "created_at": self.created_at,
+        }
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, perm):
