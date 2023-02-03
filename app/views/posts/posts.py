@@ -42,7 +42,7 @@ def posts():
 
     page = request.args.get("page", 1, type=int)
     pagination = query.order_by(Post.created_at.desc()).paginate(
-        page, settings.POSTS_PER_PAGE, error_out=True
+        page=page, per_page=settings.POSTS_PER_PAGE, error_out=True
     )
     posts = pagination.items
     return render_template(
@@ -66,7 +66,7 @@ def get_post(id: int):
     pagination = (
         post.comments.filter_by(parent_id=None)
         .order_by(Comment.created_at.desc())
-        .paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+        .paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=True)
     )
 
     comments = pagination.items
@@ -197,7 +197,7 @@ def moderate_post():
     pagination = (
         Post.query.join(Report, Report.post_id == Post.id)
         .order_by(Post.created_at.desc())
-        .paginate(page, settings.POSTS_PER_PAGE, error_out=True)
+        .paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=True)
     )
     posts = pagination.items
     return render_template("moderate_post.html", posts=posts, pagination=pagination)
