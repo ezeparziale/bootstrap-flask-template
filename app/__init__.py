@@ -13,7 +13,6 @@ app.config.from_object(settings)
 
 # Database
 db = SQLAlchemy(app)
-db.create_all()
 
 # Bcrypt
 bcrypt = Bcrypt(app)
