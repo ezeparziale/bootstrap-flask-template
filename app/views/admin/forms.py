@@ -1,9 +1,15 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import and_
-from wtforms import HiddenField, SelectMultipleField, StringField, SubmitField
-from wtforms.validators import DataRequired, Length, ValidationError
+from wtforms import (
+    BooleanField,
+    HiddenField,
+    PasswordField,
+    StringField,
+    SubmitField,
+)
+from wtforms.validators import DataRequired, Email, Length, ValidationError
 
-from app.models import Tag
+from app.models import Tag, User
 
 
 class CreateTagForm(FlaskForm):
@@ -33,6 +39,78 @@ class EditTagForm(FlaskForm):
 
         if check_tag_exists:
             self.name.errors.append(f"Tag: '{self.name.data}' name already exists.")
+            return False
+
+        return True
+
+
+class EditUserForm(FlaskForm):
+    id = HiddenField()
+    username = StringField(
+        "Username", validators=[DataRequired(), Length(min=2, max=30)]
+    )
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    confirmed = BooleanField("Confirmed")
+    submit = SubmitField("Update")
+
+    def validate(self):
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        check_username_exists = User.query.filter(
+            and_(User.username == self.username.data, User.id != self.id.data)
+        ).all()
+
+        if check_username_exists:
+            self.username.errors.append(
+                f"Username '{self.username.data}' already exists."
+            )
+            return False
+
+        check_email_exists = User.query.filter(
+            and_(User.email == self.email.data, User.id != self.id.data)
+        ).all()
+
+        if check_email_exists:
+            self.email.errors.append(f"Email '{self.email.data}' already exists.")
+            return False
+
+        return True
+
+
+class CreateUserForm(FlaskForm):
+    username = StringField(
+        "Username", validators=[DataRequired(), Length(min=2, max=30)]
+    )
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField(
+        label="PASSWORD", validators=[DataRequired(), Length(min=6, max=16)]
+    )
+    confirmed = BooleanField("Confirmed")
+    submit = SubmitField("Create")
+
+    def validate(self):
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        check_username_exists = User.query.filter(
+            and_(User.username == self.username.data)
+        ).all()
+
+        if check_username_exists:
+            self.username.errors.append(
+                f"Username '{self.username.data}' already exists."
+            )
+            return False
+
+        check_email_exists = User.query.filter(
+            and_(User.email == self.email.data)
+        ).all()
+
+        if check_email_exists:
+            self.email.errors.append(f"Email '{self.email.data}' already exists.")
             return False
 
         return True
