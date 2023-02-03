@@ -8,5 +8,5 @@ Flask-Login==0.6.2
 PyJWT==2.4.0
 Flask-Mail==0.9.1
 Flask-Moment==1.0.5
-pydantic[dotenv]==1.10.2
+pydantic[dotenv]==1.10.4
 alembic==1.9.2
