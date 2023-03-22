@@ -89,7 +89,6 @@ def create_post():
     print(form.content.data)
     print(form.title.data)
     if form.validate_on_submit():
-
         post = Post(
             title=form.title.data, content=form.content.data, author=current_user
         )
