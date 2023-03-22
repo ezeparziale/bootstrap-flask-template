@@ -22,7 +22,7 @@ class EditTagForm(FlaskForm):
 
     submit = SubmitField("Update")
 
-    def validate(self):
+    def validate(self, extra_validators=None):
         rv = FlaskForm.validate(self)
         if not rv:
             return False
