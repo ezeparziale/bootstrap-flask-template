@@ -80,7 +80,9 @@ def followers(username: str):
         flash("Usuario invalido", category="info")
         return redirect(url_for("posts.posts", username=username))
     page = request.args.get("page", 1, type=int)
-    pagination = user.followers.paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=False)
+    pagination = user.followers.paginate(
+        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
+    )
     followers = pagination.items
     return render_template(
         "followers.html", followers=followers, pagination=pagination, user=user
@@ -95,7 +97,9 @@ def follow_by(username: str):
         flash("Usuario invalido", category="info")
         return redirect(url_for("posts.posts", username=username))
     page = request.args.get("page", 1, type=int)
-    pagination = user.followed.paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=False)
+    pagination = user.followed.paginate(
+        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
+    )
     followed = pagination.items
     return render_template(
         "followed_by.html", followed=followed, pagination=pagination, user=user
@@ -235,7 +239,9 @@ def show_messages_room(room_id: int):
             RoomMessage.created_at.desc()
         )
         page = request.args.get("page", 1, type=int)
-        pagination = messages.paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=False)
+        pagination = messages.paginate(
+            page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
+        )
         messages = pagination.items
         return render_template(
             "show_message_room.html",
@@ -259,7 +265,9 @@ def show_rooms():
         Participant.room_id.in_(subquery), Participant.user_id != current_user.id
     ).order_by(Participant.created_at.desc())
     page = request.args.get("page", 1, type=int)
-    pagination = rooms.paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=False)
+    pagination = rooms.paginate(
+        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
+    )
     rooms = pagination.items
     return render_template(
         "show_rooms.html", rooms=rooms, pagination=pagination, current_user=current_user
@@ -282,7 +290,9 @@ def list_users():
     headers = ["username", "email", "confirmed"]
 
     page = request.args.get("page", 1, type=int)
-    pagination = query.paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=False)
+    pagination = query.paginate(
+        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
+    )
     users = pagination.items
 
     print(pagination.total)
