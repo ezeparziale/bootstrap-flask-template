@@ -12,10 +12,10 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
+from sqlalchemy import func
 
 from app import db
 from app.config import settings
-from sqlalchemy import func
 
 from ...models import Notification, Participant, RoomMessage, User
 from .forms import EmptyForm, ReplyMessageForm, SendMessageForm
@@ -35,7 +35,6 @@ def user(username: str):
     form = EmptyForm()
     user = db.one_or_404(db.select(User).filter_by(username=username))
     return render_template("user.html", user=user, form=form)
-
 
 
 @user_bp.route("/follow/<username>", methods=["POST"])
@@ -84,12 +83,12 @@ def followers(username: str):
         return redirect(url_for("posts.posts", username=username))
 
     page = request.args.get("page", 1, type=int)
-    per_page=settings.POSTS_PER_PAGE
-    pagination = db.paginate(user.followers, page=page, per_page=per_page, error_out=False)
-
-    return render_template(
-        "followers.html", pagination=pagination, user=user
+    per_page = settings.POSTS_PER_PAGE
+    pagination = db.paginate(
+        user.followers, page=page, per_page=per_page, error_out=False
     )
+
+    return render_template("followers.html", pagination=pagination, user=user)
 
 
 @user_bp.route("/follow_by/<username>", methods=["GET"])
@@ -102,12 +101,12 @@ def follow_by(username: str):
         return redirect(url_for("posts.posts", username=username))
     page = request.args.get("page", 1, type=int)
 
-    per_page=settings.POSTS_PER_PAGE
-    pagination = db.paginate(user.followed, page=page, per_page=per_page, error_out=False)
-
-    return render_template(
-        "followed_by.html", pagination=pagination, user=user
+    per_page = settings.POSTS_PER_PAGE
+    pagination = db.paginate(
+        user.followed, page=page, per_page=per_page, error_out=False
     )
+
+    return render_template("followed_by.html", pagination=pagination, user=user)
 
 
 # @user_bp.route("/send_message/<username>", methods=["GET", "POST"])
@@ -227,11 +226,12 @@ def send_menssage_room(username: str):
 @user_bp.route("/show_messages_room/<room_id>", methods=["GET", "POST"])
 @login_required
 def show_messages_room(room_id: int):
-    participant = db.one_or_404(db.select(Participant).filter(
-        Participant.room_id == room_id, 
-        Participant.user_id == current_user.id)
+    participant = db.one_or_404(
+        db.select(Participant).filter(
+            Participant.room_id == room_id, Participant.user_id == current_user.id
         )
-    
+    )
+
     form = ReplyMessageForm()
     if form.validate_on_submit():
         message = form.message.data
@@ -241,9 +241,13 @@ def show_messages_room(room_id: int):
     participant.last_access_at = datetime.utcnow()
     db.session.commit()
 
-    messages = db.select(RoomMessage).filter_by(room_id=room_id).order_by(RoomMessage.created_at.desc())
+    messages = (
+        db.select(RoomMessage)
+        .filter_by(room_id=room_id)
+        .order_by(RoomMessage.created_at.desc())
+    )
     page = request.args.get("page", 1, type=int)
-    per_page=settings.POSTS_PER_PAGE
+    per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(messages, page=page, per_page=per_page, error_out=False)
 
     return render_template(
@@ -254,7 +258,6 @@ def show_messages_room(room_id: int):
     )
 
 
-
 @user_bp.route("/show_rooms", methods=["GET", "POST"])
 @login_required
 def show_rooms():
@@ -263,12 +266,16 @@ def show_rooms():
     db.session.commit()
 
     subquery = db.select(Participant.room_id).filter_by(user_id=current_user.id)
-    rooms = db.select(Participant).filter(
-        Participant.room_id.in_(subquery), Participant.user_id != current_user.id
-    ).order_by(Participant.created_at.desc())
+    rooms = (
+        db.select(Participant)
+        .filter(
+            Participant.room_id.in_(subquery), Participant.user_id != current_user.id
+        )
+        .order_by(Participant.created_at.desc())
+    )
 
     page = request.args.get("page", 1, type=int)
-    per_page=settings.POSTS_PER_PAGE
+    per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(rooms, page=page, per_page=per_page, error_out=False)
 
     return render_template(
@@ -292,12 +299,10 @@ def list_users():
     headers = ["username", "email", "confirmed"]
 
     page = request.args.get("page", 1, type=int)
-    per_page=settings.POSTS_PER_PAGE
+    per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
-    return render_template(
-        "list_users.html", headers=headers, pagination=pagination
-    )
+    return render_template("list_users.html", headers=headers, pagination=pagination)
 
 
 @user_bp.route("/api/data", methods=["GET", "POST"])
@@ -320,7 +325,9 @@ def data():
             )
         )
     total_filtered = db.session.execute(func.count(query.c["id"])).scalar_one()
-    total_records = db.session.execute(func.count(db.select(User.id).c["id"])).scalar_one()
+    total_records = db.session.execute(
+        func.count(db.select(User.id).c["id"])
+    ).scalar_one()
     # sorting
     order = []
     i = 0
