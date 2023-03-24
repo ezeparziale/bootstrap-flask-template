@@ -9,8 +9,8 @@
 {% block content %}
     <h2>Siguiendo de {{ user.username }}</h2>
     <div class="list-group">
-        {% for user in followed %}
-            <a href="{{ url_for('user.user', username=user.follower.username) }}" class="list-group-item list-group-item-action" aria-current="true">
+        {% for user in pagination %}
+            <a href="{{ url_for('user.user', username=user.followed.username) }}" class="list-group-item list-group-item-action" aria-current="true">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ user.followed.username }}</h5>
                 </div>

@@ -54,7 +54,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col">
-                    {% for message in messages %}
+                    {% for message in pagination %}
                         <div class="d-flex flex-start">
                             {{ macros.print_avatar_message(message, 40)}}
                             <div class="flex-grow-1 flex-shrink-1">
