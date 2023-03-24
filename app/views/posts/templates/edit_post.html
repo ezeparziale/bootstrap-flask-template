@@ -47,7 +47,7 @@
                 </div>
             </fieldset>
             <div class="float-end mt-3">
-                <a class="btn btn-secondary" href="{{ url_for('posts.get_post', id=post_id) }}">Cancelar</a>
+                <a class="btn btn-secondary" href="{{ url_for('posts.get_post', id=post_id) }}" role="button">Cancelar</a>
                 {{ form.submit(class="btn btn-primary") }}
             </div>
         </form>
