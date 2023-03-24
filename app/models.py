@@ -202,7 +202,7 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
     def new_messages(self):
-        subquery = db.select([Participant.room_id]).filter_by(user_id=self.id)
+        subquery = db.select(Participant.room_id).filter_by(user_id=self.id)
         rooms = Participant.query.filter(
             Participant.room_id.in_(subquery), Participant.user_id != self.id
         ).order_by(Participant.created_at.desc())

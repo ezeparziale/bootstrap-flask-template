@@ -260,7 +260,7 @@ def show_rooms():
     current_user.last_message_read_time = datetime.utcnow()
     current_user.add_notification("unread_message_count", 0)
     db.session.commit()
-    subquery = db.select([Participant.room_id]).filter_by(user_id=current_user.id)
+    subquery = db.select(Participant.room_id).filter_by(user_id=current_user.id)
     rooms = Participant.query.filter(
         Participant.room_id.in_(subquery), Participant.user_id != current_user.id
     ).order_by(Participant.created_at.desc())
