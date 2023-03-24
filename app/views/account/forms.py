@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed, FileField, FileRequired
-from wtforms import BooleanField, PasswordField, StringField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from flask_wtf.file import FileAllowed, FileField
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
 
 
 class AccountInfoForm(FlaskForm):

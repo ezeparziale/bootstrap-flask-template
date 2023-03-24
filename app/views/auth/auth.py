@@ -1,11 +1,10 @@
-import pprint
 from threading import Thread
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_mail import Message
 
-from app import app, bcrypt, db, login_manager, mail, settings
+from app import app, bcrypt, db, mail, settings
 
 from ...models import User
 from .forms import (
