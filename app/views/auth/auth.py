@@ -56,7 +56,7 @@ def login():
             if next is None or not next.startswith("/"):
                 next = url_for("home.home_view")
             return redirect(next)
-        flash(f"Error al loguearse", category="danger")
+        flash("Error al loguearse", category="danger")
     return render_template("login.html", form=form)
 
 
@@ -97,8 +97,8 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash(f"Cuenta creada exitosamente", category="success")
-        flash(f"Verifique su mail para confirmar cuenta", category="info")
+        flash("Cuenta creada exitosamente", category="success")
+        flash("Verifique su mail para confirmar cuenta", category="info")
         send_email_confirm(user)
         return redirect(url_for("auth.login"))
     return render_template("register.html", form=form)

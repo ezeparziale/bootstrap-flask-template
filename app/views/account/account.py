@@ -62,7 +62,7 @@ def edit_account():
 
         # current_user.details = user_details
         db.session.commit()
-        flash(f"Cuenta actualizada", category="success")
+        flash("Cuenta actualizada", category="success")
         return redirect(url_for("account.account"))
     elif request.method == "GET":
         form.email.data = current_user.email
