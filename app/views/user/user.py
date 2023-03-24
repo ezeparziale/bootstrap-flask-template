@@ -15,6 +15,7 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.config import settings
+from sqlalchemy import func
 
 from ...models import Notification, Participant, RoomMessage, User
 from .forms import EmptyForm, ReplyMessageForm, SendMessageForm
@@ -32,8 +33,9 @@ user_bp = Blueprint(
 @login_required
 def user(username: str):
     form = EmptyForm()
-    user = User.query.filter_by(username=username).first_or_404()
+    user = db.one_or_404(db.select(User).filter_by(username=username))
     return render_template("user.html", user=user, form=form)
+
 
 
 @user_bp.route("/follow/<username>", methods=["POST"])
@@ -41,7 +43,7 @@ def user(username: str):
 def follow(username: str):
     form = EmptyForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=username).first_or_404()
+        user = db.one_or_404(db.select(User).filter_by(username=username))
         if user == current_user:
             flash("No te puede auto seguir", category="info")
             return redirect(url_for("user.user", username=username))
@@ -59,7 +61,7 @@ def follow(username: str):
 def unfollow(username: str):
     form = EmptyForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=username).first_or_404()
+        user = db.one_or_404(db.select(User).filter_by(username=username))
         if user == current_user:
             flash("No te puede auto seguir", category="info")
             return redirect(url_for("user.user", username=username))
@@ -75,34 +77,36 @@ def unfollow(username: str):
 @user_bp.route("/followers/<username>", methods=["GET"])
 @login_required
 def followers(username: str):
-    user = User.query.filter_by(username=username).first()
+    user = db.session.execute(db.select(User).filter_by(username=username)).scalar_one()
+
     if user is None:
         flash("Usuario invalido", category="info")
         return redirect(url_for("posts.posts", username=username))
+
     page = request.args.get("page", 1, type=int)
-    pagination = user.followers.paginate(
-        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
-    )
-    followers = pagination.items
+    per_page=settings.POSTS_PER_PAGE
+    pagination = db.paginate(user.followers, page=page, per_page=per_page, error_out=False)
+
     return render_template(
-        "followers.html", followers=followers, pagination=pagination, user=user
+        "followers.html", pagination=pagination, user=user
     )
 
 
 @user_bp.route("/follow_by/<username>", methods=["GET"])
 @login_required
 def follow_by(username: str):
-    user = User.query.filter_by(username=username).first()
+    user = db.session.execute(db.select(User).filter_by(username=username)).scalar_one()
+
     if user is None:
         flash("Usuario invalido", category="info")
         return redirect(url_for("posts.posts", username=username))
     page = request.args.get("page", 1, type=int)
-    pagination = user.followed.paginate(
-        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
-    )
-    followed = pagination.items
+
+    per_page=settings.POSTS_PER_PAGE
+    pagination = db.paginate(user.followed, page=page, per_page=per_page, error_out=False)
+
     return render_template(
-        "followed_by.html", followed=followed, pagination=pagination, user=user
+        "followed_by.html", pagination=pagination, user=user
     )
 
 
@@ -206,7 +210,7 @@ def notifications():
 @user_bp.route("/send_menssage_room/<username>", methods=["GET", "POST"])
 @login_required
 def send_menssage_room(username: str):
-    recipient = User.query.filter_by(username=username).first_or_404()
+    recipient = db.one_or_404(db.select(User).filter_by(username=username))
 
     form = SendMessageForm()
 
@@ -223,35 +227,32 @@ def send_menssage_room(username: str):
 @user_bp.route("/show_messages_room/<room_id>", methods=["GET", "POST"])
 @login_required
 def show_messages_room(room_id: int):
-    participant = Participant.query.filter(
-        Participant.room_id == room_id, Participant.user_id == current_user.id
-    ).first_or_404()
-    if participant:
-        form = ReplyMessageForm()
-        if form.validate_on_submit():
-            message = form.message.data
-            current_user.send_message_to_room(room_id, message)
-            participant.last_message_at = datetime.utcnow()
+    participant = db.one_or_404(db.select(Participant).filter(
+        Participant.room_id == room_id, 
+        Participant.user_id == current_user.id)
+        )
+    
+    form = ReplyMessageForm()
+    if form.validate_on_submit():
+        message = form.message.data
+        current_user.send_message_to_room(room_id, message)
+        participant.last_message_at = datetime.utcnow()
 
-        participant.last_access_at = datetime.utcnow()
-        db.session.commit()
-        messages = RoomMessage.query.filter_by(room_id=room_id).order_by(
-            RoomMessage.created_at.desc()
-        )
-        page = request.args.get("page", 1, type=int)
-        pagination = messages.paginate(
-            page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
-        )
-        messages = pagination.items
-        return render_template(
-            "show_message_room.html",
-            form=form,
-            messages=messages,
-            pagination=pagination,
-            room_id=room_id,
-        )
-    else:
-        abort(401)
+    participant.last_access_at = datetime.utcnow()
+    db.session.commit()
+
+    messages = db.select(RoomMessage).filter_by(room_id=room_id).order_by(RoomMessage.created_at.desc())
+    page = request.args.get("page", 1, type=int)
+    per_page=settings.POSTS_PER_PAGE
+    pagination = db.paginate(messages, page=page, per_page=per_page, error_out=False)
+
+    return render_template(
+        "show_message_room.html",
+        form=form,
+        pagination=pagination,
+        room_id=room_id,
+    )
+
 
 
 @user_bp.route("/show_rooms", methods=["GET", "POST"])
@@ -260,24 +261,25 @@ def show_rooms():
     current_user.last_message_read_time = datetime.utcnow()
     current_user.add_notification("unread_message_count", 0)
     db.session.commit()
+
     subquery = db.select(Participant.room_id).filter_by(user_id=current_user.id)
-    rooms = Participant.query.filter(
+    rooms = db.select(Participant).filter(
         Participant.room_id.in_(subquery), Participant.user_id != current_user.id
     ).order_by(Participant.created_at.desc())
+
     page = request.args.get("page", 1, type=int)
-    pagination = rooms.paginate(
-        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
-    )
-    rooms = pagination.items
+    per_page=settings.POSTS_PER_PAGE
+    pagination = db.paginate(rooms, page=page, per_page=per_page, error_out=False)
+
     return render_template(
-        "show_rooms.html", rooms=rooms, pagination=pagination, current_user=current_user
+        "show_rooms.html", pagination=pagination, current_user=current_user
     )
 
 
 @user_bp.route("/list_users", methods=["GET", "POST"])
 @login_required
 def list_users():
-    query = User.query
+    query = db.select(User)
 
     filters = None
     if request.method == "POST":
@@ -290,21 +292,18 @@ def list_users():
     headers = ["username", "email", "confirmed"]
 
     page = request.args.get("page", 1, type=int)
-    pagination = query.paginate(
-        page=page, per_page=settings.POSTS_PER_PAGE, error_out=False
-    )
-    users = pagination.items
+    per_page=settings.POSTS_PER_PAGE
+    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
-    print(pagination.total)
     return render_template(
-        "list_users.html", users=users, headers=headers, pagination=pagination
+        "list_users.html", headers=headers, pagination=pagination
     )
 
 
 @user_bp.route("/api/data", methods=["GET", "POST"])
 @login_required
 def data():
-    query = User.query
+    query = db.select(User)
 
     # search filter
     search = request.args.get("search[value]")
@@ -320,8 +319,8 @@ def data():
                 User.email.like(f"%{search}%"),
             )
         )
-    total_filtered = query.count()
-
+    total_filtered = db.session.execute(func.count(query.c["id"])).scalar_one()
+    total_records = db.session.execute(func.count(db.select(User.id).c["id"])).scalar_one()
     # sorting
     order = []
     i = 0
@@ -344,10 +343,8 @@ def data():
     # pagination
     start = request.args.get("start", type=int)
     length = request.args.get("length", type=int)
-    query = query.offset(start).limit(length)
+    query = db.session.execute(query.offset(start).limit(length)).scalars()
 
-    # print(query.all())
-    # response
     return {
         "data": [
             {
@@ -359,6 +356,6 @@ def data():
             for user in query
         ],
         "recordsFiltered": total_filtered,
-        "recordsTotal": User.query.count(),
+        "recordsTotal": total_records,
         "draw": request.args.get("draw", type=int),
     }
