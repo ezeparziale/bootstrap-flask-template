@@ -1,14 +1,6 @@
 from datetime import datetime
 
-from flask import (
-    Blueprint,
-    flash,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from sqlalchemy import func
 
@@ -326,6 +318,7 @@ def data():
     total_records = db.session.execute(
         func.count(db.select(User.id).c["id"])
     ).scalar_one()
+
     # sorting
     order = []
     i = 0
