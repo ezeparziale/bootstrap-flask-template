@@ -7,6 +7,8 @@ from app.models import Tag
 
 from .forms import CreateTagForm, EditTagForm
 
+from app import db
+
 tags_bp = Blueprint(
     "tags",
     __name__,
@@ -20,8 +22,7 @@ tags_bp = Blueprint(
 @login_required
 @admin_required
 def tag_view():
-    tags = Tag.query.all()
-    return render_template("tags/list.html", tags=tags)
+    return render_template("tags/list.html")
 
 
 @tags_bp.route("/create", methods=["GET", "POST"])
