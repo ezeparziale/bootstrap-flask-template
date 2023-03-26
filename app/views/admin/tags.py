@@ -45,16 +45,17 @@ def create_tag():
 @login_required
 @admin_required
 def edit_tag(id):
-    role = Tag.query.get_or_404(id)
+    tag = Tag.query.get_or_404(id)
+
     form = EditTagForm()
 
     if form.validate_on_submit():
-        role.name = form.name.data
-        role.update()
+        tag.name = form.name.data
+        tag.update()
         return redirect(url_for("admin.tags.tag_view"))
 
-    form.id.data = role.id
-    form.name.data = role.name
+    form.id.data = tag.id
+    form.name.data = tag.name
     return render_template("tags/edit.html", form=form)
 
 
