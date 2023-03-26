@@ -47,7 +47,7 @@ class EditUserForm(FlaskForm):
     confirmed = BooleanField("Confirmed")
     submit = SubmitField("Update")
 
-    def validate(self):
+    def validate(self, extra_validators=None):
         rv = FlaskForm.validate(self)
         if not rv:
             return False
@@ -84,7 +84,7 @@ class CreateUserForm(FlaskForm):
     confirmed = BooleanField("Confirmed")
     submit = SubmitField("Create")
 
-    def validate(self):
+    def validate(self, extra_validators=None):
         rv = FlaskForm.validate(self)
         if not rv:
             return False
