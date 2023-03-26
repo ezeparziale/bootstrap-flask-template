@@ -95,8 +95,7 @@ def register():
             password=encrypted_password,
             image_file=User.generate_avatar(),
         )
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash("Cuenta creada exitosamente", category="success")
         flash("Verifique su mail para confirmar cuenta", category="info")
         send_email_confirm(user)
@@ -156,7 +155,7 @@ def reset_token(token):
             "utf-8"
         )
         user.password = encrypted_password
-        db.session.commit()
+        user.update()
         flash("Password cambiado", category="success")
         return redirect(url_for("auth.login"))
 
@@ -180,7 +179,6 @@ def confirm(token):
 @auth_bp.route("/confirm")
 @login_required
 def resend_confirmation():
-    token = current_user.get_confirm_token()
     send_email_confirm(current_user)
     flash("Email de confirmacion reenviado", category="info")
     return redirect(url_for("home.home_view"))
