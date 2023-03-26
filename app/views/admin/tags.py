@@ -1,13 +1,12 @@
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
-from sqlalchemy import or_
+from sqlalchemy import func
 
+from app import db
 from app.decorators import admin_required
 from app.models import Tag
 
 from .forms import CreateTagForm, EditTagForm
-
-from app import db
 
 tags_bp = Blueprint(
     "tags",
@@ -45,7 +44,7 @@ def create_tag():
 @login_required
 @admin_required
 def edit_tag(id):
-    tag = Tag.query.get_or_404(id)
+    tag = db.get_or_404(Tag, id)
 
     form = EditTagForm()
 
@@ -63,7 +62,7 @@ def edit_tag(id):
 @login_required
 @admin_required
 def delete_tag(id):
-    tag = Tag.query.get_or_404(id)
+    tag = db.get_or_404(Tag, id)
     tag.delete()
     return redirect(url_for("admin.tags.tag_view"))
 
@@ -72,17 +71,18 @@ def delete_tag(id):
 @login_required
 @admin_required
 def get_data():
-    query = Tag.query
+    query = db.select(Tag)
 
     # search filter
     search = request.args.get("search[value]")
     if search:
         query = query.filter(
-            or_(
-                Tag.name.like(f"%{search}%"),
-            )
+            Tag.name.like(f"%{search}%"),
         )
-    total_filtered = query.count()
+    total_filtered = db.session.execute(func.count(query.c["id"])).scalar_one()
+    total_records = db.session.execute(
+        func.count(db.select(Tag.id).c["id"])
+    ).scalar_one()
 
     # sorting
     order = []
@@ -106,12 +106,12 @@ def get_data():
     # pagination
     start = request.args.get("start", type=int)
     length = request.args.get("length", type=int)
-    query = query.offset(start).limit(length)
+    query = db.session.execute(query.offset(start).limit(length)).scalars()
 
     # response
     return {
         "data": [tag.to_dict() for tag in query],
         "recordsFiltered": total_filtered,
-        "recordsTotal": Tag.query.count(),
+        "recordsTotal": total_records,
         "draw": request.args.get("draw", type=int),
     }
