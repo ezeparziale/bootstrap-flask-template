@@ -3,6 +3,7 @@ from sqlalchemy import and_
 from wtforms import BooleanField, HiddenField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, ValidationError
 
+from app import db
 from app.models import Tag, User
 
 
@@ -12,7 +13,12 @@ class CreateTagForm(FlaskForm):
     submit = SubmitField("Create")
 
     def validate_name(self, field):
-        if Tag.query.filter_by(name=field.data).first():
+        tag = (
+            db.session.execute(db.select(Tag).filter_by(name=field.data))
+            .scalars()
+            .first()
+        )
+        if tag:
             raise ValidationError("Tag name already exists.")
 
 
@@ -27,9 +33,15 @@ class EditTagForm(FlaskForm):
         if not rv:
             return False
 
-        check_tag_exists = Tag.query.filter(
-            and_(Tag.name == self.name.data, Tag.id != self.id.data)
-        ).all()
+        check_tag_exists = (
+            db.session.execute(
+                db.select(Tag).filter(
+                    and_(Tag.name == self.name.data, Tag.id != self.id.data)
+                )
+            )
+            .scalars()
+            .first()
+        )
 
         if check_tag_exists:
             self.name.errors.append(f"Tag: '{self.name.data}' name already exists.")
@@ -52,9 +64,15 @@ class EditUserForm(FlaskForm):
         if not rv:
             return False
 
-        check_username_exists = User.query.filter(
-            and_(User.username == self.username.data, User.id != self.id.data)
-        ).all()
+        check_username_exists = (
+            db.session.execute(
+                db.select(User).filter(
+                    and_(User.username == self.username.data, User.id != self.id.data)
+                )
+            )
+            .scalars()
+            .first()
+        )
 
         if check_username_exists:
             self.username.errors.append(
@@ -62,9 +80,15 @@ class EditUserForm(FlaskForm):
             )
             return False
 
-        check_email_exists = User.query.filter(
-            and_(User.email == self.email.data, User.id != self.id.data)
-        ).all()
+        check_email_exists = (
+            db.session.execute(
+                db.select(User).filter(
+                    and_(User.email == self.email.data, User.id != self.id.data)
+                )
+            )
+            .scalars()
+            .first()
+        )
 
         if check_email_exists:
             self.email.errors.append(f"Email '{self.email.data}' already exists.")
@@ -89,9 +113,13 @@ class CreateUserForm(FlaskForm):
         if not rv:
             return False
 
-        check_username_exists = User.query.filter(
-            and_(User.username == self.username.data)
-        ).all()
+        check_username_exists = (
+            db.session.execute(
+                db.select(User).filter(and_(User.username == self.username.data))
+            )
+            .scalars()
+            .first()
+        )
 
         if check_username_exists:
             self.username.errors.append(
@@ -99,9 +127,13 @@ class CreateUserForm(FlaskForm):
             )
             return False
 
-        check_email_exists = User.query.filter(
-            and_(User.email == self.email.data)
-        ).all()
+        check_email_exists = (
+            db.session.execute(
+                db.select(User).filter(and_(User.email == self.email.data))
+            )
+            .scalars()
+            .first()
+        )
 
         if check_email_exists:
             self.email.errors.append(f"Email '{self.email.data}' already exists.")
