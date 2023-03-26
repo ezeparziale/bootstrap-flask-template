@@ -3,7 +3,7 @@ import random
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from flask import current_app, redirect, url_for
+from flask import current_app, redirect, request, url_for
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy import BOOLEAN, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.sql.expression import text
@@ -19,7 +19,7 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("auth.login", next=request.path))
 
 
 class Follow(db.Model):
