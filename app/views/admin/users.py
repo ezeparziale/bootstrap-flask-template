@@ -1,8 +1,8 @@
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
-from app import bcrypt
+from app import bcrypt, db
 from app.decorators import admin_required
 from app.models import User
 
@@ -50,7 +50,8 @@ def create_user():
 @login_required
 @admin_required
 def edit_user(id):
-    user = User.query.get_or_404(id)
+    user = db.get_or_404(User, id)
+
     form = EditUserForm()
 
     if form.validate_on_submit():
@@ -72,7 +73,7 @@ def edit_user(id):
 @login_required
 @admin_required
 def delete_user(id):
-    user = User.query.get_or_404(id)
+    user = db.get_or_404(User, id)
     user.delete()
     return redirect(url_for("admin.users.user_view"))
 
@@ -81,18 +82,21 @@ def delete_user(id):
 @login_required
 @admin_required
 def get_data():
-    query = User.query
+    query = db.select(User)
 
     # search filter
     search = request.args.get("search[value]")
     if search:
         query = query.filter(
             or_(
-                User.username.like(f"%{search}%"),
-                User.email.like(f"%{search}%"),
+                User.username.ilike(f"%{search}%"),
+                User.email.ilike(f"%{search}%"),
             )
         )
-    total_filtered = query.count()
+    total_filtered = db.session.execute(func.count(query.c["id"])).scalar_one()
+    total_records = db.session.execute(
+        func.count(db.select(User.id).c["id"])
+    ).scalar_one()
 
     # sorting
     order = []
@@ -116,12 +120,12 @@ def get_data():
     # pagination
     start = request.args.get("start", type=int)
     length = request.args.get("length", type=int)
-    query = query.offset(start).limit(length)
+    query = db.session.execute(query.offset(start).limit(length)).scalars()
 
     # response
     return {
         "data": [user.to_dict() for user in query],
         "recordsFiltered": total_filtered,
-        "recordsTotal": User.query.count(),
+        "recordsTotal": total_records,
         "draw": request.args.get("draw", type=int),
     }
