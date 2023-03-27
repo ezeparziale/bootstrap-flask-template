@@ -34,26 +34,26 @@ def posts():
     if current_user.is_authenticated:
         view_mode = int(request.cookies.get("view_mode", 0))
     if view_mode == 0:
-        query = Post.query
+        query = db.select(Post)
     if view_mode == 1:
         query = current_user.followed_posts
     if view_mode == 2:
         query = current_user.favorites_posts
 
     page = request.args.get("page", 1, type=int)
-    pagination = query.order_by(Post.created_at.desc()).paginate(
-        page=page, per_page=settings.POSTS_PER_PAGE, error_out=True
-    )
-    posts = pagination.items
+    per_page = settings.POSTS_PER_PAGE
+    pagination = db.paginate(query.order_by(Post.created_at.desc()), page=page, per_page=per_page, error_out=False)
+
     return render_template(
-        "posts.html", posts=posts, pagination=pagination, view_mode=view_mode
+        "posts.html", pagination=pagination, view_mode=view_mode
     )
 
 
 @posts_bp.route("/<id>", methods=["GET", "POST"])
 @login_required
 def get_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
+
     form = PostCommentForm()
     if form.validate_on_submit():
         comment = Comment(content=form.comment.data, author=current_user, post=post)
@@ -62,21 +62,17 @@ def get_post(id: int):
         # flash("Comentario creado", category="success")
         return redirect(url_for("posts.get_post", id=id))
 
+    query = post.comments.filter_by(parent_id=None).order_by(Comment.created_at.desc())
     page = request.args.get("page", 1, type=int)
-    pagination = (
-        post.comments.filter_by(parent_id=None)
-        .order_by(Comment.created_at.desc())
-        .paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=True)
-    )
+    per_page = settings.POSTS_PER_PAGE
+    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
-    comments = pagination.items
     post.add_view(current_user)
     return render_template(
         "post.html",
         form=form,
         post=post,
         username=post.author.username,
-        comments=comments,
         pagination=pagination,
     )
 
@@ -85,9 +81,7 @@ def get_post(id: int):
 @login_required
 def create_post():
     form = CreatePostForm()
-    print(form.tags.data)
-    print(form.content.data)
-    print(form.title.data)
+
     if form.validate_on_submit():
         post = Post(
             title=form.title.data, content=form.content.data, author=current_user
@@ -109,32 +103,41 @@ def create_post():
 @posts_bp.route("/edit/<post_id>", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id: int):
-    post = Post.query.filter_by(id=post_id).first_or_404()
+    post = db.get_or_404(Post, post_id)
+
     if current_user != post.author and not current_user.is_admin():
         abort(404)
+
     form = EditPostForm()
+
     if form.validate_on_submit():
         post.title = form.title.data
         post.content = form.content.data
         post_tags = PostTag.query.filter_by(post_id=post.id).all()
+        post_tags = db.session.execute(db.select(PostTag).filter_by(post_id=post_id)).scalars()
+
         for tag in post_tags:
             db.session.delete(tag)
         for tag in form.tags.data:
             post_tag = PostTag(post_id=post.id, tag_id=tag)
             db.session.add(post_tag)
+
         db.session.commit()
+
         flash("Post actualizado", category="success")
         return redirect(url_for("posts.get_post", id=post_id))
+
     form.title.data = post.title
     form.content.data = post.content
     form.tags.data = [tag.tag_id for tag in post.tags]
+
     return render_template("edit_post.html", form=form, post_id=post_id)
 
 
 @posts_bp.route("/delete/<id>", methods=["GET", "POST"])
 @login_required
 def delete_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if current_user != post.author and not current_user.is_admin():
         abort(404)
     db.session.delete(post)
@@ -178,34 +181,31 @@ def moderate():
 @login_required
 @permission_required(Permission.MODERATE)
 def moderate_comment():
+    query = db.select(Comment).order_by(Comment.created_at.desc())
     page = request.args.get("page", 1, type=int)
-    pagination = Comment.query.order_by(Comment.created_at.desc()).paginate(
-        page, settings.POSTS_PER_PAGE, error_out=True
-    )
-    comments = pagination.items
+    per_page = settings.POSTS_PER_PAGE
+    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+
     return render_template(
-        "moderate_comment.html", comments=comments, pagination=pagination
+        "moderate_comment.html", pagination=pagination
     )
 
 
 @posts_bp.route("/moderate/post", methods=["GET", "POST"])
 @login_required
 @permission_required(Permission.MODERATE)
-def moderate_post():
+def moderate_post():    
+    query = db.select(Post).join(Report, Report.post_id == Post.id).order_by(Post.created_at.desc())
     page = request.args.get("page", 1, type=int)
-    pagination = (
-        Post.query.join(Report, Report.post_id == Post.id)
-        .order_by(Post.created_at.desc())
-        .paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=True)
-    )
-    posts = pagination.items
-    return render_template("moderate_post.html", posts=posts, pagination=pagination)
+    per_page = settings.POSTS_PER_PAGE
+    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+    return render_template("moderate_post.html", pagination=pagination)
 
 
 @posts_bp.route("/moderate/post/enable_disable/<id>", methods=["GET"])
 @login_required
 def enable_disable_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if post.is_disabled():
         post.enable()
         return jsonify({"disable": False, "icon": "bi bi-star-fill"})
@@ -218,7 +218,7 @@ def enable_disable_post(id: int):
 @login_required
 @permission_required(Permission.MODERATE)
 def post_enable(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     post.disabled = False
     db.session.commit()
     page = request.args.get("page", 1, type=int)
@@ -230,7 +230,7 @@ def post_enable(id: int):
 @login_required
 @permission_required(Permission.MODERATE)
 def post_disable(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     post.disabled = True
     db.session.commit()
     page = request.args.get("page", 1, type=int)
@@ -242,7 +242,7 @@ def post_disable(id: int):
 @login_required
 @permission_required(Permission.MODERATE)
 def moderate_comment_disable(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment = db.get_or_404(Comment, id)
     if comment.disabled:
         comment.enable()
         return jsonify(
@@ -289,7 +289,7 @@ def moderate_comment_disable(id: int):
 @posts_bp.route("/like_post/<id>", methods=["GET"])
 @login_required
 def like_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if post.is_like(current_user):
         post.unlike(current_user)
         return jsonify({"likes": post.likes.count(), "icon": "bi bi-star"})
@@ -310,7 +310,7 @@ def like_post(id: int):
 @posts_bp.route("/favorite_post/<id>", methods=["GET"])
 @login_required
 def favorite_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if post.is_favorite(current_user):
         post.unfavorite(current_user)
         return jsonify({"favorite": False, "icon": "bi bi-bookmark"})
@@ -340,7 +340,7 @@ def favorite_post(id: int):
 @posts_bp.route("/report_post/<id>", methods=["GET"])
 @login_required
 def report_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if post.is_report(current_user):
         post.delete_report(current_user)
         return jsonify({"report": False, "icon": "bi bi-flag"})
@@ -370,7 +370,7 @@ def report_post(id: int):
 @posts_bp.route("/reply_comment/<id>", methods=["POST"])
 @login_required
 def reply_comment(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment = db.get_or_404(Comment, id)
     if request.method == "POST":
         comment = Comment(
             content=request.form["comment"],
@@ -389,7 +389,7 @@ def reply_comment(id: int):
 @posts_bp.route("/post/close/<id>", methods=["GET", "POST"])
 @login_required
 def close_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if post.author == current_user or current_user.is_admin():
         post.close()
         # flash("Post cerrado", category="success")
@@ -400,7 +400,7 @@ def close_post(id: int):
 @posts_bp.route("/post/open/<id>", methods=["GET", "POST"])
 @login_required
 def open_post(id: int):
-    post = Post.query.filter_by(id=id).first_or_404()
+    post = db.get_or_404(Post, id)
     if post.author == current_user or current_user.is_admin():
         post.open()
         # flash("Post abierto", category="success")
@@ -411,7 +411,7 @@ def open_post(id: int):
 @posts_bp.route("/report_comment/<id>", methods=["GET"])
 @login_required
 def report_comment(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment = db.get_or_404(Comment, id)
     if comment.is_report(current_user):
         comment.delete_report(current_user)
         return jsonify({"reports": comment.reports.count(), "icon": "bi bi-flag"})
@@ -441,7 +441,7 @@ def report_comment(id: int):
 @posts_bp.route("/like_comment/<id>", methods=["GET"])
 @login_required
 def like_comment(id: int):
-    comment = Comment.query.filter_by(id=id).first_or_404()
+    comment = db.get_or_404(Comment, id)
     if comment.is_like(current_user):
         comment.unlike(current_user)
         return jsonify({"likes": comment.likes.count(), "icon": "bi bi-star"})

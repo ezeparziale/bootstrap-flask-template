@@ -160,7 +160,7 @@
 
         <br>
         
-        {% if comments %}
+        {% if pagination.items %}
             <div class="nav nav-pills">
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page"><i class="bi bi-chat-fill"></i> Comentarios</a>
@@ -170,7 +170,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col">
-                            {% for comment in comments %}
+                            {% for comment in pagination %}
                                 <div class="d-flex flex-start mt-2">
                                     {{ macros.print_avatar_comment(comment, 40)}}
                                     <div class="flex-grow-1 flex-shrink-1">

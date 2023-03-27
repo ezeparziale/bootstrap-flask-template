@@ -3,7 +3,7 @@ from wtforms import SelectMultipleField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Length
 
 from ...models import Tag
-
+from app import db
 
 class PostViewForm(FlaskForm):
     title = StringField(
@@ -18,7 +18,7 @@ class PostForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.tags.choices = [(tag.id, tag.name) for tag in Tag.query.all()]
+        self.tags.choices = [(tag.id, tag.name) for tag in db.session.execute(db.select(Tag)).scalars()]
 
     title = StringField(
         label="Titulo", validators=[DataRequired(), Length(min=5, max=40)]

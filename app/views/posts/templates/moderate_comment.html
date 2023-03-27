@@ -17,7 +17,7 @@
 
         <h2>Moderar Comentarios</h2>
 
-        {% for comment in comments %}
+        {% for comment in pagination %}
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex w-100 justify-content-between">
@@ -27,9 +27,9 @@
                         <p class="mb-1">{{ comment.content }}</p>
 
                         {% if comment.disabled %}
-                            <a class="btn btn-success" href="{{url_for('posts.comment_enable', id=comment.id, page=pagination.page)}}" role="button">Habilitar</a>
+                            <a class="btn btn-success" href="{{url_for('posts.moderate_comment_disable', id=comment.id, page=pagination.page)}}" role="button">Habilitar</a>
                         {% else %}
-                            <a class="btn btn-danger" href="{{url_for('posts.comment_disable', id=comment.id, page=pagination.page)}}" role="button">Deshabilitar</a>
+                            <a class="btn btn-danger" href="{{url_for('posts.moderate_comment_disable', id=comment.id, page=pagination.page)}}" role="button">Deshabilitar</a>
                         {% endif %}
                     </div>
                 </div>
