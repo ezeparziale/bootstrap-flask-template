@@ -37,7 +37,7 @@
                 <a class="mt-3 ms-3" href="{{ url_for('user.user', username=post.author.username) }}">
                     <img class="rounded-circle"
                         src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" alt="avatar" width="40"
-                        height="40" />
+                        height="40" data-toggle="tooltip" data-placement="top" title="{{ username }}" />
                 </a>
                 <div class="card-body">
                     <div class="row">
@@ -135,7 +135,7 @@
                         <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
                             <img class="rounded-circle"
                                 src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar" width="40"
-                                height="40" />
+                                height="40" data-toggle="tooltip" data-placement="top" title="{{ username }}"/>
                         </a>    
                         <div class="form-outline w-100 me-3">
                             <fieldset>
