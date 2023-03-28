@@ -39,6 +39,7 @@ def create_user():
             email=form.email.data,
             confirmed=form.confirmed.data,
             password=encrypted_password,
+            image_file=User.generate_avatar(),
         )
         user.save()
         return redirect(url_for("admin.users.user_view"))
