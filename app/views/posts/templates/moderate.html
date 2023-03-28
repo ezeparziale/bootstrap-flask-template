@@ -1,27 +1,44 @@
 {% extends "base.html" %}
-{% import "macro_kpi.html" as graph %}
-
 
 {% block navbar %}
     {% include "navbar.html" %}
 {% endblock %}
 
-{% block title %} Moderar Post {% endblock %}
 
 {% block content %}
 
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Moderar</li>
-        </ol>
-    </nav>
+    <div class="container">
 
-    <div class="col-12 col-sm-6 col-xl-4 mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Moderate</li>
+            </ol>
+        </nav>
+
+        <h3>{% block title %} Moderate {% endblock %}</h3>
+
         <div class="row">
-            {{ graph.simple_kpi("Comentarios", 123, "bi bi-bar-chart-fill") }}
-            {{ graph.kpi("Post", 123, 405, "Ultimo mes", "bi bi-bar-chart-fill", "bi bi-arrow-up-square-fill") }}
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Post</h5>
+                  <p class="card-text">All post reported.</p>
+                  <a href="{{ url_for('posts.moderate_post') }}" class="btn btn-primary" role="button">Go to post moderate</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Comments</h5>
+                  <p class="card-text">All comments reported.</p>
+                  <a href="{{ url_for('posts.moderate_comment') }}" class="btn btn-primary" role="button">Go to comments moderate</a>
+                </div>
+              </div>
+            </div>
         </div>
+
     </div>
 
 {% endblock %}
