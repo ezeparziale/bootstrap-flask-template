@@ -9,7 +9,6 @@ from app.models import Tag, User
 
 class CreateTagForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(min=2, max=30)])
-
     submit = SubmitField("Create")
 
     def validate_name(self, field):
@@ -25,18 +24,13 @@ class CreateTagForm(FlaskForm):
 class EditTagForm(FlaskForm):
     id = HiddenField()
     name = StringField("Name", validators=[DataRequired(), Length(min=2, max=30)])
-
     submit = SubmitField("Update")
 
-    def validate(self, extra_validators=None):
-        rv = FlaskForm.validate(self)
-        if not rv:
-            return False
-
+    def validate_name(self, field):
         check_tag_exists = (
             db.session.execute(
                 db.select(Tag).filter(
-                    and_(Tag.name == self.name.data, Tag.id != self.id.data)
+                    and_(Tag.name == field.data, Tag.id != self.id.data)
                 )
             )
             .scalars()
@@ -44,10 +38,7 @@ class EditTagForm(FlaskForm):
         )
 
         if check_tag_exists:
-            self.name.errors.append(f"Tag: '{self.name.data}' name already exists.")
-            return False
-
-        return True
+            raise ValidationError(f"Tag '{field.data}' already exists.")
 
 
 class EditUserForm(FlaskForm):
@@ -59,15 +50,11 @@ class EditUserForm(FlaskForm):
     confirmed = BooleanField("Confirmed")
     submit = SubmitField("Update")
 
-    def validate(self, extra_validators=None):
-        rv = FlaskForm.validate(self)
-        if not rv:
-            return False
-
+    def validate_username(self, field):
         check_username_exists = (
             db.session.execute(
                 db.select(User).filter(
-                    and_(User.username == self.username.data, User.id != self.id.data)
+                    and_(User.username == field.data, User.id != self.id.data)
                 )
             )
             .scalars()
@@ -75,15 +62,13 @@ class EditUserForm(FlaskForm):
         )
 
         if check_username_exists:
-            self.username.errors.append(
-                f"Username '{self.username.data}' already exists."
-            )
-            return False
+            raise ValidationError(f"Username '{field.data}' already exists.")
 
+    def validate_email(self, field):
         check_email_exists = (
             db.session.execute(
                 db.select(User).filter(
-                    and_(User.email == self.email.data, User.id != self.id.data)
+                    and_(User.email == field.data, User.id != self.id.data)
                 )
             )
             .scalars()
@@ -91,10 +76,7 @@ class EditUserForm(FlaskForm):
         )
 
         if check_email_exists:
-            self.email.errors.append(f"Email '{self.email.data}' already exists.")
-            return False
-
-        return True
+            raise ValidationError(f"Email '{field.data}' already exists.")
 
 
 class CreateUserForm(FlaskForm):
@@ -103,40 +85,29 @@ class CreateUserForm(FlaskForm):
     )
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField(
-        label="PASSWORD", validators=[DataRequired(), Length(min=6, max=16)]
+        label="Password", validators=[DataRequired(), Length(min=6, max=16)]
     )
     confirmed = BooleanField("Confirmed")
     submit = SubmitField("Create")
 
-    def validate(self, extra_validators=None):
-        rv = FlaskForm.validate(self)
-        if not rv:
-            return False
-
+    def validate_username(self, field):
         check_username_exists = (
             db.session.execute(
-                db.select(User).filter(and_(User.username == self.username.data))
+                db.select(User).filter(and_(User.username == field.data))
             )
             .scalars()
             .first()
         )
 
         if check_username_exists:
-            self.username.errors.append(
-                f"Username '{self.username.data}' already exists."
-            )
-            return False
+            raise ValidationError(f"Username '{field.data}' already exists.")
 
+    def validate_email(self, field):
         check_email_exists = (
-            db.session.execute(
-                db.select(User).filter(and_(User.email == self.email.data))
-            )
+            db.session.execute(db.select(User).filter(and_(User.email == field.data)))
             .scalars()
             .first()
         )
 
         if check_email_exists:
-            self.email.errors.append(f"Email '{self.email.data}' already exists.")
-            return False
-
-        return True
+            raise ValidationError(f"Email '{field.data}' already exists.")
