@@ -42,11 +42,14 @@ def posts():
 
     page = request.args.get("page", 1, type=int)
     per_page = settings.POSTS_PER_PAGE
-    pagination = db.paginate(query.order_by(Post.created_at.desc()), page=page, per_page=per_page, error_out=False)
-
-    return render_template(
-        "posts.html", pagination=pagination, view_mode=view_mode
+    pagination = db.paginate(
+        query.order_by(Post.created_at.desc()),
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
+
+    return render_template("posts.html", pagination=pagination, view_mode=view_mode)
 
 
 @posts_bp.route("/<id>", methods=["GET", "POST"])
@@ -114,7 +117,9 @@ def edit_post(post_id: int):
         post.title = form.title.data
         post.content = form.content.data
         post_tags = PostTag.query.filter_by(post_id=post.id).all()
-        post_tags = db.session.execute(db.select(PostTag).filter_by(post_id=post_id)).scalars()
+        post_tags = db.session.execute(
+            db.select(PostTag).filter_by(post_id=post_id)
+        ).scalars()
 
         for tag in post_tags:
             db.session.delete(tag)
@@ -186,16 +191,18 @@ def moderate_comment():
     per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
-    return render_template(
-        "moderate_comment.html", pagination=pagination
-    )
+    return render_template("moderate_comment.html", pagination=pagination)
 
 
 @posts_bp.route("/moderate/post", methods=["GET", "POST"])
 @login_required
 @permission_required(Permission.MODERATE)
-def moderate_post():    
-    query = db.select(Post).join(Report, Report.post_id == Post.id).order_by(Post.created_at.desc())
+def moderate_post():
+    query = (
+        db.select(Post)
+        .join(Report, Report.post_id == Post.id)
+        .order_by(Post.created_at.desc())
+    )
     page = request.args.get("page", 1, type=int)
     per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
