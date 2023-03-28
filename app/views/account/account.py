@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, fresh_login_required, login_required
 
 from app import app, db
@@ -9,13 +9,19 @@ from ...models import UserDetail
 from .forms import AccountInfoForm, AccountUpdateForm
 
 account_bp = Blueprint(
-    "account", __name__, url_prefix="/account", template_folder="templates"
+    "account",
+    __name__,
+    url_prefix="/account",
+    template_folder="templates",
+    static_folder="static",
 )
 
 
 def save_image(picture_file):
     picture_name = picture_file.filename
-    picture_path = os.path.join(app.root_path, "static/img/profiles", picture_name)
+    picture_path = os.path.join(
+        app.root_path, "static/img/avatars/profiles", picture_name
+    )
     picture_file.save(picture_path)
     return picture_name
 
@@ -44,7 +50,7 @@ def edit_account():
     if form.validate_on_submit():
         if form.picture.data:
             image_file = save_image(form.picture.data)
-            current_user.image_file = image_file
+            current_user.image_file = "profiles/" + image_file
 
         current_user.username = form.username.data
         current_user.email = form.email.data
@@ -72,3 +78,17 @@ def edit_account():
             form.lastname.data = current_user.details.lastname
     image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
     return render_template("edit_account.html", form=form, image_url=image_url)
+
+
+@account_bp.route("/reset_avatar")
+@login_required
+def reset_avatar():
+    current_user.reset_avatar()
+    return jsonify(
+        {
+            "status": True,
+            "image_file": url_for(
+                "static", filename="img/avatars/" + current_user.image_file
+            ),
+        }
+    )

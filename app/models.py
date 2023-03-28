@@ -91,7 +91,11 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def generate_avatar():
-        return f"avatar{random.randint(0,14)}.png"
+        return f"avatar{random.randint(1,15)}.png"
+
+    def reset_avatar(self):
+        self.image_file = User.generate_avatar()
+        self.update()
 
     # def send_message(self, recipient, message):
     #     msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
