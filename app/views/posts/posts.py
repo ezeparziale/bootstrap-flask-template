@@ -221,9 +221,8 @@ def post_enable(id: int):
     post = db.get_or_404(Post, id)
     post.disabled = False
     db.session.commit()
-    page = request.args.get("page", 1, type=int)
     flash("Post habilitado", category="success")
-    return redirect(url_for("posts.moderate_post", page=page))
+    return redirect(url_for("posts.get_post", id=id))
 
 
 @posts_bp.route("/moderate/post/disable/<id>", methods=["GET", "POST"])
@@ -233,9 +232,8 @@ def post_disable(id: int):
     post = db.get_or_404(Post, id)
     post.disabled = True
     db.session.commit()
-    page = request.args.get("page", 1, type=int)
     flash("Post deshabilitado", category="success")
-    return redirect(url_for("posts.moderate_post", page=page))
+    return redirect(url_for("posts.get_post", id=id))
 
 
 @posts_bp.route("/moderate/comment/disable/<id>", methods=["GET"])
