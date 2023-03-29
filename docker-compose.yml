@@ -10,9 +10,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=flaskuser
-      - POSTGRES_PASSWORD=flaskpassword
-      - POSTGRES_DB=flaskdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
     volumes:
       - postgres-db:/var/lib/postgresql/data
     networks:
