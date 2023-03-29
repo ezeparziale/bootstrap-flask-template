@@ -1,13 +1,15 @@
 import json
 import random
 from datetime import datetime, timedelta, timezone
+from typing import List
 
 import jwt
 from flask import current_app, redirect, request, url_for
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import BOOLEAN, Column, ForeignKey, Integer, String, Text
+from sqlalchemy import BOOLEAN, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.expression import text
-from sqlalchemy.sql.sqltypes import TIMESTAMP, DateTime
+from sqlalchemy.sql.sqltypes import TIMESTAMP
 
 from app import app, db, login_manager
 
@@ -24,70 +26,100 @@ def unauthorized():
 
 class Follow(db.Model):
     __tablename__ = "follows"
-    follower_id = Column(
+
+    follower_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    followed_id = Column(
+    followed_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    followed_at = Column(
+    followed_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
 
     def __repr__(self) -> str:
-        return f"{self.user_id} {self.follower_id}"
+        return f"Follow(follower_id={self.user_id}, followed_id={self.follower_id}, followed_at={self.followed_at}"
 
 
 class User(db.Model, UserMixin):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(40), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
-    image_file = Column(String(), nullable=False, default="default.jpg")
-    password = Column(String(60), nullable=False)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    image_file: Mapped[str] = mapped_column(
+        String(), nullable=False, default="default.jpg"
+    )
+    password: Mapped[str] = mapped_column(String(60), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    confirmed = Column(BOOLEAN, default=False)
-    last_seen = Column(
+    confirmed: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    last_seen: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    details = db.relationship("UserDetail", backref="user", lazy=True, uselist=False)
-    posts = db.relationship("Post", backref="author", lazy="dynamic")
-    followed = db.relationship(
+    details: Mapped["UserDetail"] = relationship(
+        backref="user", lazy=True, uselist=False
+    )
+    posts: Mapped[List["Post"]] = relationship("Post", backref="author", lazy="dynamic")
+    followed: Mapped[List["Follow"]] = relationship(
         "Follow",
         foreign_keys=[Follow.follower_id],
         backref=db.backref("follower", lazy="joined"),
         lazy="dynamic",
         cascade="all, delete-orphan",
     )
-    followers = db.relationship(
+    followers: Mapped[List["Follow"]] = relationship(
         "Follow",
         foreign_keys=[Follow.followed_id],
         backref=db.backref("followed", lazy="joined"),
         lazy="dynamic",
         cascade="all, delete-orphan",
     )
-    comments = db.relationship("Comment", backref="author", lazy="dynamic")
-    rol_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
-    likes = db.relationship("Like", backref="user", lazy="dynamic")
-    favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
-    # messages_sent = db.relationship("Message", foreign_keys="Message.sender_id", backref="author", lazy="dynamic")
-    # messages_received = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient", lazy="dynamic")
-    last_message_read_time = db.Column(TIMESTAMP)
-    notifications = db.relationship("Notification", backref="user", lazy="dynamic")
-    views = db.relationship("View", backref="user", lazy="dynamic")
-    report = db.relationship("Report", backref="user", lazy="dynamic")
-    comments_reported = db.relationship("CommentReport", backref="user", lazy="dynamic")
-    comments_liked = db.relationship("CommentLike", backref="user", lazy="dynamic")
-    participant = db.relationship("Participant", backref="user", lazy="dynamic")
-    room_messages = db.relationship("RoomMessage", backref="author", lazy="dynamic")
+    comments: Mapped[List["Comment"]] = relationship(
+        "Comment", backref="author", lazy="dynamic"
+    )
+    rol_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False
+    )
+    likes: Mapped[List["Like"]] = relationship("Like", backref="user", lazy="dynamic")
+    favorites: Mapped[List["Favorite"]] = relationship(
+        "Favorite", backref="user", lazy="dynamic"
+    )
+    last_message_read_time: Mapped[datetime] = mapped_column(TIMESTAMP)
+    notifications: Mapped[List["Notification"]] = relationship(
+        "Notification", backref="user", lazy="dynamic"
+    )
+    views: Mapped[List["View"]] = relationship("View", backref="user", lazy="dynamic")
+    report: Mapped[List["Report"]] = relationship(
+        "Report", backref="user", lazy="dynamic"
+    )
+    comments_reported: Mapped[List["CommentReport"]] = relationship(
+        "CommentReport", backref="user", lazy="dynamic"
+    )
+    comments_liked: Mapped[List["CommentLike"]] = relationship(
+        "CommentLike", backref="user", lazy="dynamic"
+    )
+    participant: Mapped[List["Participant"]] = relationship(
+        "Participant", backref="user", lazy="dynamic"
+    )
+    room_messages: Mapped[List["RoomMessage"]] = relationship(
+        "RoomMessage", backref="author", lazy="dynamic"
+    )
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.role is None:
+            self.role = Role.query.filter_by(default=True).first()
+
+    def __repr__(self) -> str:
+        return f"User(username={self.username}, email={self.email}, created_at={self.created_at})"
 
     @staticmethod
     def generate_avatar():
@@ -96,19 +128,6 @@ class User(db.Model, UserMixin):
     def reset_avatar(self):
         self.image_file = User.generate_avatar()
         self.update()
-
-    # def send_message(self, recipient, message):
-    #     msg = Message(sender_id=self.id, recipient_id=recipient.id, message=message)
-    #     db.session.add(msg)
-    #     db.session.commit()
-
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
-
-    def __repr__(self) -> str:
-        return f"{self.username} : {self.email} : {self.created_at}"
 
     def ping(self):
         self.last_seen = datetime.utcnow()
@@ -158,7 +177,7 @@ class User(db.Model, UserMixin):
             user_id = decode.get("user_id")
         except:
             return None
-        return User.query.get(user_id)
+        return db.session.execute(db.select(User).filter_by(id=user_id)).scalar_one()
 
     def follow(self, user):
         if not self.is_following(user):
@@ -303,10 +322,11 @@ login_manager.anonymous_user = AnonymousUser
 
 class UserDetail(db.Model):
     __tablename__ = "user_details"
-    id = Column(Integer, primary_key=True)
-    firstname = Column(String(60), unique=True, nullable=False)
-    lastname = Column(String(60), unique=True, nullable=False)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    firstname: Mapped[str] = mapped_column(String(60), unique=True, nullable=False)
+    lastname: Mapped[str] = mapped_column(String(60), unique=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
@@ -316,37 +336,39 @@ class UserDetail(db.Model):
 
 class PostTag(db.Model):
     __tablename__ = "post_tags"
-    post_id = Column(
+
+    post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True
     )
-    tag_id = Column(
+    tag_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True
     )
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} post_id={self.post_id} tag_id={self.tag_id}"
+        return f"PostTag(post_id={self.post_id}, tag_id={self.tag_id}, created_at={self.created_at})"
 
 
 class Tag(db.Model):
     __tablename__ = "tags"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(128), nullable=False)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    posts = db.relationship(
+    posts: Mapped[List["PostTag"]] = relationship(
         "PostTag", backref=db.backref("tag", remote_side=[id]), lazy="dynamic"
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} name={self.name}"
+        return f"Tag(id={self.id}, name={self.name}, created_at={self.created_at})"
 
     def save(self):
         db.session.add(self)
@@ -370,40 +392,44 @@ class Tag(db.Model):
 
 class Post(db.Model):
     __tablename__ = "posts"
-    id = Column(Integer, primary_key=True)
-    title = Column(String(60), nullable=False)
-    content = Column(Text, nullable=False)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(60), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    author_id = Column(
+    author_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    comments = db.relationship(
+    comments: Mapped[List["Comment"]] = relationship(
         "Comment", backref="post", cascade="all, delete-orphan", lazy="dynamic"
     )
-    likes = db.relationship(
+    likes: Mapped[List["Like"]] = relationship(
         "Like", backref="post", cascade="all, delete-orphan", lazy="dynamic"
     )
-    favorites = db.relationship(
+    favorites: Mapped[List["Favorite"]] = relationship(
         "Favorite", backref="post", cascade="all, delete-orphan", lazy="dynamic"
     )
-    views = db.relationship(
+    views: Mapped[List["View"]] = relationship(
         "View", backref="post", cascade="all, delete-orphan", lazy="dynamic"
     )
-    reports = db.relationship(
+    reports: Mapped[List["Report"]] = relationship(
         "Report", backref="post", cascade="all, delete-orphan", lazy="dynamic"
     )
-    closed = Column(BOOLEAN, default=False)
-    disabled = Column(BOOLEAN, default=False)
-    tags = db.relationship(
+    closed: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    disabled: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    tags: Mapped[List["PostTag"]] = relationship(
         "PostTag",
         backref=db.backref("post", remote_side=[id]),
         cascade="all, delete-orphan",
         lazy="dynamic",
     )
+
+    def __repr__(self) -> str:
+        return f"Post(id={self.id}, title={self.title}, content={self.content}, created_at={self.created_at}, author_id={self.author_id})"
 
     def add_visit(self):
         self.visits += 1
@@ -492,63 +518,66 @@ class Post(db.Model):
 
 class Like(db.Model):
     __tablename__ = "likes"
-    id = Column(Integer, primary_key=True)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    user_id = Column(
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    post_id = Column(
+    post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
 
 
 class Favorite(db.Model):
     __tablename__ = "favorites"
-    id = Column(Integer, primary_key=True)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    user_id = Column(
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    post_id = Column(
+    post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
 
 
 class Comment(db.Model):
     __tablename__ = "comments"
-    id = Column(Integer, primary_key=True)
-    content = Column(Text, nullable=False)
-    disabled = Column(BOOLEAN, default=False)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    disabled: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    post_id = Column(
+    post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
-    author_id = Column(
+    author_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    parent_id = Column(
+    parent_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=True
     )
-    childrens = db.relationship(
+    childrens: Mapped[List["Comment"]] = relationship(
         "Comment", backref=db.backref("parent", remote_side=[id])
     )
-    level = Column(Integer, default=0)
-    reports = db.relationship(
+    level: Mapped[int] = mapped_column(Integer, default=0)
+    reports: Mapped[List["CommentReport"]] = relationship(
         "CommentReport", backref="comment", cascade="all, delete-orphan", lazy="dynamic"
     )
-    likes = db.relationship(
+    likes: Mapped[List["CommentLike"]] = relationship(
         "CommentLike", backref="comment", cascade="all, delete-orphan", lazy="dynamic"
     )
 
@@ -607,11 +636,12 @@ class Comment(db.Model):
 
 class Role(db.Model):
     __tablename__ = "roles"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(40), unique=True, nullable=False)
-    default = Column(BOOLEAN, default=False, index=True)
-    permissions = Column(Integer, nullable=False)
-    users = db.relationship("User", backref="role", lazy="dynamic")
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
+    default: Mapped[bool] = mapped_column(BOOLEAN, default=False, index=True)
+    permissions: Mapped[int] = mapped_column(Integer, nullable=False)
+    users: Mapped[List["User"]] = relationship("User", backref="role", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(Role, self).__init__(**kwargs)
@@ -679,46 +709,20 @@ def inject_permission():
     return dict(Permission=Permission)
 
 
-# class Message(db.Model):
-#     __tablename__ = "messages"
-#     id = Column(Integer, primary_key=True)
-#     message = Column(Text, nullable=False)
-#     created_at = Column(TIMESTAMP(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
-#     sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-#     recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-#     read = Column(BOOLEAN, default=False)
-#     parent_id = Column(Integer, ForeignKey("messages.id", ondelete="CASCADE"), nullable=True)
-#     childrens = db.relationship("Message", backref=db.backref("parent", remote_side=[id]), lazy="dynamic")
-#     level = Column(Integer, default=0)
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         if self.parent:
-#             self.level = self.parent.level + 1
-
-#     def reply(self, message, sender_id, recipient_id):
-#         if self.parent:
-#             raise Exception("This message is already a reply")
-
-#         reply = Message(message=message, parent=self, sender_id=sender_id, recipient_id=recipient_id)
-#         reply.level = self.level + 1
-#         db.session.add(reply)
-#         db.session.commit()
-
-
 class Notification(db.Model):
     __tablename__ = "notifications"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(128), nullable=False)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    timestamp = Column(
+    timestamp: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    payload_json = Column(Text, nullable=False)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
 
     def get_data(self):
         return json.loads(str(self.payload_json))
@@ -726,14 +730,15 @@ class Notification(db.Model):
 
 class View(db.Model):
     __tablename__ = "views"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    post_id = Column(
+    post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
@@ -742,14 +747,15 @@ class View(db.Model):
 
 class Report(db.Model):
     __tablename__ = "reports"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    post_id = Column(
+    post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
@@ -758,14 +764,15 @@ class Report(db.Model):
 
 class CommentReport(db.Model):
     __tablename__ = "comment_reports"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    comment_id = Column(
+    comment_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
@@ -777,14 +784,15 @@ class CommentReport(db.Model):
 
 class CommentLike(db.Model):
     __tablename__ = "comment_likes"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    comment_id = Column(
+    comment_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
@@ -796,24 +804,25 @@ class CommentLike(db.Model):
 
 class Participant(db.Model):
     __tablename__ = "participants"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    room_id = Column(
+    room_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("rooms.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    last_access_at = Column(
+    last_access_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    last_message_at = Column(
+    last_message_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
@@ -825,20 +834,21 @@ class Participant(db.Model):
 
 class Room(db.Model):
     __tablename__ = "rooms"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(128), nullable=False)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[int] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    participants = db.relationship(
+    participants: Mapped[List["Participant"]] = relationship(
         "Participant", backref=db.backref("room", remote_side=[id]), lazy="dynamic"
     )
-    messages = db.relationship(
+    messages: Mapped[List["RoomMessage"]] = relationship(
         "RoomMessage", backref=db.backref("room", remote_side=[id]), lazy="dynamic"
     )
-    last_message_at = Column(
+    last_message_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
@@ -850,17 +860,18 @@ class Room(db.Model):
 
 class RoomMessage(db.Model):
     __tablename__ = "room_messages"
-    id = Column(Integer, primary_key=True)
-    message = Column(Text, nullable=False)
-    created_at = Column(
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    user_id = Column(
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    room_id = Column(
+    room_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("rooms.id", ondelete="CASCADE"), nullable=False
     )
 
