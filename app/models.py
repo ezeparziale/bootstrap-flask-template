@@ -40,7 +40,7 @@ class Follow(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Follow(follower_id={self.user_id}, followed_id={self.follower_id}, followed_at={self.followed_at}"
+        return f"Follow(follower_id={self.user_id}, followed_id={self.follower_id}, followed_at={self.followed_at})"
 
 
 class User(db.Model, UserMixin):
@@ -331,7 +331,7 @@ class UserDetail(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"{self.firstname} {self.lastname}"
+        return f"UserDetail(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, user_id={self.user_id})"
 
 
 class PostTag(db.Model):
@@ -532,6 +532,9 @@ class Like(db.Model):
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
 
+    def __repr__(self) -> str:
+        return f"Like(id={self.id}, created_at={self.created_at}, user_id={self.user_id}, post_id={self.post_id})"
+
 
 class Favorite(db.Model):
     __tablename__ = "favorites"
@@ -548,6 +551,9 @@ class Favorite(db.Model):
     post_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False
     )
+
+    def __repr__(self) -> str:
+        return f"Favorite(id={self.id}, created_at={self.created_at}, user_id={self.user_id}, post_id={self.post_id})"
 
 
 class Comment(db.Model):
@@ -587,7 +593,7 @@ class Comment(db.Model):
             self.level = self.parent.level + 1
 
     def __repr__(self) -> str:
-        return f"id={self.id} content={self.content}"
+        return f"Comment(id={self.id}, content={self.content}, disabled={self.disabled}, created_at={self.created_at}, post_id={self.post_id}, author_id={self.author_id}, parent_id={self.parent_id})"
 
     def add_report(self, user):
         if not self.is_report(user):
@@ -663,7 +669,7 @@ class Role(db.Model):
         return self.permissions & perm == perm
 
     def __repr__(self) -> str:
-        return f"{self.name}"
+        return f"Role(id={self.id}, name={self.name}, default={self.default}, permissions={self.permissions})"
 
     @staticmethod
     def insert_roles():
@@ -727,6 +733,9 @@ class Notification(db.Model):
     def get_data(self):
         return json.loads(str(self.payload_json))
 
+    def __repr__(self) -> str:
+        return f"Notification(id={self.id}, name={self.name}, post_id={self.post_id}, timestamp={self.timestamp}, payload_json={self.payload_json})"
+
 
 class View(db.Model):
     __tablename__ = "views"
@@ -744,6 +753,9 @@ class View(db.Model):
         nullable=False,
     )
 
+    def __repr__(self) -> str:
+        return f"View(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})"
+
 
 class Report(db.Model):
     __tablename__ = "reports"
@@ -760,6 +772,9 @@ class Report(db.Model):
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
+
+    def __repr__(self) -> str:
+        return f"Report(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})"
 
 
 class CommentReport(db.Model):
@@ -779,7 +794,7 @@ class CommentReport(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} user_id={self.user_id} comment_id={self.comment_id}"
+        return f"CommentReport(id={self.id}, user_id={self.user_id}, comment_id={self.comment_id}, created_at={self.created_at})"
 
 
 class CommentLike(db.Model):
@@ -799,7 +814,7 @@ class CommentLike(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} user_id={self.user_id} comment_id={self.comment_id}"
+        return f"CommentLike(id={self.id}, user_id={self.user_id}, comment_id={self.comment_id}, created_at={self.created_at})"
 
 
 class Participant(db.Model):
@@ -829,7 +844,7 @@ class Participant(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} user_id={self.user_id} room_id={self.room_id}"
+        return f"Participant(id={self.id}, user_id={self.user_id}, room_id={self.room_id}, created_at={self.created_at}, last_access_at={self.last_access_at}, last_message_at={self.last_message_at})"
 
 
 class Room(db.Model):
@@ -855,7 +870,7 @@ class Room(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} name={self.name}"
+        return f"Room(id={self.id},name={self.name}, created_at={self.created_at}, last_message_at={self.last_message_at}"
 
 
 class RoomMessage(db.Model):
@@ -876,4 +891,4 @@ class RoomMessage(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} message={self.message} user_id={self.user_id} room_id={self.room_id}"
+        return f"id={self.id} message={self.message}, created_at={self.created_at}, user_id={self.user_id} room_id={self.room_id}"
