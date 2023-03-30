@@ -1,8 +1,8 @@
-"""Init_db
+"""init_db
 
-Revision ID: fccc50649369
-Revises: 
-Create Date: 2022-09-08 20:40:09.283723
+Revision ID: 36bdf04c320c
+Revises:
+Create Date: 2023-03-29 21:50:30.293834
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "fccc50649369"
+revision = "36bdf04c320c"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +22,7 @@ def upgrade() -> None:
         "roles",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(length=40), nullable=False),
-        sa.Column("default", sa.BOOLEAN(), nullable=True),
+        sa.Column("default", sa.BOOLEAN(), nullable=False),
         sa.Column("permissions", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
@@ -71,7 +71,7 @@ def upgrade() -> None:
             server_default=sa.text("CURRENT_TIMESTAMP"),
             nullable=False,
         ),
-        sa.Column("confirmed", sa.BOOLEAN(), nullable=True),
+        sa.Column("confirmed", sa.BOOLEAN(), nullable=False),
         sa.Column(
             "last_seen",
             sa.TIMESTAMP(timezone=True),
@@ -153,8 +153,8 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("author_id", sa.Integer(), nullable=False),
-        sa.Column("closed", sa.BOOLEAN(), nullable=True),
-        sa.Column("disabled", sa.BOOLEAN(), nullable=True),
+        sa.Column("closed", sa.BOOLEAN(), nullable=False),
+        sa.Column("disabled", sa.BOOLEAN(), nullable=False),
         sa.ForeignKeyConstraint(["author_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -189,7 +189,7 @@ def upgrade() -> None:
         "comments",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("disabled", sa.BOOLEAN(), nullable=True),
+        sa.Column("disabled", sa.BOOLEAN(), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -199,7 +199,7 @@ def upgrade() -> None:
         sa.Column("post_id", sa.Integer(), nullable=False),
         sa.Column("author_id", sa.Integer(), nullable=False),
         sa.Column("parent_id", sa.Integer(), nullable=True),
-        sa.Column("level", sa.Integer(), nullable=True),
+        sa.Column("level", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["author_id"], ["users.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["parent_id"], ["comments.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["post_id"], ["posts.id"], ondelete="CASCADE"),
