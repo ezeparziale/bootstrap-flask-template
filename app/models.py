@@ -58,7 +58,7 @@ class User(db.Model, UserMixin):
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
-    confirmed: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    confirmed: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
     last_seen: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
@@ -92,7 +92,7 @@ class User(db.Model, UserMixin):
     favorites: Mapped[List["Favorite"]] = relationship(
         "Favorite", backref="user", lazy="dynamic"
     )
-    last_message_read_time: Mapped[datetime] = mapped_column(TIMESTAMP)
+    last_message_read_time: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True)
     notifications: Mapped[List["Notification"]] = relationship(
         "Notification", backref="user", lazy="dynamic"
     )
@@ -419,8 +419,8 @@ class Post(db.Model):
     reports: Mapped[List["Report"]] = relationship(
         "Report", backref="post", cascade="all, delete-orphan", lazy="dynamic"
     )
-    closed: Mapped[bool] = mapped_column(BOOLEAN, default=False)
-    disabled: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    closed: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
+    disabled: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
     tags: Mapped[List["PostTag"]] = relationship(
         "PostTag",
         backref=db.backref("post", remote_side=[id]),
@@ -561,7 +561,7 @@ class Comment(db.Model):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    disabled: Mapped[bool] = mapped_column(BOOLEAN, default=False)
+    disabled: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
@@ -579,7 +579,7 @@ class Comment(db.Model):
     childrens: Mapped[List["Comment"]] = relationship(
         "Comment", backref=db.backref("parent", remote_side=[id])
     )
-    level: Mapped[int] = mapped_column(Integer, default=0)
+    level: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     reports: Mapped[List["CommentReport"]] = relationship(
         "CommentReport", backref="comment", cascade="all, delete-orphan", lazy="dynamic"
     )
@@ -645,7 +645,7 @@ class Role(db.Model):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
-    default: Mapped[bool] = mapped_column(BOOLEAN, default=False, index=True)
+    default: Mapped[bool] = mapped_column(BOOLEAN, default=False, index=True, nullable=False)
     permissions: Mapped[int] = mapped_column(Integer, nullable=False)
     users: Mapped[List["User"]] = relationship("User", backref="role", lazy="dynamic")
 
