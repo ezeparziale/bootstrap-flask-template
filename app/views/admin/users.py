@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import func, or_
 
-from app import bcrypt, db
+from app import db
 from app.decorators import admin_required
 from app.models import User
 
@@ -31,14 +31,11 @@ def create_user():
     form = CreateUserForm()
 
     if form.validate_on_submit():
-        encrypted_password = bcrypt.generate_password_hash(form.password.data).decode(
-            "utf-8"
-        )
         user = User(
             username=form.username.data,
             email=form.email.data,
             confirmed=form.confirmed.data,
-            password=encrypted_password,
+            password_hash=User.generate_password_hash(form.password.data),
             image_file=User.generate_avatar(),
         )
         user.save()

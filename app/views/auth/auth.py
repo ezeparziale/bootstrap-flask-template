@@ -89,11 +89,10 @@ def register():
         return redirect(url_for("home.home_view"))
     form = RegistrationForm()
     if form.validate_on_submit():
-        encrypted_password = User.generate_password_hash(form.password.data)
         user = User(
             username=form.username.data,
             email=form.email.data,
-            password=encrypted_password,
+            password_hash=User.generate_password_hash(form.password.data),
             image_file=User.generate_avatar(),
         )
         user.save()
@@ -152,13 +151,18 @@ def reset_token(token):
         return redirect(url_for("auth.reset_password"))
 
     form = ResetPasswordForm()
+    print(form.data)
     if form.validate_on_submit():
-        encrypted_password = User.generate_password_hash(form.password.data)
-        user.password = encrypted_password
-        user.update()
-        flash("Password cambiado", category="success")
-        return redirect(url_for("auth.login"))
-
+        if user.verify_password_history(form.new_password.data):
+            flash(
+                "This password has been used before. Please choose a new one",
+                category="danger",
+            )
+        else:
+            user.set_password(form.new_password.data)
+            flash("Password cambiado", category="success")
+            return redirect(url_for("auth.login"))
+    print("eze")
     return render_template("auth/change_password.html", form=form)
 
 

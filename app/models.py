@@ -53,7 +53,7 @@ class User(db.Model, UserMixin):
     image_file: Mapped[str] = mapped_column(
         String(), nullable=False, default="default.jpg"
     )
-    password: Mapped[str] = mapped_column(String(60), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(60), nullable=False)
     blocked: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
     login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     last_login_attempt: Mapped[datetime] = mapped_column(
@@ -192,17 +192,28 @@ class User(db.Model, UserMixin):
         return db.session.execute(db.select(User).filter_by(id=user_id)).scalar_one()
 
     def check_password(self, password: str) -> bool:
-        return bcrypt.check_password_hash(self.password, password)
+        return bcrypt.check_password_hash(self.password_hash, password)
 
     def set_password(self, password: str) -> None:
-        password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
-        self.password = password_hash
+        self.password_hash = User.generate_password_hash(password)
+        self.update()
+        self.add_password_history()
+
+    def add_password_history(self) -> None:
         password_history = PasswordHistory(
             user_id=self.id,
-            password_hash=password_hash,
+            password_hash=self.password_hash,
         )
         db.session.add(password_history)
-        self.update()
+        db.session.commit()
+
+    def verify_password_history(self, password: str) -> bool:
+        for history in self.password_history.order_by(
+            PasswordHistory.created_at.desc()
+        ).limit(5):
+            if bcrypt.check_password_hash(history.password_hash, password):
+                return True
+        return False
 
     @staticmethod
     def generate_password_hash(password: str) -> str:
@@ -319,6 +330,7 @@ class User(db.Model, UserMixin):
     def save(self) -> None:
         db.session.add(self)
         db.session.commit()
+        self.add_password_history()
 
     def update(self) -> None:
         self.updated_at = datetime.utcnow()
@@ -366,14 +378,6 @@ class User(db.Model, UserMixin):
                 return True
         else:
             return False
-
-    def verify_password_history(self, password: str) -> bool:
-        for history in self.password_history.order_by(
-            PasswordHistory.created_at.desc()
-        ).limit(5):
-            if bcrypt.check_password_hash(history.password_hash, password):
-                return True
-        return False
 
 
 class PasswordHistory(db.Model):

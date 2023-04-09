@@ -64,7 +64,7 @@ def upgrade() -> None:
         sa.Column("username", sa.String(length=40), nullable=False),
         sa.Column("email", sa.String(length=120), nullable=False),
         sa.Column("image_file", sa.String(), nullable=False),
-        sa.Column("password", sa.String(length=60), nullable=False),
+        sa.Column("password_hash", sa.String(length=60), nullable=False),
         sa.Column("blocked", sa.BOOLEAN(), nullable=False),
         sa.Column("login_attempts", sa.Integer(), nullable=False),
         sa.Column("last_login_attempt", sa.TIMESTAMP(timezone=True), nullable=True),
