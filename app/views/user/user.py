@@ -241,7 +241,7 @@ def show_messages_room(room_id: int):
     pagination = db.paginate(messages, page=page, per_page=per_page, error_out=False)
 
     return render_template(
-        "show_message_room.html",
+        "user/show_message_room.html",
         form=form,
         pagination=pagination,
         room_id=room_id,
