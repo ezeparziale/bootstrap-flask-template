@@ -146,6 +146,20 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
+        "password_history",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("password_hash", sa.String(length=60), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
         "posts",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("title", sa.String(length=60), nullable=False),
@@ -346,6 +360,7 @@ def downgrade() -> None:
     op.drop_table("user_details")
     op.drop_table("room_messages")
     op.drop_table("posts")
+    op.drop_table("password_history")
     op.drop_table("participants")
     op.drop_table("notifications")
     op.drop_table("follows")

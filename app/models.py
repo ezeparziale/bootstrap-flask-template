@@ -121,6 +121,9 @@ class User(db.Model, UserMixin):
     room_messages: Mapped[List["RoomMessage"]] = relationship(
         "RoomMessage", backref="author", lazy="dynamic"
     )
+    password_history: Mapped[List["PasswordHistory"]] = relationship(
+        "PasswordHistory", backref="user", lazy="dynamic"
+    )
 
     def __init__(self, **kwargs) -> None:
         super(User, self).__init__(**kwargs)
@@ -357,6 +360,22 @@ class User(db.Model, UserMixin):
                 return True
         else:
             return False
+
+
+class PasswordHistory(db.Model):
+    __tablename__ = "password_history"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    password_hash: Mapped[str] = mapped_column(String(60), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, perm: str) -> bool:
