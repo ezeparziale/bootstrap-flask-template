@@ -49,7 +49,7 @@ def posts():
         error_out=False,
     )
 
-    return render_template("posts.html", pagination=pagination, view_mode=view_mode)
+    return render_template("posts/posts.html", pagination=pagination, view_mode=view_mode)
 
 
 @posts_bp.route("/<id>", methods=["GET", "POST"])
@@ -72,7 +72,7 @@ def get_post(id: int):
 
     post.add_view(current_user)
     return render_template(
-        "post.html",
+        "posts/post.html",
         form=form,
         post=post,
         username=post.author.username,
@@ -100,7 +100,7 @@ def create_post():
 
         flash("Post creado", category="success")
         return redirect(url_for("posts.get_post", id=post.id))
-    return render_template("create_post.html", form=form)
+    return render_template("posts/create_post.html", form=form)
 
 
 @posts_bp.route("/edit/<post_id>", methods=["GET", "POST"])
@@ -136,7 +136,7 @@ def edit_post(post_id: int):
     form.content.data = post.content
     form.tags.data = [tag.tag_id for tag in post.tags]
 
-    return render_template("edit_post.html", form=form, post_id=post_id)
+    return render_template("posts/edit_post.html", form=form, post_id=post_id)
 
 
 @posts_bp.route("/delete/<id>", methods=["GET", "POST"])
@@ -179,7 +179,7 @@ def show_favorite():
 @login_required
 @permission_required(Permission.MODERATE)
 def moderate():
-    return render_template("moderate.html")
+    return render_template("posts/moderate.html")
 
 
 @posts_bp.route("/moderate/comment", methods=["GET", "POST"])
@@ -191,7 +191,7 @@ def moderate_comment():
     per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
-    return render_template("moderate_comment.html", pagination=pagination)
+    return render_template("posts/moderate_comment.html", pagination=pagination)
 
 
 @posts_bp.route("/moderate/post", methods=["GET", "POST"])
@@ -206,7 +206,7 @@ def moderate_post():
     page = request.args.get("page", 1, type=int)
     per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
-    return render_template("moderate_post.html", pagination=pagination)
+    return render_template("posts/moderate_post.html", pagination=pagination)
 
 
 @posts_bp.route("/moderate/post/enable_disable/<id>", methods=["GET"])

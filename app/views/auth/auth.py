@@ -36,14 +36,14 @@ def before_request():
             return redirect(url_for("auth.unconfirmed"))
 
 
-@auth_bp.route("/unconfirmed/")
+@auth_bp.route("/unconfirmed")
 def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for("home.home_view"))
-    return render_template("unconfirmed.html")
+    return render_template("auth/unconfirmed.html")
 
 
-@auth_bp.route("/login/", methods=["GET", "POST"])
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("home.home_view"))
@@ -57,7 +57,7 @@ def login():
                 next = url_for("home.home_view")
             return redirect(next)
         flash("Error al loguearse", category="danger")
-    return render_template("login.html", form=form)
+    return render_template("auth/login.html", form=form)
 
 
 def send_async_email(app, msg):
@@ -73,14 +73,14 @@ def send_email_confirm(user):
         sender="noreplay@test.com",
     )
     msg.html = render_template(
-        "emails/confirm_account.html", token=token, app_name=settings.SITE_NAME
+        "auth/emails/confirm_account.html", token=token, app_name=settings.SITE_NAME
     )
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return thr
 
 
-@auth_bp.route("/register/", methods=["GET", "POST"])
+@auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("home.home_view"))
@@ -100,10 +100,10 @@ def register():
         flash("Verifique su mail para confirmar cuenta", category="info")
         send_email_confirm(user)
         return redirect(url_for("auth.login"))
-    return render_template("register.html", form=form)
+    return render_template("auth/register.html", form=form)
 
 
-@auth_bp.route("/logout/")
+@auth_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
@@ -124,7 +124,7 @@ def send_email_reset_password(user):
     thr.start()
 
 
-@auth_bp.route("/reset_password/", methods=["GET", "POST"])
+@auth_bp.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
@@ -139,7 +139,7 @@ def reset_password():
         else:
             flash("Email no registrado, por favor registrese", category="danger")
             return redirect(url_for("auth.register"))
-    return render_template("reset_password.html", form=form)
+    return render_template("auth/reset_password.html", form=form)
 
 
 @auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
@@ -159,7 +159,7 @@ def reset_token(token):
         flash("Password cambiado", category="success")
         return redirect(url_for("auth.login"))
 
-    return render_template("change_password.html", form=form)
+    return render_template("auth/change_password.html", form=form)
 
 
 @auth_bp.route("/confirm/<token>", methods=["GET", "POST"])

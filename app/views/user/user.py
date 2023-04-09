@@ -24,7 +24,7 @@ user_bp = Blueprint(
 def user(username: str):
     form = EmptyForm()
     user = db.one_or_404(db.select(User).filter_by(username=username))
-    return render_template("user.html", user=user, form=form)
+    return render_template("user/user.html", user=user, form=form)
 
 
 @user_bp.route("/follow/<username>", methods=["POST"])
@@ -78,7 +78,7 @@ def followers(username: str):
         user.followers, page=page, per_page=per_page, error_out=False
     )
 
-    return render_template("followers.html", pagination=pagination, user=user)
+    return render_template("user/followers.html", pagination=pagination, user=user)
 
 
 @user_bp.route("/follow_by/<username>", methods=["GET"])
@@ -96,7 +96,7 @@ def follow_by(username: str):
         user.followed, page=page, per_page=per_page, error_out=False
     )
 
-    return render_template("followed_by.html", pagination=pagination, user=user)
+    return render_template("user/followed_by.html", pagination=pagination, user=user)
 
 
 # @user_bp.route("/send_message/<username>", methods=["GET", "POST"])
@@ -210,7 +210,7 @@ def send_menssage_room(username: str):
         recipient.add_notification("unread_message_count", recipient.new_messages())
         return redirect(url_for("user.show_messages_room", room_id=room_id))
 
-    return render_template("send_message_room.html", form=form, recipient=recipient)
+    return render_template("user/send_message_room.html", form=form, recipient=recipient)
 
 
 @user_bp.route("/show_messages_room/<room_id>", methods=["GET", "POST"])
@@ -269,7 +269,7 @@ def show_rooms():
     pagination = db.paginate(rooms, page=page, per_page=per_page, error_out=False)
 
     return render_template(
-        "show_rooms.html", pagination=pagination, current_user=current_user
+        "user/show_rooms.html", pagination=pagination, current_user=current_user
     )
 
 
@@ -292,7 +292,7 @@ def list_users():
     per_page = settings.POSTS_PER_PAGE
     pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
 
-    return render_template("list_users.html", headers=headers, pagination=pagination)
+    return render_template("user/list_users.html", headers=headers, pagination=pagination)
 
 
 @user_bp.route("/api/data", methods=["GET", "POST"])

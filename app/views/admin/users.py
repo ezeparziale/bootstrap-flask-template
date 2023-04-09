@@ -21,7 +21,7 @@ users_bp = Blueprint(
 @login_required
 @admin_required
 def user_view():
-    return render_template("users/list.html")
+    return render_template("admin/users/list.html")
 
 
 @users_bp.route("/create", methods=["GET", "POST"])
@@ -44,7 +44,7 @@ def create_user():
         user.save()
         return redirect(url_for("admin.users.user_view"))
 
-    return render_template("users/create.html", form=form)
+    return render_template("admin/users/create.html", form=form)
 
 
 @users_bp.route("/edit/<int:id>", methods=["GET", "POST"])
@@ -67,7 +67,7 @@ def edit_user(id):
     form.email.data = user.email
     form.confirmed.data = user.confirmed
 
-    return render_template("users/edit.html", form=form)
+    return render_template("admin/users/edit.html", form=form)
 
 
 @users_bp.route("/delete/<int:id>", methods=["GET", "POST"])

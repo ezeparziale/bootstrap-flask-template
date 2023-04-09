@@ -21,7 +21,7 @@ tags_bp = Blueprint(
 @login_required
 @admin_required
 def tag_view():
-    return render_template("tags/list.html")
+    return render_template("admin/tags/list.html")
 
 
 @tags_bp.route("/create", methods=["GET", "POST"])
@@ -37,7 +37,7 @@ def create_tag():
         tag.save()
         return redirect(url_for("admin.tags.tag_view"))
 
-    return render_template("tags/create.html", form=form)
+    return render_template("admin/tags/create.html", form=form)
 
 
 @tags_bp.route("/edit/<int:id>", methods=["GET", "POST"])
@@ -55,7 +55,7 @@ def edit_tag(id):
 
     form.id.data = tag.id
     form.name.data = tag.name
-    return render_template("tags/edit.html", form=form)
+    return render_template("admin/tags/edit.html", form=form)
 
 
 @tags_bp.route("/delete/<int:id>", methods=["GET", "POST"])
