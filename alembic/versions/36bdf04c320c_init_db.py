@@ -65,6 +65,10 @@ def upgrade() -> None:
         sa.Column("email", sa.String(length=120), nullable=False),
         sa.Column("image_file", sa.String(), nullable=False),
         sa.Column("password", sa.String(length=60), nullable=False),
+        sa.Column("blocked", sa.BOOLEAN(), nullable=False),
+        sa.Column("login_attempts", sa.Integer(), nullable=False),
+        sa.Column("last_login_attempt", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("block_time", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
