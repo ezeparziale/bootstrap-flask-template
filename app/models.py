@@ -210,7 +210,7 @@ class User(db.Model, UserMixin):
     def verify_password_history(self, password: str) -> bool:
         for history in self.password_history.order_by(
             PasswordHistory.created_at.desc()
-        ).limit(5):
+        ).limit(settings.CHECK_LAST_PASSWORD):
             if bcrypt.check_password_hash(history.password_hash, password):
                 return True
         return False

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     MAX_LOGIN_ATTEMPTS: int = 5
     LOCK_TIME: timedelta = timedelta(minutes=5)
     BLOCK_TIME: timedelta = timedelta(minutes=1)
+    CHECK_LAST_PASSWORD: int = 5
 
     # Mail
     MAIL_SERVER: str
