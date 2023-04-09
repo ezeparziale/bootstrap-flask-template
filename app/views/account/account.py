@@ -1,11 +1,11 @@
 import os
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
-from flask_login import current_user, fresh_login_required, login_required
+from flask_login import current_user, login_required
 
 from app import app, db
 
-from ...models import UserDetail, User
+from ...models import UserDetail
 from .forms import AccountInfoForm, AccountUpdateForm, ChangePasswordForm
 
 account_bp = Blueprint(
@@ -104,5 +104,5 @@ def change_password():
             flash("Your password has been changed", category="success")
             return redirect(url_for("account.account"))
         else:
-            flash("Invalid current password", category="danger")        
+            flash("Invalid current password", category="danger")
     return render_template("account/change_password.html", form=form)

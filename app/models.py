@@ -40,7 +40,7 @@ class Follow(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Follow(follower_id={self.user_id}, followed_id={self.follower_id}, followed_at={self.followed_at})"
+        return f"Follow(follower_id={self.user_id}, followed_id={self.follower_id}, followed_at={self.followed_at})"  # noqa: E501
 
 
 class User(db.Model, UserMixin):
@@ -119,7 +119,7 @@ class User(db.Model, UserMixin):
             self.role = Role.query.filter_by(default=True).first()
 
     def __repr__(self) -> str:
-        return f"User(username={self.username}, email={self.email}, created_at={self.created_at})"
+        return f"User(username={self.username}, email={self.email}, created_at={self.created_at})"  # noqa: E501
 
     @staticmethod
     def generate_avatar() -> str:
@@ -165,7 +165,7 @@ class User(db.Model, UserMixin):
             self.confirmed = True
             db.session.commit()
             return True
-        except:
+        except:  # noqa: E722
             return None
 
     @staticmethod
@@ -175,7 +175,7 @@ class User(db.Model, UserMixin):
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
             user_id = decode.get("user_id")
-        except:
+        except:  # noqa: E722
             return None
         return db.session.execute(db.select(User).filter_by(id=user_id)).scalar_one()
 
@@ -287,7 +287,7 @@ class User(db.Model, UserMixin):
         participant = Participant.query.filter(
             Participant.room_id == room_id, Participant.user_id == self.id
         ).first()
-        room = Room.query.filter_by(id=room_id).first()
+        # room = Room.query.filter_by(id=room_id).first()
         messages = (
             RoomMessage.query.filter(
                 RoomMessage.room_id == room_id,
@@ -342,7 +342,7 @@ class UserDetail(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"UserDetail(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, user_id={self.user_id})"
+        return f"UserDetail(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, user_id={self.user_id})"  # noqa: E501
 
 
 class PostTag(db.Model):
@@ -361,7 +361,7 @@ class PostTag(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"PostTag(post_id={self.post_id}, tag_id={self.tag_id}, created_at={self.created_at})"
+        return f"PostTag(post_id={self.post_id}, tag_id={self.tag_id}, created_at={self.created_at})"  # noqa: E501
 
 
 class Tag(db.Model):
@@ -440,7 +440,7 @@ class Post(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Post(id={self.id}, title={self.title}, content={self.content}, created_at={self.created_at}, author_id={self.author_id})"
+        return f"Post(id={self.id}, title={self.title}, content={self.content}, created_at={self.created_at}, author_id={self.author_id})"  # noqa: E501
 
     def add_visit(self) -> None:
         self.visits += 1
@@ -544,7 +544,7 @@ class Like(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Like(id={self.id}, created_at={self.created_at}, user_id={self.user_id}, post_id={self.post_id})"
+        return f"Like(id={self.id}, created_at={self.created_at}, user_id={self.user_id}, post_id={self.post_id})"  # noqa: E501
 
 
 class Favorite(db.Model):
@@ -564,7 +564,7 @@ class Favorite(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Favorite(id={self.id}, created_at={self.created_at}, user_id={self.user_id}, post_id={self.post_id})"
+        return f"Favorite(id={self.id}, created_at={self.created_at}, user_id={self.user_id}, post_id={self.post_id})"  # noqa: E501
 
 
 class Comment(db.Model):
@@ -604,7 +604,7 @@ class Comment(db.Model):
             self.level = self.parent.level + 1
 
     def __repr__(self) -> str:
-        return f"Comment(id={self.id}, content={self.content}, disabled={self.disabled}, created_at={self.created_at}, post_id={self.post_id}, author_id={self.author_id}, parent_id={self.parent_id})"
+        return f"Comment(id={self.id}, content={self.content}, disabled={self.disabled}, created_at={self.created_at}, post_id={self.post_id}, author_id={self.author_id}, parent_id={self.parent_id})"  # noqa: E501
 
     def add_report(self, user: "User") -> None:
         if not self.is_report(user):
@@ -682,7 +682,7 @@ class Role(db.Model):
         return self.permissions & perm == perm
 
     def __repr__(self) -> str:
-        return f"Role(id={self.id}, name={self.name}, default={self.default}, permissions={self.permissions})"
+        return f"Role(id={self.id}, name={self.name}, default={self.default}, permissions={self.permissions})"  # noqa: E501
 
     @staticmethod
     def insert_roles():
@@ -747,7 +747,7 @@ class Notification(db.Model):
         return json.loads(str(self.payload_json))
 
     def __repr__(self) -> str:
-        return f"Notification(id={self.id}, name={self.name}, post_id={self.post_id}, timestamp={self.timestamp}, payload_json={self.payload_json})"
+        return f"Notification(id={self.id}, name={self.name}, post_id={self.post_id}, timestamp={self.timestamp}, payload_json={self.payload_json})"  # noqa: E501
 
 
 class View(db.Model):
@@ -767,7 +767,7 @@ class View(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"View(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})"
+        return f"View(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})"  # noqa: E501
 
 
 class Report(db.Model):
@@ -787,7 +787,7 @@ class Report(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Report(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})"
+        return f"Report(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})"  # noqa: E501
 
 
 class CommentReport(db.Model):
@@ -807,7 +807,7 @@ class CommentReport(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"CommentReport(id={self.id}, user_id={self.user_id}, comment_id={self.comment_id}, created_at={self.created_at})"
+        return f"CommentReport(id={self.id}, user_id={self.user_id}, comment_id={self.comment_id}, created_at={self.created_at})"  # noqa: E501
 
 
 class CommentLike(db.Model):
@@ -827,7 +827,7 @@ class CommentLike(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"CommentLike(id={self.id}, user_id={self.user_id}, comment_id={self.comment_id}, created_at={self.created_at})"
+        return f"CommentLike(id={self.id}, user_id={self.user_id}, comment_id={self.comment_id}, created_at={self.created_at})"  # noqa: E501
 
 
 class Participant(db.Model):
@@ -857,7 +857,7 @@ class Participant(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Participant(id={self.id}, user_id={self.user_id}, room_id={self.room_id}, created_at={self.created_at}, last_access_at={self.last_access_at}, last_message_at={self.last_message_at})"
+        return f"Participant(id={self.id}, user_id={self.user_id}, room_id={self.room_id}, created_at={self.created_at}, last_access_at={self.last_access_at}, last_message_at={self.last_message_at})"  # noqa: E501
 
 
 class Room(db.Model):
@@ -883,7 +883,7 @@ class Room(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"Room(id={self.id},name={self.name}, created_at={self.created_at}, last_message_at={self.last_message_at}"
+        return f"Room(id={self.id},name={self.name}, created_at={self.created_at}, last_message_at={self.last_message_at}"  # noqa: E501
 
 
 class RoomMessage(db.Model):
@@ -904,4 +904,4 @@ class RoomMessage(db.Model):
     )
 
     def __repr__(self) -> str:
-        return f"id={self.id} message={self.message}, created_at={self.created_at}, user_id={self.user_id} room_id={self.room_id}"
+        return f"id={self.id} message={self.message}, created_at={self.created_at}, user_id={self.user_id} room_id={self.room_id}"  # noqa: E501

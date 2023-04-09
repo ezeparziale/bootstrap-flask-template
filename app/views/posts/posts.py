@@ -49,7 +49,9 @@ def posts():
         error_out=False,
     )
 
-    return render_template("posts/posts.html", pagination=pagination, view_mode=view_mode)
+    return render_template(
+        "posts/posts.html", pagination=pagination, view_mode=view_mode
+    )
 
 
 @posts_bp.route("/<id>", methods=["GET", "POST"])

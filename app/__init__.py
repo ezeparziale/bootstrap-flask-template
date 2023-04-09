@@ -30,31 +30,31 @@ mail = Mail(app)
 moment = Moment(app)
 
 # Blueprints
-from app.views.home import home
+from app.views.home import home  # type: ignore  # noqa
 
 app.register_blueprint(home.home_bp)
 
-from app.views.about import about
+from app.views.about import about  # type: ignore  # noqa
 
 app.register_blueprint(about.about_bp)
 
-from app.views.auth import auth
+from app.views.auth import auth  # type: ignore  # noqa
 
 app.register_blueprint(auth.auth_bp)
 
-from app.views.account import account
+from app.views.account import account  # type: ignore  # noqa
 
 app.register_blueprint(account.account_bp)
 
-from app.views.posts import posts
+from app.views.posts import posts  # type: ignore  # noqa
 
 app.register_blueprint(posts.posts_bp)
 
-from app.views.user import user
+from app.views.user import user  # type: ignore  # noqa
 
 app.register_blueprint(user.user_bp)
 
-from app.views.admin import admin
+from app.views.admin import admin  # type: ignore  # noqa
 
 app.register_blueprint(admin.admin_bp)
 

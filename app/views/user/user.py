@@ -125,7 +125,9 @@ def send_menssage_room(username: str):
         recipient.add_notification("unread_message_count", recipient.new_messages())
         return redirect(url_for("user.show_messages_room", room_id=room_id))
 
-    return render_template("user/send_message_room.html", form=form, recipient=recipient)
+    return render_template(
+        "user/send_message_room.html", form=form, recipient=recipient
+    )
 
 
 @user_bp.route("/show_messages_room/<room_id>", methods=["GET", "POST"])

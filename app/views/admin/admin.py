@@ -12,12 +12,12 @@ admin_bp = Blueprint(
 )
 
 # Blueprint nested
-from .tags import tags_bp
+from .tags import tags_bp  # type: ignore  # noqa
 
 admin_bp.register_blueprint(tags_bp)
 
 
-from .users import users_bp
+from .users import users_bp  # type: ignore  # noqa
 
 admin_bp.register_blueprint(users_bp)
 
