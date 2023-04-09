@@ -99,13 +99,10 @@ def reset_avatar():
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        user = db.session.execute(
-            db.select(User).filter_by(id=current_user.id)
-        ).scalar_one()
-        if user is None or not user.check_password(form.current_password.data):
-            flash("Invalid current password", category="danger")
-            return redirect(url_for("account.change_password"))
-        user.set_password(form.new_password.data)
-        flash("Your password has been changed", category="success")
-        return redirect(url_for("account.account"))
+        if current_user.check_password(form.current_password.data):
+            current_user.set_password(form.new_password.data)
+            flash("Your password has been changed", category="success")
+            return redirect(url_for("account.account"))
+        else:
+            flash("Invalid current password", category="danger")        
     return render_template("account/change_password.html", form=form)
