@@ -1,10 +1,8 @@
-from threading import Thread
-
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from flask_mail import Message
 
-from app import app, bcrypt, db, mail, settings
+from app import settings
+from app.utils.email import send_email
 
 from ...models import User
 from .forms import (
@@ -60,24 +58,19 @@ def login():
     return render_template("auth/login.html", form=form)
 
 
-def send_async_email(app, msg):
-    with app.app_context():
-        mail.send(msg)
-
-
 def send_email_confirm(user):
     token = user.get_confirm_token()
-    msg = Message(
-        subject="Confirmar cuenta",
-        recipients=[user.email],
-        sender="noreplay@test.com",
-    )
-    msg.html = render_template(
+
+    html_body = render_template(
         "auth/emails/confirm_account.html", token=token, app_name=settings.SITE_NAME
     )
-    thr = Thread(target=send_async_email, args=[app, msg])
-    thr.start()
-    return thr
+    text_body = ""
+    subject = "Confirm account"
+    recipients = [user.email]
+    sender = "noreplay@test.com"
+    send_email(
+        subject, sender, recipients, text_body, html_body, attachments=None, sync=False
+    )
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -110,16 +103,17 @@ def logout():
 
 def send_email_reset_password(user):
     token = user.get_token()
-    msg = Message(
-        subject="Password Reset Request",
-        recipients=[user.email],
-        sender="noreplay@test.com",
+
+    html_body = render_template(
+        "auth/emails/reset_password.html", token=token, app_name=settings.SITE_NAME
     )
-    msg.html = render_template(
-        "emails/reset_password.html", token=token, app_name=settings.SITE_NAME
+    text_body = ""
+    subject = "Reset password"
+    recipients = [user.email]
+    sender = "noreplay@test.com"
+    send_email(
+        subject, sender, recipients, text_body, html_body, attachments=None, sync=False
     )
-    thr = Thread(target=send_async_email, args=[app, msg])
-    thr.start()
 
 
 @auth_bp.route("/reset_password", methods=["GET", "POST"])
