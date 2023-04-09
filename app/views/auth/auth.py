@@ -50,7 +50,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
+        if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             next = request.args.get("next")
             if next is None or not next.startswith("/"):
@@ -86,9 +86,7 @@ def register():
         return redirect(url_for("home.home_view"))
     form = RegistrationForm()
     if form.validate_on_submit():
-        encrypted_password = bcrypt.generate_password_hash(form.password.data).decode(
-            "utf-8"
-        )
+        encrypted_password = User.generate_password_hash(form.password.data)
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -151,9 +149,7 @@ def reset_token(token):
 
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        encrypted_password = bcrypt.generate_password_hash(form.password.data).decode(
-            "utf-8"
-        )
+        encrypted_password = User.generate_password_hash(form.password.data)
         user.password = encrypted_password
         user.update()
         flash("Password cambiado", category="success")
