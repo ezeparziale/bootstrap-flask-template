@@ -5,8 +5,8 @@ from flask_login import current_user, fresh_login_required, login_required
 
 from app import app, db
 
-from ...models import UserDetail
-from .forms import AccountInfoForm, AccountUpdateForm
+from ...models import UserDetail, User
+from .forms import AccountInfoForm, AccountUpdateForm, ChangePasswordForm
 
 account_bp = Blueprint(
     "account",
@@ -92,3 +92,20 @@ def reset_avatar():
             ),
         }
     )
+
+
+@account_bp.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        user = db.session.execute(
+            db.select(User).filter_by(id=current_user.id)
+        ).scalar_one()
+        if user is None or not user.check_password(form.current_password.data):
+            flash("Invalid current password", category="danger")
+            return redirect(url_for("account.change_password"))
+        user.set_password(form.new_password.data)
+        flash("Your password has been changed", category="success")
+        return redirect(url_for("account.account"))
+    return render_template("account/change_password.html", form=form)
