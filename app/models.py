@@ -12,6 +12,7 @@ from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 
 from app import app, bcrypt, db, login_manager
+from app.config import settings
 
 
 @login_manager.user_loader
@@ -53,6 +54,14 @@ class User(db.Model, UserMixin):
         String(), nullable=False, default="default.jpg"
     )
     password: Mapped[str] = mapped_column(String(60), nullable=False)
+    blocked: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
+    login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_login_attempt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    block_time: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
@@ -319,6 +328,35 @@ class User(db.Model, UserMixin):
             "created_at": self.created_at,
         }
 
+    def handle_failed_login(self):
+        self.login_attempts += 1
+        self.last_login_attempt = datetime.utcnow()
+        if self.login_attempts >= settings.MAX_LOGIN_ATTEMPTS:
+            self.blocked = True
+            self.block_time = datetime.utcnow()
+        self.update()
+
+    def handle_successful_login(self):
+        self.login_attempts = 0
+        self.last_login_attempt = None
+        self.blocked = False
+        self.block_time = None
+        self.update()
+
+    def is_blocked(self):
+        if self.blocked:
+            if self.block_time is None:
+                return True
+            elif datetime.now(timezone.utc) >= self.block_time + settings.BLOCK_TIME:
+                self.blocked = False
+                self.block_time = None
+                self.login_attempts = 0
+                self.update()
+                return False
+            else:
+                return True
+        else:
+            return False
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, perm: str) -> bool:
