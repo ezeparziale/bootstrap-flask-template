@@ -15,7 +15,7 @@ from app import app, bcrypt, db, login_manager
 
 
 @login_manager.user_loader
-def load_user(user_id) -> Optional["User"]:
+def load_user(user_id: int) -> Optional["User"]:
     return User.query.get(user_id)
 
 
