@@ -186,6 +186,10 @@ class User(db.Model, UserMixin):
         self.password = bcrypt.generate_password_hash(password).decode("utf-8")
         self.update()
 
+    @staticmethod
+    def generate_password_hash(password: str) -> str:
+        return bcrypt.generate_password_hash(password).decode("utf-8")
+
     def follow(self, user: "User") -> None:
         if not self.is_following(user):
             follow = Follow(follower=self, followed=user)
