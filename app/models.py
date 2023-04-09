@@ -197,9 +197,9 @@ class User(db.Model, UserMixin):
     def set_password(self, password: str) -> None:
         self.password_hash = User.generate_password_hash(password)
         self.update()
-        self.add_password_history()
+        self.add_password_to_history()
 
-    def add_password_history(self) -> None:
+    def add_password_to_history(self) -> None:
         password_history = PasswordHistory(
             user_id=self.id,
             password_hash=self.password_hash,
@@ -330,7 +330,7 @@ class User(db.Model, UserMixin):
     def save(self) -> None:
         db.session.add(self)
         db.session.commit()
-        self.add_password_history()
+        self.add_password_to_history()
 
     def update(self) -> None:
         self.updated_at = datetime.utcnow()
