@@ -2,12 +2,11 @@ from datetime import datetime
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import func
 
 from app import db
 from app.config import settings
 
-from ...models import Notification, Participant, RoomMessage, User
+from ...models import Participant, RoomMessage, User
 from .forms import EmptyForm, ReplyMessageForm, SendMessageForm
 
 user_bp = Blueprint(
@@ -99,90 +98,6 @@ def follow_by(username: str):
     return render_template("user/followed_by.html", pagination=pagination, user=user)
 
 
-# @user_bp.route("/send_message/<username>", methods=["GET", "POST"])
-# @login_required
-# def send_message(username: str):
-#     recipient = User.query.filter_by(username=username).first_or_404()
-#     form = SendMessageForm()
-#     if form.validate_on_submit():
-#         message = form.message.data
-#         current_user.send_message(recipient, message)
-#         recipient.add_notification("unread_message_count", recipient.new_messages())
-#         flash("Mensaje enviado", category="success")
-#         return redirect(url_for("user.show_messages_sent"))
-#     return render_template("send_message.html", form=form, recipient=recipient)
-
-
-# @user_bp.route("/messages", methods=["GET"])
-# @login_required
-# def messages():
-#     current_user.last_message_read_time = datetime.utcnow()
-#     current_user.add_notification("unread_message_count", 0)
-#     db.session.commit()
-#     view_message = 0
-#     if current_user.is_authenticated:
-#         view_message = int(request.cookies.get("view_message", 0))
-#     if view_message == 0:
-#         query = current_user.messages_received.filter(Message.level==0).order_by(Message.created_at.desc())
-#     if view_message == 1:
-#         query = current_user.messages_sent.filter(Message.level==0).order_by(Message.created_at.desc())
-
-#     page = request.args.get("page", 1, type=int)
-#     pagination = query.paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=False)
-#     messages = pagination.items
-#     return render_template("messages.html", messages=messages, pagination=pagination, view_message=view_message)
-
-
-# @user_bp.route("/show_messages_received", methods=["GET","POST"])
-# @login_required
-# def show_messages_received():
-#     resp = make_response(redirect(url_for("user.messages")))
-#     resp.set_cookie("view_message", "0", max_age=30*24*60*60) # 30 days
-#     return resp
-
-# @user_bp.route("/show_messages_sent", methods=["GET","POST"])
-# @login_required
-# def show_messages_sent():
-#     resp = make_response(redirect(url_for("user.messages")))
-#     resp.set_cookie("view_message", "1", max_age=30*24*60*60) # 30 days
-#     return resp
-
-# @user_bp.route("/view_message/<id>", methods=["GET", "POST"])
-# @login_required
-# def view_message(id: int):
-#     message = Message.query.filter_by(id=id, level=0).first()
-#     if message is None:
-#         flash("Mensaje invalido", category="info")
-#         return redirect(url_for("user.messages"))
-#     if message.recipient != current_user and message.author != current_user:
-#         flash("No puedes ver este mensaje", category="info")
-#         return redirect(url_for("user.messages"))
-#     message.read = True
-#     db.session.commit()
-#     form = ReplyMessageForm()
-#     if form.validate_on_submit():
-#         if current_user.id == message.sender_id:
-#             sender_id = message.sender_id
-#             recipient_id = message.recipient_id
-#         else:
-#             sender_id = message.recipient_id
-#             recipient_id = message.sender_id
-#         message.reply(form.message.data, sender_id, recipient_id)
-#         flash("Respuesta enviada", category="success")
-#         return redirect(url_for("user.view_message", id=message.id))
-
-#     page = request.args.get("page", 1, type=int)
-#     pagination = message.childrens.order_by(Message.created_at.desc()).paginate(page=page, per_page=settings.POSTS_PER_PAGE, error_out=True)
-
-#     message_childrens = pagination.items
-
-#     if current_user.id == message.sender_id:
-#         message_type = "Enviados"
-#     else:
-#         message_type = "Recibidos"
-#     return render_template("view_message.html", form=form, current_user=current_user, message=message, message_childrens=message_childrens, pagination=pagination, message_type=message_type)
-
-
 @user_bp.route("/notifications", methods=["GET"])
 @login_required
 def notifications():
@@ -272,89 +187,3 @@ def show_rooms():
     return render_template(
         "user/show_rooms.html", pagination=pagination, current_user=current_user
     )
-
-
-@user_bp.route("/list_users", methods=["GET", "POST"])
-@login_required
-def list_users():
-    query = db.select(User)
-
-    filters = None
-    if request.method == "POST":
-        filters = request.get_json()
-        print(filters)
-    if filters:
-        if filters.get("confirmed"):
-            query = query.filter_by(confirmed=filters.get("confirmed"))
-
-    headers = ["username", "email", "confirmed"]
-
-    page = request.args.get("page", 1, type=int)
-    per_page = settings.POSTS_PER_PAGE
-    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
-
-    return render_template("user/list_users.html", headers=headers, pagination=pagination)
-
-
-@user_bp.route("/api/data", methods=["GET", "POST"])
-@login_required
-def data():
-    query = db.select(User)
-
-    # search filter
-    search = request.args.get("search[value]")
-    username_filter = request.args.get("columns[0][search][value]")
-    print(request.args)
-    print(username_filter)
-    if username_filter:
-        query = query.filter(User.username.regexp_match(f"{username_filter}"))
-    if search:
-        query = query.filter(
-            db.or_(
-                User.username.like(f"%{search}%"),
-                User.email.like(f"%{search}%"),
-            )
-        )
-    total_filtered = db.session.execute(func.count(query.c["id"])).scalar_one()
-    total_records = db.session.execute(
-        func.count(db.select(User.id).c["id"])
-    ).scalar_one()
-
-    # sorting
-    order = []
-    i = 0
-    while True:
-        col_index = request.args.get(f"order[{i}][column]")
-        if col_index is None:
-            break
-        col_name = request.args.get(f"columns[{col_index}][data]")
-        if col_name not in ["username", "email"]:
-            col_name = "username"
-        descending = request.args.get(f"order[{i}][dir]") == "desc"
-        col = getattr(User, col_name)
-        if descending:
-            col = col.desc()
-        order.append(col)
-        i += 1
-    if order:
-        query = query.order_by(*order)
-
-    # pagination
-    start = request.args.get("start", type=int)
-    length = request.args.get("length", type=int)
-    query = db.session.execute(query.offset(start).limit(length)).scalars()
-
-    return {
-        "data": [
-            {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "confirmed": user.confirmed,
-            }
-            for user in query
-        ],
-        "recordsFiltered": total_filtered,
-        "recordsTotal": total_records,
-        "draw": request.args.get("draw", type=int),
-    }
