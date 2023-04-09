@@ -39,7 +39,7 @@ def account():
         form.firstname.data = current_user.details.firstname
         form.lastname.data = current_user.details.lastname
     image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
-    return render_template("account.html", form=form, image_url=image_url)
+    return render_template("account/account.html", form=form, image_url=image_url)
 
 
 @account_bp.route("/edit", methods=["GET", "POST"])
@@ -77,7 +77,7 @@ def edit_account():
             form.firstname.data = current_user.details.firstname
             form.lastname.data = current_user.details.lastname
     image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
-    return render_template("edit_account.html", form=form, image_url=image_url)
+    return render_template("account/edit_account.html", form=form, image_url=image_url)
 
 
 @account_bp.route("/reset_avatar")
