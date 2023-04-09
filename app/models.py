@@ -1,7 +1,7 @@
 import json
 import random
 from datetime import datetime, timedelta, timezone
-from typing import List
+from typing import List, Optional, Union
 
 import jwt
 from flask import current_app, redirect, request, url_for
@@ -15,12 +15,12 @@ from app import app, bcrypt, db, login_manager
 
 
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(user_id) -> Optional["User"]:
     return User.query.get(user_id)
 
 
 @login_manager.unauthorized_handler
-def unauthorized():
+def unauthorized() -> redirect:
     return redirect(url_for("auth.login", next=request.path))
 
 
@@ -113,7 +113,7 @@ class User(db.Model, UserMixin):
         "RoomMessage", backref="author", lazy="dynamic"
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(User, self).__init__(**kwargs)
         if self.role is None:
             self.role = Role.query.filter_by(default=True).first()
@@ -122,18 +122,18 @@ class User(db.Model, UserMixin):
         return f"User(username={self.username}, email={self.email}, created_at={self.created_at})"
 
     @staticmethod
-    def generate_avatar():
+    def generate_avatar() -> str:
         return f"avatar{random.randint(1,15)}.png"
 
-    def reset_avatar(self):
+    def reset_avatar(self) -> None:
         self.image_file = User.generate_avatar()
         self.update()
 
-    def ping(self):
+    def ping(self) -> None:
         self.last_seen = datetime.utcnow()
         db.session.commit()
 
-    def get_token(self, expires_sec=300):
+    def get_token(self, expires_sec: int = 300) -> str:
         encoded = jwt.encode(
             {
                 "user_id": self.id,
@@ -144,7 +144,7 @@ class User(db.Model, UserMixin):
         )
         return encoded
 
-    def get_confirm_token(self, expires_sec=300):
+    def get_confirm_token(self, expires_sec: int = 300) -> str:
         encoded = jwt.encode(
             {
                 "comfirm": self.id,
@@ -155,7 +155,7 @@ class User(db.Model, UserMixin):
         )
         return encoded
 
-    def confirm(self, token):
+    def confirm(self, token: str) -> bool | None:
         try:
             decode = jwt.decode(
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
@@ -169,7 +169,7 @@ class User(db.Model, UserMixin):
             return None
 
     @staticmethod
-    def verify_token(token):
+    def verify_token(token: str) -> Union["User", None]:
         try:
             decode = jwt.decode(
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
@@ -186,52 +186,52 @@ class User(db.Model, UserMixin):
         self.password = bcrypt.generate_password_hash(password).decode("utf-8")
         self.update()
 
-    def follow(self, user):
+    def follow(self, user: "User") -> None:
         if not self.is_following(user):
             follow = Follow(follower=self, followed=user)
             db.session.add(follow)
             db.session.commit()
 
-    def unfollow(self, user):
+    def unfollow(self, user: "User") -> None:
         follow = self.followed.filter_by(followed_id=user.id).first()
         if follow:
             db.session.delete(follow)
             db.session.commit()
 
-    def is_following(self, user):
+    def is_following(self, user: "User") -> bool:
         return self.followed.filter_by(followed_id=user.id).first() is not None
 
-    def is_followed_by(self, user):
+    def is_followed_by(self, user: "User") -> bool:
         return self.followers.filter_by(follower_id=user.id).first() is not None
 
     @property
-    def followed_posts(self):
+    def followed_posts(self) -> Optional[List["Post"]]:
         return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(
             Follow.follower_id == self.id
         )
 
     @property
-    def favorites_posts(self):
+    def favorites_posts(self) -> Optional[List["Post"]]:
         return Post.query.join(Favorite, Favorite.post_id == Post.id).filter(
             Favorite.user_id == self.id
         )
 
-    def can(self, perm):
+    def can(self, perm: str) -> bool:
         return self.role is not None and self.role.has_permission(perm)
 
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return self.can(Permission.ADMIN)
 
-    def is_moderate(self):
+    def is_moderate(self) -> bool:
         return self.can(Permission.MODERATE)
 
-    def add_notification(self, name, data):
+    def add_notification(self, name: str, data: str) -> None:
         self.notifications.filter_by(name=name).delete()
         n = Notification(name=name, payload_json=json.dumps(data), user=self)
         db.session.add(n)
         db.session.commit()
 
-    def new_messages(self):
+    def new_messages(self) -> int:
         subquery = db.select(Participant.room_id).filter_by(user_id=self.id)
         rooms = Participant.query.filter(
             Participant.room_id.in_(subquery), Participant.user_id != self.id
@@ -241,12 +241,12 @@ class User(db.Model, UserMixin):
             unread_messages += self.get_room_messages(room.room_id)
         return unread_messages
 
-    def get_notifications(self, since):
+    def get_notifications(self, since: datetime) -> Optional["Notification"]:
         return self.notifications.filter(
             Notification.timestamp > datetime.utcfromtimestamp(since)
         ).order_by(Notification.timestamp.asc())
 
-    def get_room_id(self, recipient):
+    def get_room_id(self, recipient: "User") -> int:
         room_id = None
         for participate in self.participant:
             user_to_participant = Participant.query.filter(
@@ -272,14 +272,14 @@ class User(db.Model, UserMixin):
 
         return room_id
 
-    def send_message_to_room(self, room_id, message):
+    def send_message_to_room(self, room_id: int, message: str) -> None:
         msg = RoomMessage(message=message, user_id=self.id, room_id=room_id)
         room = Room.query.filter_by(id=room_id).first()
         room.last_message_at = datetime.utcnow()
         db.session.add(msg)
         db.session.commit()
 
-    def get_room_messages(self, room_id):
+    def get_room_messages(self, room_id: int) -> Optional[List["RoomMessage"]]:
         participant = Participant.query.filter(
             Participant.room_id == room_id, Participant.user_id == self.id
         ).first()
@@ -294,19 +294,19 @@ class User(db.Model, UserMixin):
         )
         return messages
 
-    def save(self):
+    def save(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    def update(self) -> None:
         self.updated_at = datetime.utcnow()
         db.session.commit()
 
-    def delete(self):
+    def delete(self) -> None:
         db.session.delete(self)
         db.session.commit()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "username": self.username,
@@ -317,10 +317,10 @@ class User(db.Model, UserMixin):
 
 
 class AnonymousUser(AnonymousUserMixin):
-    def can(self, perm):
+    def can(self, perm: str) -> bool:
         return False
 
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return False
 
 
@@ -377,19 +377,19 @@ class Tag(db.Model):
     def __repr__(self) -> str:
         return f"Tag(id={self.id}, name={self.name}, created_at={self.created_at})"
 
-    def save(self):
+    def save(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    def update(self) -> None:
         self.updated_at = datetime.utcnow()
         db.session.commit()
 
-    def delete(self):
+    def delete(self) -> None:
         db.session.delete(self)
         db.session.commit()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
@@ -438,87 +438,87 @@ class Post(db.Model):
     def __repr__(self) -> str:
         return f"Post(id={self.id}, title={self.title}, content={self.content}, created_at={self.created_at}, author_id={self.author_id})"
 
-    def add_visit(self):
+    def add_visit(self) -> None:
         self.visits += 1
         db.session.commit()
 
-    def is_favorite(self, user):
+    def is_favorite(self, user: "User") -> bool:
         return self.favorites.filter_by(user_id=user.id).first() is not None
 
-    def favorite(self, user):
+    def favorite(self, user: "User") -> None:
         if not self.is_favorite(user):
             favorite = Favorite(user=user, post=self)
             db.session.add(favorite)
             db.session.commit()
 
-    def unfavorite(self, user):
+    def unfavorite(self, user: "User") -> None:
         favorite = self.favorites.filter_by(user_id=user.id).first()
         if favorite:
             db.session.delete(favorite)
             db.session.commit()
 
-    def is_like(self, user):
+    def is_like(self, user: "User") -> bool:
         return self.likes.filter_by(user_id=user.id).first() is not None
 
-    def like(self, user):
+    def like(self, user: "User") -> None:
         if not self.is_like(user):
             like = Like(user=user, post=self)
             db.session.add(like)
             db.session.commit()
 
-    def unlike(self, user):
+    def unlike(self, user: "User") -> None:
         like = self.likes.filter_by(user_id=user.id).first()
         if like:
             db.session.delete(like)
             db.session.commit()
 
-    def get_views(self):
+    def get_views(self) -> int:
         return self.views.distinct(View.user_id).count()
 
-    def add_view(self, user):
+    def add_view(self, user: "User") -> None:
         view = View(user_id=user.id, post_id=self.id)
         db.session.add(view)
         db.session.commit()
 
-    def add_report(self, user):
+    def add_report(self, user: "User") -> None:
         report = Report(user_id=user.id, post_id=self.id)
         db.session.add(report)
         db.session.commit()
 
-    def get_reports(self):
+    def get_reports(self) -> int:
         return self.reports.distinct(Report.user_id).count()
 
-    def delete_report(self, user):
+    def delete_report(self, user: "User") -> None:
         report = self.reports.filter_by(user_id=user.id).first()
         if report:
             db.session.delete(report)
             db.session.commit()
 
-    def is_report(self, user):
+    def is_report(self, user: "User") -> bool:
         return self.reports.filter_by(user_id=user.id).first() is not None
 
-    def is_reported(self):
+    def is_reported(self) -> bool:
         return self.reports.count() > 0
 
-    def close(self):
+    def close(self) -> None:
         self.closed = True
         db.session.commit()
 
-    def open(self):
+    def open(self) -> None:
         self.closed = False
         db.session.commit()
 
-    def is_closed(self):
+    def is_closed(self) -> bool:
         return self.closed
 
-    def is_disabled(self):
+    def is_disabled(self) -> bool:
         return self.disabled
 
-    def enable(self):
+    def enable(self) -> None:
         self.disabled = False
         db.session.commit()
 
-    def disable(self):
+    def disable(self) -> None:
         self.disabled = True
         db.session.commit()
 
@@ -602,47 +602,47 @@ class Comment(db.Model):
     def __repr__(self) -> str:
         return f"Comment(id={self.id}, content={self.content}, disabled={self.disabled}, created_at={self.created_at}, post_id={self.post_id}, author_id={self.author_id}, parent_id={self.parent_id})"
 
-    def add_report(self, user):
+    def add_report(self, user: "User") -> None:
         if not self.is_report(user):
             report = CommentReport(user_id=user.id, comment_id=self.id)
             db.session.add(report)
             db.session.commit()
 
-    def delete_report(self, user):
+    def delete_report(self, user: "User") -> None:
         report = self.reports.filter_by(user_id=user.id).first()
         if report:
             db.session.delete(report)
             db.session.commit()
 
-    def is_report(self, user):
+    def is_report(self, user: "User") -> bool:
         return self.reports.filter_by(user_id=user.id).first() is not None
 
-    def is_reported(self):
+    def is_reported(self) -> bool:
         return self.reports.count() > 0
 
-    def get_reports(self):
+    def get_reports(self) -> int:
         return self.reports.distinct(CommentReport.user_id).count()
 
-    def is_like(self, user):
+    def is_like(self, user: "User") -> bool:
         return self.likes.filter_by(user_id=user.id).first() is not None
 
-    def like(self, user):
+    def like(self, user: "User") -> None:
         if not self.is_like(user):
             like = CommentLike(user=user, comment=self)
             db.session.add(like)
             db.session.commit()
 
-    def unlike(self, user):
+    def unlike(self, user: "User") -> None:
         like = self.likes.filter_by(user_id=user.id).first()
         if like:
             db.session.delete(like)
             db.session.commit()
 
-    def disable(self):
+    def disable(self) -> None:
         self.disabled = True
         db.session.commit()
 
-    def enable(self):
+    def enable(self) -> None:
         self.disabled = False
         db.session.commit()
 
@@ -663,18 +663,18 @@ class Role(db.Model):
         if self.permissions is None:
             self.permissions = 0
 
-    def add_permission(self, perm):
+    def add_permission(self, perm: str) -> None:
         if not self.has_permission(perm):
             self.permissions += perm
 
-    def remove_permission(self, perm):
+    def remove_permission(self, perm: str) -> None:
         if self.has_permission(perm):
             self.permissions -= perm
 
-    def reset_permissions(self):
+    def reset_permissions(self) -> None:
         self.permissions = 0
 
-    def has_permission(self, perm):
+    def has_permission(self, perm: str) -> bool:
         return self.permissions & perm == perm
 
     def __repr__(self) -> str:
@@ -739,7 +739,7 @@ class Notification(db.Model):
     )
     payload_json: Mapped[str] = mapped_column(Text, nullable=False)
 
-    def get_data(self):
+    def get_data(self) -> dict:
         return json.loads(str(self.payload_json))
 
     def __repr__(self) -> str:
