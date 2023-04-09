@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any, Dict, Optional
 
 from pydantic import BaseSettings, PostgresDsn, validator
@@ -6,8 +7,13 @@ from pydantic import BaseSettings, PostgresDsn, validator
 class Settings(BaseSettings):
     # Flask
     SECRET_KEY: str
+
+    # Site
     SITE_NAME: str
     POSTS_PER_PAGE: int = 10
+    MAX_LOGIN_ATTEMPTS: int = 5
+    LOCK_TIME: timedelta = timedelta(minutes=5)
+    BLOCK_TIME: timedelta = timedelta(minutes=1)
 
     # Mail
     MAIL_SERVER: str
@@ -25,7 +31,7 @@ class Settings(BaseSettings):
 
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    # SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO: bool = False
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
