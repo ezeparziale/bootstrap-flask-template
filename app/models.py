@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 
-from app import app, db, login_manager
+from app import app, bcrypt, db, login_manager
 
 
 @login_manager.user_loader
@@ -178,6 +178,13 @@ class User(db.Model, UserMixin):
         except:
             return None
         return db.session.execute(db.select(User).filter_by(id=user_id)).scalar_one()
+
+    def check_password(self, password: str) -> bool:
+        return bcrypt.check_password_hash(self.password, password)
+
+    def set_password(self, password: str) -> None:
+        self.password = bcrypt.generate_password_hash(password).decode("utf-8")
+        self.update()
 
     def follow(self, user):
         if not self.is_following(user):
@@ -645,7 +652,9 @@ class Role(db.Model):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
-    default: Mapped[bool] = mapped_column(BOOLEAN, default=False, index=True, nullable=False)
+    default: Mapped[bool] = mapped_column(
+        BOOLEAN, default=False, index=True, nullable=False
+    )
     permissions: Mapped[int] = mapped_column(Integer, nullable=False)
     users: Mapped[List["User"]] = relationship("User", backref="role", lazy="dynamic")
 
