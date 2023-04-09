@@ -227,6 +227,7 @@ def show_messages_room(room_id: int):
         message = form.message.data
         current_user.send_message_to_room(room_id, message)
         participant.last_message_at = datetime.utcnow()
+        form.message.data = ""
 
     participant.last_access_at = datetime.utcnow()
     db.session.commit()
