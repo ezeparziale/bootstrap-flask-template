@@ -68,6 +68,9 @@
             </fieldset>
             <div class="text-end">
                 <div class="form-group mt-3">
+                    <a href="{{ url_for('account.change_password') }}" class="btn btn-primary" tabindex="-1" role="button" aria-disabled="true">
+                        Change password
+                    </a>
                     {{ form.submit(class="btn btn-primary") }}
                 </div>
             </div>
