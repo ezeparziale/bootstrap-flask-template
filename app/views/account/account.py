@@ -100,9 +100,15 @@ def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if current_user.check_password(form.current_password.data):
-            current_user.set_password(form.new_password.data)
-            flash("Your password has been changed", category="success")
-            return redirect(url_for("account.account"))
+            if current_user.verify_password_history(form.new_password.data):
+                flash(
+                    "This password has been used before. Please choose a new one",
+                    category="danger",
+                )
+            else:
+                current_user.set_password(form.new_password.data)
+                flash("Your password has been changed", category="success")
+                return redirect(url_for("account.account"))
         else:
             flash("Invalid current password", category="danger")
     return render_template("account/change_password.html", form=form)

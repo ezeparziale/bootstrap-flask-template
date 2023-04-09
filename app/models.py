@@ -195,7 +195,13 @@ class User(db.Model, UserMixin):
         return bcrypt.check_password_hash(self.password, password)
 
     def set_password(self, password: str) -> None:
-        self.password = bcrypt.generate_password_hash(password).decode("utf-8")
+        password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+        self.password = password_hash
+        password_history = PasswordHistory(
+            user_id=self.id,
+            password_hash=password_hash,
+        )
+        db.session.add(password_history)
         self.update()
 
     @staticmethod
@@ -361,6 +367,14 @@ class User(db.Model, UserMixin):
         else:
             return False
 
+    def verify_password_history(self, password: str) -> bool:
+        for history in self.password_history.order_by(
+            PasswordHistory.created_at.desc()
+        ).limit(5):
+            if bcrypt.check_password_hash(history.password_hash, password):
+                return True
+        return False
+
 
 class PasswordHistory(db.Model):
     __tablename__ = "password_history"
@@ -375,6 +389,9 @@ class PasswordHistory(db.Model):
         server_default=text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
+
+    def __repr__(self) -> str:
+        return f"PasswordHistory(id={self.id}, user_id={self.user_id}, password_hash={self.password_hash}, created_at={self.created_at})"  # noqa: E501
 
 
 class AnonymousUser(AnonymousUserMixin):
