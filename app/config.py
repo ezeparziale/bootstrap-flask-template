@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     LOCK_TIME: timedelta = timedelta(minutes=5)
     BLOCK_TIME: timedelta = timedelta(minutes=1)
     CHECK_LAST_PASSWORD: int = 5
+    PASSWORD_EXPIRATION_DAYS: int = 90
 
     # Mail
     MAIL_SERVER: str
