@@ -13,7 +13,7 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.config import settings
-from app.decorators import permission_required
+from app.decorators import password_not_expired, permission_required
 
 from ...models import Comment, Permission, Post, PostTag, Report
 from .forms import CreatePostForm, EditPostForm, PostCommentForm
@@ -25,6 +25,12 @@ posts_bp = Blueprint(
     template_folder="templates",
     static_folder="static",
 )
+
+
+@posts_bp.before_request
+@password_not_expired
+def before_request():
+    pass
 
 
 @posts_bp.route("/", methods=["GET"])

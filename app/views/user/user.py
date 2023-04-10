@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.config import settings
+from app.decorators import password_not_expired
 
 from ...models import Participant, RoomMessage, User
 from .forms import EmptyForm, ReplyMessageForm, SendMessageForm
@@ -16,6 +17,12 @@ user_bp = Blueprint(
     template_folder="templates",
     static_folder="static",
 )
+
+
+@user_bp.before_request
+@password_not_expired
+def before_request():
+    pass
 
 
 @user_bp.route("/<username>", methods=["GET", "POST"])

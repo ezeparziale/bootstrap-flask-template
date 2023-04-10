@@ -4,6 +4,7 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user, login_required
 
 from app import app, db
+from app.decorators import password_not_expired
 
 from ...models import UserDetail
 from .forms import AccountInfoForm, AccountUpdateForm, ChangePasswordForm
@@ -28,6 +29,7 @@ def save_image(picture_file):
 
 @account_bp.route("/", methods=["GET", "POST"])
 @login_required
+@password_not_expired
 # @fresh_login_required
 def account():
     form = AccountInfoForm()
@@ -44,6 +46,7 @@ def account():
 
 @account_bp.route("/edit", methods=["GET", "POST"])
 @login_required
+@password_not_expired
 # @fresh_login_required
 def edit_account():
     form = AccountUpdateForm()
@@ -82,6 +85,7 @@ def edit_account():
 
 @account_bp.route("/reset_avatar")
 @login_required
+@password_not_expired
 def reset_avatar():
     current_user.reset_avatar()
     return jsonify(
