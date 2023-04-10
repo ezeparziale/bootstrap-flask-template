@@ -62,6 +62,11 @@ class User(db.Model, UserMixin):
     block_time: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
     )
+    last_password_change: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
@@ -196,6 +201,7 @@ class User(db.Model, UserMixin):
 
     def set_password(self, password: str) -> None:
         self.password_hash = User.generate_password_hash(password)
+        self.last_password_change = datetime.utcnow()
         self.update()
         self.add_password_to_history()
 
@@ -213,6 +219,13 @@ class User(db.Model, UserMixin):
         ).limit(settings.CHECK_LAST_PASSWORD):
             if bcrypt.check_password_hash(history.password_hash, password):
                 return True
+        return False
+
+    def password_is_expired(self) -> bool:
+        if (datetime.now(tz=timezone.utc) - self.last_password_change) > timedelta(
+            days=settings.PASSWORD_EXPIRATION_DAYS
+        ):
+            return True
         return False
 
     @staticmethod

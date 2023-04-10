@@ -70,6 +70,12 @@ def upgrade() -> None:
         sa.Column("last_login_attempt", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("block_time", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
+            "last_password_change",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
             server_default=sa.text("CURRENT_TIMESTAMP"),
