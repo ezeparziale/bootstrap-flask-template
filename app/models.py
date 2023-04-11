@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 
 import jwt
 from flask import current_app, redirect, request, url_for
+from flask.typing import ResponseValue
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy import BOOLEAN, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -21,7 +22,7 @@ def load_user(user_id: int) -> Optional["User"]:
 
 
 @login_manager.unauthorized_handler
-def unauthorized() -> redirect:
+def unauthorized() -> ResponseValue:
     return redirect(url_for("auth.login", next=request.path))
 
 
