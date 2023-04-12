@@ -10,3 +10,5 @@ Flask-Mail==0.9.1
 Flask-Moment==1.0.5
 pydantic[dotenv]==1.10.4
 alembic==1.9.2
+pyotp==2.8.0
+qrcode==7.4.2

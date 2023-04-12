@@ -15,66 +15,87 @@
             </ol>
         </nav>
 
-        <form method="post" action="" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            <fieldset>
-                <div class="form-group">
-                    <img src="{{ image_url }}" alt="" style="max-height: 150px; max-width: 150px;">
-                </div>
-                <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
-                        {{ form.email(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.email(class="form-control form-control-lg", disabled=True) }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-                    {% if form.username.errors %}
-                        {{ form.username(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.username.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.username(class="form-control form-control-lg", disabled=True) }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.firstname.label(class="form-control-label") }}
-                    {% if form.firstname.errors %}
-                        {{ form.firstname(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.firstname.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.firstname(class="form-control form-control-lg", disabled=True) }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.lastname.label(class="form-control-label") }}
-                    {% if form.lastname.errors %}
-                        {{ form.lastname(class="form-control form-control-lg is-invalid") }}
-                            {% for error in form.lastname.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.lastname(class="form-control form-control-lg", disabled=True) }}
-                    {% endif %}
-                </div>
-            </fieldset>
-            <div class="text-end">
+        <div class="card mt-3">
+            <div class="row m-3">
+                <form method="post" action="" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <fieldset>
+                        <div class="form-group">
+                            <img src="{{ image_url }}" alt="" style="max-height: 150px; max-width: 150px;">
+                        </div>
+                        <div class="form-group">
+                            {{ form.email.label(class="form-control-label") }}
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.email(class="form-control form-control-lg", disabled=True) }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.username.label(class="form-control-label") }}
+                            {% if form.username.errors %}
+                                {{ form.username(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.username.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.username(class="form-control form-control-lg", disabled=True) }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.firstname.label(class="form-control-label") }}
+                            {% if form.firstname.errors %}
+                                {{ form.firstname(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.firstname.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.firstname(class="form-control form-control-lg", disabled=True) }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.lastname.label(class="form-control-label") }}
+                            {% if form.lastname.errors %}
+                                {{ form.lastname(class="form-control form-control-lg is-invalid") }}
+                                    {% for error in form.lastname.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                            {% else %}
+                                {{ form.lastname(class="form-control form-control-lg", disabled=True) }}
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="text-end">
+                        <div class="form-group mt-3">
+                            <a href="{{ url_for('account.change_password') }}" class="btn btn-primary" tabindex="-1" role="button" aria-disabled="true">
+                                Change password
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="row m-3">
                 <div class="form-group mt-3">
-                    <a href="{{ url_for('account.change_password') }}" class="btn btn-primary" tabindex="-1" role="button" aria-disabled="true">
-                        Change password
+                    <h5>Two-steps verification</h5>
+                    {% if current_user.totp_enabled %}
+                    <a href="{{ url_for('auth.disable_2fa') }}" class="btn btn-danger" tabindex="-1" role="button" aria-disabled="true">
+                        Disable Two factor authentication
                     </a>
-                    {{ form.submit(class="btn btn-primary") }}
+                    {% else %}
+                    <a href="{{ url_for('auth.config_2fa') }}" class="btn btn-primary" tabindex="-1" role="button" aria-disabled="true">
+                        Enable Two factor authentication
+                    </a>
+                    {% endif %}
                 </div>
             </div>
-        </form>
+        </div>
+        
 {% endblock %}
 
 

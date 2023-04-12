@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block head %} 
+    <link rel="stylesheet" type="text/css" href="{{ url_for('auth.static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column justify-content-center align-items-center">
+    <form method="post" action="">
+        {{ form.hidden_tag() }}
+        <div class="shadow p-3 mb-5 bg-white rounded">
+            <div class="card-body">
+                <div class="text-center">
+                    <p class="fs-3 text-uppercase fw-bolder mb-5"><i class="bi bi-stack"></i> APP NAME</p>
+                </div>
+                <div class="text-center">
+                    <p class="fs-3 text-uppercase fw-bolder mb-5"><i class="bi bi-stack"></i> 
+                        {% block title %} Verify two factor authentication {% endblock %}
+                    </p>
+                </div>
+                <fieldset>
+                    <form method="POST">
+                        {{ form.csrf_token }}
+                        <div class="form-group">
+                            <label for="token">Código de autenticación:</label>
+                            {{ form.token(size=10, class="form-control") }}
+                        </div>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

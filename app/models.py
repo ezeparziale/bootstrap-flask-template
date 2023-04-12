@@ -1,4 +1,6 @@
+import base64
 import json
+import os
 import random
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Union
@@ -74,6 +76,10 @@ class User(db.Model, UserMixin):
         nullable=False,
     )
     confirmed: Mapped[bool] = mapped_column(BOOLEAN, default=False, nullable=False)
+    totp_secret: Mapped[str] = mapped_column(String(60), nullable=True)
+    totp_enabled: Mapped[bool] = mapped_column(
+        BOOLEAN, default=False, nullable=False, server_default="0"
+    )
     last_seen: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         server_default=text("CURRENT_TIMESTAMP"),
@@ -228,6 +234,19 @@ class User(db.Model, UserMixin):
         ):
             return True
         return False
+
+    def enable_2fa(self) -> None:
+        self.totp_enabled = True
+        self.update()
+
+    def disable_2fa(self) -> None:
+        self.totp_secret = None
+        self.totp_enabled = False
+        self.update()
+
+    def generate_token_2fa(self) -> None:
+        self.totp_secret = base64.b32encode(os.urandom(10)).decode("utf-8")
+        self.update()
 
     @staticmethod
     def generate_password_hash(password: str) -> str:

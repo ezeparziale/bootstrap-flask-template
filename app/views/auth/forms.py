@@ -39,3 +39,8 @@ class ResetPasswordForm(FlaskForm):
         label="Confirma Password", validators=[DataRequired(), EqualTo("new_password")]
     )
     submit = SubmitField(label="Cambiar Password")
+
+
+class TwoFAForm(FlaskForm):
+    token = StringField(label="Code", validators=[DataRequired(), Length(min=6, max=6)])
+    submit = SubmitField(label="Verify")
