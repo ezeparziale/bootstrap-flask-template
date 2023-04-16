@@ -1,99 +1,108 @@
 <nav class="navbar navbar-expand fixed-top navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand" href="#"><i class="bi bi-stack"></i> Navbar</a>
-      
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+	<div class="container">
+		<a class="navbar-brand" href="#"><i class="bi bi-stack"></i> Navbar</a>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{{ url_for('home.home_view') }}">
-            Home
-          </a>
-        </li>
-        {% if current_user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">
-              Posts
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ url_for('user.show_rooms') }}">
-              Mensajes
-              {% set count_messages = current_user.new_messages() %}
-              <span id="messages_unread" class="badge bg-secondary">{{ count_messages if count_messages else "" }}</span>
-            </a>
-          </li>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
 
-          {% if current_user.is_moderate() %}
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('posts.moderate') }}">
-                Moderate
-              </a>
-          {% endif %}
-        {% endif %}
-        {% if current_user.is_authenticated and current_user.is_admin() %}
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Admin
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li>
-              <a class="dropdown-item" aria-current="page" href="{{ url_for('admin.tags.tag_view') }}">
-                Tags
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" aria-current="page" href="{{ url_for('admin.users.user_view') }}">
-                Users
-              </a>
-            </li>
-          </ul>
-        </li>
-        {% endif %}
-      </ul>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav me-auto">
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="{{ url_for('home.home_view') }}">
+						Home
+					</a>
+				</li>
+				{% if current_user.is_authenticated %}
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="{{ url_for('posts.posts') }}">
+						Posts
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="{{ url_for('user.show_rooms') }}">
+						Mensajes
+						{% set count_messages = current_user.new_messages() %}
+						<span id="messages_unread" class="badge bg-secondary">{{ count_messages if count_messages else
+							"" }}</span>
+					</a>
+				</li>
 
-      <ul class="navbar-nav justify-content-end">
-      {% if current_user.is_authenticated %}
-        <div class="dropdown text-end">
-          <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="mdo" width="32" height="32" class="rounded-circle">
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="dropdownUser">
-            <li>
-              <a class="dropdown-item" aria-current="page" href="{{ url_for('account.account') }}">
-                <i class="bi bi-person"></i> Perfil
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" aria-current="page" href="{{ url_for('account.account') }}">
-                <i class="bi bi-gear"></i> Configuración
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="{{ url_for('about.about_view') }}">
-                <i class="bi bi-info-circle"></i> About
-              </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>             
-            <li>
-              <a class="dropdown-item dropdown-item-danger" aria-current="page" href="{{ url_for('auth.logout') }}">
-                <i class="bi bi-box-arrow-right"></i> Logout
-              </a>
-            </li>
-          </ul>
-        </div>
-      {% else %}
-        <li class="nav-item">
-          <a class="btn btn-outline-light  me-1" href="{{ url_for('auth.login') }}">Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="btn btn-primary  me-1" aria-current="page" href="{{ url_for('auth.register') }}">Sign Up</a>
-        </li>
-      {% endif %}
-      </ul>
-    </div>
-  </div>
+				{% if current_user.is_moderate() %}
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="{{ url_for('posts.moderate') }}">
+						Moderate
+					</a>
+					{% endif %}
+					{% endif %}
+					{% if current_user.is_authenticated and current_user.is_admin() %}
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button"
+						data-bs-toggle="dropdown" aria-expanded="false">
+						Admin
+					</a>
+					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<li>
+							<a class="dropdown-item" aria-current="page" href="{{ url_for('admin.tags.tag_view') }}">
+								Tags
+							</a>
+						</li>
+						<li>
+							<a class="dropdown-item" aria-current="page" href="{{ url_for('admin.users.user_view') }}">
+								Users
+							</a>
+						</li>
+					</ul>
+				</li>
+				{% endif %}
+			</ul>
+
+			<ul class="navbar-nav justify-content-end">
+				{% if current_user.is_authenticated %}
+				<div class="dropdown text-end">
+					<a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
+						data-bs-toggle="dropdown" aria-expanded="false">
+						<img src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="mdo"
+							width="32" height="32" class="rounded-circle">
+					</a>
+					<ul class="dropdown-menu" aria-labelledby="dropdownUser">
+						<li>
+							<a class="dropdown-item" aria-current="page" href="{{ url_for('account.account') }}">
+								<i class="bi bi-person"></i> Perfil
+							</a>
+						</li>
+						<li>
+							<a class="dropdown-item" aria-current="page" href="{{ url_for('account.account') }}">
+								<i class="bi bi-gear"></i> Configuración
+							</a>
+						</li>
+						<li>
+							<a class="dropdown-item" href="{{ url_for('about.about_view') }}">
+								<i class="bi bi-info-circle"></i> About
+							</a>
+						</li>
+						<li>
+							<hr class="dropdown-divider">
+						</li>
+						<li>
+							<a class="dropdown-item dropdown-item-danger" aria-current="page"
+								href="{{ url_for('auth.logout') }}">
+								<i class="bi bi-box-arrow-right"></i> Logout
+							</a>
+						</li>
+					</ul>
+				</div>
+				{% else %}
+				<li class="nav-item">
+					<a class="btn btn-outline-light  me-1" href="{{ url_for('auth.login') }}">Login</a>
+				</li>
+				<li class="nav-item">
+					<a class="btn btn-primary  me-1" aria-current="page" href="{{ url_for('auth.register') }}">Sign
+						Up</a>
+				</li>
+				{% endif %}
+			</ul>
+		</div>
+	</div>
 </nav>

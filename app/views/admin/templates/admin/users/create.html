@@ -2,73 +2,73 @@
 {% import "macros/macro_pagination.html" as widget %}
 
 {% block navbar %}
-    {% include "navbar.html" %}
+{% include "navbar.html" %}
 {% endblock %}
 
 {% block content %}
 
-    <div class="container">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_view') }}">Admin</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.tags.tag_view') }}">Users</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Create</li>
+    </ol>
+</nav>
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_view') }}">Admin</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.tags.tag_view') }}">Users</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Create</li>
-            </ol>
-        </nav>
+<h3>{% block title %} Create user {% endblock %}</h3>
 
-        <h3>{% block title %} Create user {% endblock %}</h3>
+<div class="card p-3">
+    <form method="post" action="" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
 
-        <form method="post" action="" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-
-            <fieldset>
-                <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-                    {% if form.username.errors %}
-                        {{ form.username(class="form-control is-invalid") }}
-                            {% for error in form.username.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.username(class="form-control") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
-                        {{ form.email(class="form-control is-invalid") }}
-                            {% for error in form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.email(class="form-control") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-                    {% if form.password.errors %}
-                        {{ form.password(class="form-control is-invalid") }}
-                            {% for error in form.password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                    {% else %}
-                        {{ form.password(class="form-control") }}
-                    {% endif %}
-                </div>
-                <div class="form-group mt-3">
-                    {{ form.confirmed(class="form-check-input") }}
-                    <label class="form-check-label" for="flexCheckDefault">
-                        {{ form.confirmed.label(class="form-control-label") }}
-                    </label>
-                </div>
-            </fieldset>
-            <div class="float-end mt-3">
-                <a href="{{ url_for('admin.users.user_view') }}" class="btn btn-secondary">Cancel</a>
-                {{ form.submit(class="btn btn-primary") }}
+        <fieldset>
+            <div class="form-group">
+                {{ form.username.label(class="form-control-label") }}
+                {% if form.username.errors %}
+                {{ form.username(class="form-control is-invalid") }}
+                {% for error in form.username.errors %}
+                <span>{{ error }}</span>
+                {% endfor%}
+                {% else %}
+                {{ form.username(class="form-control") }}
+                {% endif %}
             </div>
-        </form>
-    </div>
+            <div class="form-group">
+                {{ form.email.label(class="form-control-label") }}
+                {% if form.email.errors %}
+                {{ form.email(class="form-control is-invalid") }}
+                {% for error in form.email.errors %}
+                <span>{{ error }}</span>
+                {% endfor%}
+                {% else %}
+                {{ form.email(class="form-control") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label(class="form-control-label") }}
+                {% if form.password.errors %}
+                {{ form.password(class="form-control is-invalid") }}
+                {% for error in form.password.errors %}
+                <span>{{ error }}</span>
+                {% endfor%}
+                {% else %}
+                {{ form.password(class="form-control") }}
+                {% endif %}
+            </div>
+            <div class="form-group mt-3">
+                {{ form.confirmed(class="form-check-input") }}
+                <label class="form-check-label" for="flexCheckDefault">
+                    {{ form.confirmed.label(class="form-control-label") }}
+                </label>
+            </div>
+        </fieldset>
+        <div class="float-end mt-3">
+            <a href="{{ url_for('admin.users.user_view') }}" class="btn btn-secondary">Cancel</a>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+
 
 {% endblock %}

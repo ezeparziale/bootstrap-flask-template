@@ -4,8 +4,6 @@
 {% include "navbar.html" %}
 {% endblock %}
 
-{% block title %} Cuenta {% endblock %}
-
 {% block content %}
 
 <nav aria-label="breadcrumb">
@@ -14,6 +12,8 @@
         <li class="breadcrumb-item active" aria-current="page">Perfil</li>
     </ol>
 </nav>
+
+<h3>{% block title %} My account {% endblock %}</h3>
 
 <form method="post" action="" enctype="multipart/form-data">
     <div class="card mt-3">

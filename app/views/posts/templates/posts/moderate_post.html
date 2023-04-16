@@ -2,63 +2,64 @@
 {% import "macros/macro_pagination.html" as widget %}
 
 {% block navbar %}
-    {% include "navbar.html" %}
+{% include "navbar.html" %}
 {% endblock %}
 
 {% block title %} Moderar Post {% endblock %}
 
 {% block content %}
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('posts.moderate') }}">Moderate</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Posts</li>
-            </ol>
-        </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('posts.moderate') }}">Moderate</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Posts</li>
+    </ol>
+</nav>
 
-        <h2>Moderar Post</h2>
+<h3>Moderar Post</h3>
 
-        <div class="list-group "> 
-            {% for post in pagination %}
-                <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action" aria-current="true">
-                    <div class="row">
-                        <div class="col-auto">
-                            <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" class="image-posts" alt="avatar" width="40"
-                            height="40">
+<div class="list-group ">
+    {% for post in pagination %}
+    <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action"
+        aria-current="true">
+        <div class="row">
+            <div class="col-auto">
+                <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }}" class="image-posts"
+                    alt="avatar" width="40" height="40">
+            </div>
+            <div class="col-sm-11">
+                <div class="row">
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex">
+                            <h5 class="mb-1">{{ post.title }}</h5>
+                            {% if post.is_closed() %}
+                            <h6> <span class="badge bg-secondary ms-2">Cerrado</span></h6>
+                            {% endif %}
+                            {% if post.disabled %}
+                            <h6> <span class="badge bg-danger ms-2">Disabled</span></h6>
+                            {% endif %}
                         </div>
-                        <div class="col-sm-11">
-                            <div class="row">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <div class="d-flex">
-                                        <h5 class="mb-1">{{ post.title }}</h5>
-                                        {% if post.is_closed() %}
-                                        <h6> <span class="badge bg-secondary ms-2">Cerrado</span></h6>
-                                        {% endif %}
-                                        {% if post.disabled %}
-                                        <h6> <span class="badge bg-danger ms-2">Disabled</span></h6>
-                                        {% endif %}
-                                    </div>
-                                    <small>{{ moment(post.created_at).fromNow() }}</small>
-                                </div>
-                            </div>
-                            <div class="text-muted">
-                                <small>
-                                    <i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios
-                                    <i class="bi bi-star"></i> {{ post.likes.count() }} Me gusta
-                                </small>
-                            </div>
-                        </div>
+                        <small>{{ moment(post.created_at).fromNow() }}</small>
                     </div>
-                </a>
-                
-            {% endfor %}
+                </div>
+                <div class="text-muted">
+                    <small>
+                        <i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios
+                        <i class="bi bi-star"></i> {{ post.likes.count() }} Me gusta
+                    </small>
+                </div>
+            </div>
         </div>
-    
-        {{ widget.pagination(pagination, 'posts.moderate_post', name="Moderate posts") }}
-  
+    </a>
+
+    {% endfor %}
+</div>
+
+{{ widget.pagination(pagination, 'posts.moderate_post', name="Moderate posts") }}
+
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('posts.static', filename='js/moderate_comments.js') }}"></script>
+<script src="{{ url_for('posts.static', filename='js/moderate_comments.js') }}"></script>
 {% endblock %}

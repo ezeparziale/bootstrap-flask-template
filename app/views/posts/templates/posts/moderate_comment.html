@@ -2,50 +2,53 @@
 {% import "macros/macro_pagination.html" as widget %}
 
 {% block navbar %}
-    {% include "navbar.html" %}
+{% include "navbar.html" %}
 {% endblock %}
 
 {% block title %} Moderar Comentarios {% endblock %}
 
 {% block content %}
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('posts.moderate') }}">Moderate</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Comments</li>
-        </ol>
-        </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('posts.moderate') }}">Moderate</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Comments</li>
+    </ol>
+</nav>
 
-        <h2>Moderar Comentarios</h2>
+<h3>Moderar Comentarios</h3>
 
-        {% for comment in pagination %}
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{ comment.author.username }}</h5>
-                            <small>{{ moment(comment.created_at).fromNow() }}</small>
-                        </div>
-                        <p class="mb-1">{{ comment.content }}</p>
+{% for comment in pagination %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ comment.author.username }}</h5>
+            <small>{{ moment(comment.created_at).fromNow() }}</small>
+        </div>
+        <p class="mb-1">{{ comment.content }}</p>
 
-                        <div id="disable-comment-{{comment.id}}-section" class="small text-muted">
-                            <button class="btn btn-sm shadow-none text-muted" id="disable-comment-{{comment.id}}-btn" value="{{comment.id}}" onclick="disableComment(this.value)">
-                                {% if comment.disabled %}
-                                    <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Habilitar</span>
-                                {% else %}
-                                    <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Deshabilitar</span>
-                                {% endif %}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-        {% endfor %}
+        <div id="disable-comment-{{comment.id}}-section" class="small text-muted">
+            <button class="btn btn-sm shadow-none text-muted" id="disable-comment-{{comment.id}}-btn"
+                value="{{comment.id}}" onclick="disableComment(this.value)">
+                {% if comment.disabled %}
+                <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span
+                    id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Habilitar</span>
+                {% else %}
+                <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span
+                    id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Deshabilitar</span>
+                {% endif %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
-        {{ widget.pagination(pagination, 'posts.moderate_comment', name="Moderate comments") }}
-  
+{{ widget.pagination(pagination, 'posts.moderate_comment', name="Moderate comments") }}
+
 {% endblock %}
 
 
 {% block scripts %}
-    <script src="{{ url_for('posts.static', filename='js/moderate_posts.js') }}"></script>
+<script src="{{ url_for('posts.static', filename='js/moderate_posts.js') }}"></script>
 {% endblock %}
