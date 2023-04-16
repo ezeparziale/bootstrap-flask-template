@@ -16,91 +16,94 @@
 
 <h3>{% block title %} Edit profile {% endblock %}</h3>
 
-<div class="card mt-3 p-3">
-    <form method="post" action="" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <fieldset>
-            <div class="form-group">
-                <div class="row align-items-center">
-                    <div class="col-2">
-                        <img id="avatar" src="{{ image_url }}" alt="avatar"
-                            style="max-height: 150px; max-width: 150px;">
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group">
-                            <!-- {{ form.picture.label(class="form-control-label") }} -->
-                            {% if form.picture.errors %}
-                            {{ form.picture(class="form-control form-control is-invalid") }}
-                            {% for error in form.picture.errors %}
-                            <span>{{ error }}</span>
-                            {% endfor %}
-                            {% else %}
-                            {{ form.picture(class="form-control form-control") }}
-                            {% endif %}
+<div class="card mt-3">
+    <div class="row m-3">
+        <form method="post" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <div class="form-group mt-3">
+                    <div class="row align-items-center">
+                        <div class="col-2">
+                            <img id="avatar" src="{{ image_url }}" alt="avatar"
+                                style="max-height: 150px; max-width: 150px;">
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <!-- {{ form.picture.label(class="form-control-label") }} -->
+                                {% if form.picture.errors %}
+                                {{ form.picture(class="form-control form-control is-invalid") }}
+                                {% for error in form.picture.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                                {% else %}
+                                {{ form.picture(class="form-control form-control") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-secondary" role="button" onclick="reset_avatar()">
+                                Resetear
+                            </button>
                         </div>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-secondary" role="button" onclick="reset_avatar()">
-                            Resetear
-                        </button>
-                    </div>
+                </div>
+                <div class="form-group mt-3">
+                    {{ form.email.label(class="form-control-label") }}
+                    {% if form.email.errors %}
+                    {{ form.email(class="form-control form-control-lg is-invalid") }}
+                    {% for error in form.email.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor%}
+                    {% else %}
+                    {{ form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group mt-3">
+                    {{ form.username.label(class="form-control-label") }}
+                    {% if form.username.errors %}
+                    {{ form.username(class="form-control form-control-lg is-invalid") }}
+                    {% for error in form.username.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor%}
+                    {% else %}
+                    {{ form.username(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group mt-3">
+                    {{ form.firstname.label(class="form-control-label") }}
+                    {% if form.firstname.errors %}
+                    {{ form.firstname(class="form-control form-control-lg is-invalid") }}
+                    {% for error in form.firstname.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor%}
+                    {% else %}
+                    {{ form.firstname(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group mt-3">
+                    {{ form.lastname.label(class="form-control-label") }}
+                    {% if form.lastname.errors %}
+                    {{ form.lastname(class="form-control form-control-lg is-invalid") }}
+                    {% for error in form.lastname.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor%}
+                    {% else %}
+                    {{ form.lastname(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="text-end">
+                <div class="form-group mt-3">
+                    <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button"
+                        aria-disabled="true">
+                        Cancelar
+                    </a>
+                    {{ form.submit(class="btn btn-primary") }}
                 </div>
             </div>
-            <div class="form-group">
-                {{ form.email.label(class="form-control-label") }}
-                {% if form.email.errors %}
-                {{ form.email(class="form-control form-control-lg is-invalid") }}
-                {% for error in form.email.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.email(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.username.label(class="form-control-label") }}
-                {% if form.username.errors %}
-                {{ form.username(class="form-control form-control-lg is-invalid") }}
-                {% for error in form.username.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.username(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.firstname.label(class="form-control-label") }}
-                {% if form.firstname.errors %}
-                {{ form.firstname(class="form-control form-control-lg is-invalid") }}
-                {% for error in form.firstname.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.firstname(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.lastname.label(class="form-control-label") }}
-                {% if form.lastname.errors %}
-                {{ form.lastname(class="form-control form-control-lg is-invalid") }}
-                {% for error in form.lastname.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.lastname(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-        </fieldset>
-        <div class="text-end">
-            <div class="form-group mt-3">
-                <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button"
-                    aria-disabled="true">
-                    Cancelar
-                </a>
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
+
 </div>
 
 {% endblock %}
