@@ -6,8 +6,13 @@ from flask_login import current_user, login_required
 from app import app, db
 from app.decorators import password_not_expired
 
-from ...models import UserDetail
-from .forms import AccountInfoForm, AccountUpdateForm, ChangePasswordForm
+from ...models import User, UserDetail
+from .forms import (
+    AccountInfoForm,
+    AccountUpdateForm,
+    ChangePasswordForm,
+    DeleteAccountForm,
+)
 
 account_bp = Blueprint(
     "account",
@@ -33,15 +38,23 @@ def save_image(picture_file):
 # @fresh_login_required
 def account():
     form = AccountInfoForm()
+    form2 = DeleteAccountForm()
+
     if form.validate_on_submit():
         return redirect(url_for("account.edit_account"))
+
     form.email.data = current_user.email
     form.username.data = current_user.username
+
     if current_user.details:
         form.firstname.data = current_user.details.firstname
         form.lastname.data = current_user.details.lastname
+
     image_url = url_for("static", filename="img/avatars/" + current_user.image_file)
-    return render_template("account/account.html", form=form, image_url=image_url)
+
+    return render_template(
+        "account/account.html", form=form, image_url=image_url, form2=form2
+    )
 
 
 @account_bp.route("/edit", methods=["GET", "POST"])
@@ -116,3 +129,21 @@ def change_password():
         else:
             flash("Invalid current password", category="danger")
     return render_template("account/change_password.html", form=form)
+
+
+@account_bp.route("/delete_account", methods=["POST"])
+def delete_account():
+    form = DeleteAccountForm()
+
+    if form.validate_on_submit():
+        if not form.confirm_delete.data:
+            flash(
+                "Please confirm that you want to delete your account", category="info"
+            )
+            return redirect(url_for("account.account"))
+
+        User.delete_user(current_user)
+        flash("Your account has been deleted", category="success")
+        return redirect(url_for("home.home_view"))
+
+    return redirect(url_for("account.account"))

@@ -24,7 +24,7 @@ from flask_login import (
 from app import settings
 from app.utils.email import send_email
 
-from ...models import User
+from ...models import DeletedUser, User
 from .forms import (
     LoginForm,
     RegistrationForm,
@@ -119,8 +119,17 @@ def send_email_confirm(user):
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("home.home_view"))
+
     form = RegistrationForm()
+
     if form.validate_on_submit():
+        if DeletedUser.check_alredy_exists(
+            username=form.username.data,
+            email=form.email.data,
+        ):
+            flash("Username or Email are banned", category="info")
+            return redirect(url_for("auth.register"))
+
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -132,6 +141,7 @@ def register():
         flash("Verifique su mail para confirmar cuenta", category="info")
         send_email_confirm(user)
         return redirect(url_for("auth.login"))
+
     return render_template("auth/register.html", form=form)
 
 

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
-from wtforms import PasswordField, StringField, SubmitField
+from wtforms import BooleanField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
@@ -47,3 +47,8 @@ class ChangePasswordForm(FlaskForm):
         ],
     )
     submit = SubmitField("Save")
+
+
+class DeleteAccountForm(FlaskForm):
+    confirm_delete = BooleanField("I confirm that I want to delete my account")
+    submit = SubmitField("Delete Account")

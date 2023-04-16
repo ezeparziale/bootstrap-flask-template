@@ -86,9 +86,17 @@ class User(db.Model, UserMixin):
         nullable=False,
     )
     details: Mapped["UserDetail"] = relationship(
-        backref="user", lazy=True, uselist=False
+        backref="user",
+        lazy=True,
+        uselist=False,
+        cascade="all, delete-orphan",
     )
-    posts: Mapped[List["Post"]] = relationship("Post", backref="author", lazy="dynamic")
+    posts: Mapped[List["Post"]] = relationship(
+        "Post",
+        backref="author",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
     followed: Mapped[List["Follow"]] = relationship(
         "Follow",
         foreign_keys=[Follow.follower_id],
@@ -104,37 +112,69 @@ class User(db.Model, UserMixin):
         cascade="all, delete-orphan",
     )
     comments: Mapped[List["Comment"]] = relationship(
-        "Comment", backref="author", lazy="dynamic"
+        "Comment",
+        backref="author",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     rol_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False
     )
-    likes: Mapped[List["Like"]] = relationship("Like", backref="user", lazy="dynamic")
+    likes: Mapped[List["Like"]] = relationship(
+        "Like",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
     favorites: Mapped[List["Favorite"]] = relationship(
-        "Favorite", backref="user", lazy="dynamic"
+        "Favorite",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     last_message_read_time: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True)
     notifications: Mapped[List["Notification"]] = relationship(
-        "Notification", backref="user", lazy="dynamic"
+        "Notification",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     views: Mapped[List["View"]] = relationship("View", backref="user", lazy="dynamic")
     report: Mapped[List["Report"]] = relationship(
-        "Report", backref="user", lazy="dynamic"
+        "Report",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     comments_reported: Mapped[List["CommentReport"]] = relationship(
-        "CommentReport", backref="user", lazy="dynamic"
+        "CommentReport",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     comments_liked: Mapped[List["CommentLike"]] = relationship(
-        "CommentLike", backref="user", lazy="dynamic"
+        "CommentLike",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     participant: Mapped[List["Participant"]] = relationship(
-        "Participant", backref="user", lazy="dynamic"
+        "Participant",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     room_messages: Mapped[List["RoomMessage"]] = relationship(
-        "RoomMessage", backref="author", lazy="dynamic"
+        "RoomMessage",
+        backref="author",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
     password_history: Mapped[List["PasswordHistory"]] = relationship(
-        "PasswordHistory", backref="user", lazy="dynamic"
+        "PasswordHistory",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
 
     def __init__(self, **kwargs) -> None:
@@ -411,6 +451,16 @@ class User(db.Model, UserMixin):
                 return True
         else:
             return False
+
+    @staticmethod
+    def delete_user(user: "User") -> None:
+        deleted_user = DeletedUser(
+            username=user.username,
+            email=user.email,
+        )
+        db.session.add(deleted_user)
+        db.session.delete(user)
+        db.session.commit()
 
 
 class PasswordHistory(db.Model):
@@ -1016,3 +1066,39 @@ class RoomMessage(db.Model):
 
     def __repr__(self) -> str:
         return f"id={self.id} message={self.message}, created_at={self.created_at}, user_id={self.user_id} room_id={self.room_id}"  # noqa: E501
+
+
+class DeletedUser(db.Model):
+    __tablename__ = "deleted_users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(40), nullable=False)
+    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    deleted_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
+    def __repr__(self) -> str:
+        return f"DeletedUser(id={self.id!r}, username={self.username!r}, email={self.email!r}, deleted_at={self.deleted_at!r})"
+
+    @staticmethod
+    def check_alredy_exists(username: str, email: str) -> bool:
+        username_exists = (
+            db.session.execute(db.select(DeletedUser).filter_by(username=username))
+            .scalars()
+            .first()
+        )
+        if username_exists:
+            return True
+
+        email_exists = (
+            db.session.execute(db.select(DeletedUser).filter_by(email=email))
+            .scalars()
+            .first()
+        )
+        if email_exists:
+            return True
+
+        return False
