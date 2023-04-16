@@ -19,7 +19,7 @@
 
 <h3>Moderar Post</h3>
 
-<div class="list-group ">
+<div class="list-group mt-3">
     {% for post in pagination %}
     <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action"
         aria-current="true">
@@ -52,7 +52,6 @@
             </div>
         </div>
     </a>
-
     {% endfor %}
 </div>
 

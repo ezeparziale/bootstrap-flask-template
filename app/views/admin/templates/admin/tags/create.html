@@ -18,12 +18,12 @@
 
 <h3>{% block title %} Create new tag {% endblock %}</h3>
 
-<div class="card p-3">
+<div class="card mt-3 p-3">
     <form method="post" action="" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
 
         <fieldset>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 {{ form.name.label(class="form-control-label") }}
                 {% if form.name.errors %}
                 {{ form.name(class="form-control is-invalid") }}

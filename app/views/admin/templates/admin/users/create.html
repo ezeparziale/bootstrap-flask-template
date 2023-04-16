@@ -18,12 +18,12 @@
 
 <h3>{% block title %} Create user {% endblock %}</h3>
 
-<div class="card p-3">
+<div class="card mt-3 p-3">
     <form method="post" action="" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
 
         <fieldset>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 {{ form.username.label(class="form-control-label") }}
                 {% if form.username.errors %}
                 {{ form.username(class="form-control is-invalid") }}
@@ -34,7 +34,7 @@
                 {{ form.username(class="form-control") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 {{ form.email.label(class="form-control-label") }}
                 {% if form.email.errors %}
                 {{ form.email(class="form-control is-invalid") }}
@@ -45,7 +45,7 @@
                 {{ form.email(class="form-control") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 {{ form.password.label(class="form-control-label") }}
                 {% if form.password.errors %}
                 {{ form.password(class="form-control is-invalid") }}
@@ -57,7 +57,7 @@
                 {% endif %}
             </div>
             <div class="form-group mt-3">
-                {{ form.confirmed(class="form-check-input") }}
+                {{ form.confirmed(class="form-check-input mt-3") }}
                 <label class="form-check-label" for="flexCheckDefault">
                     {{ form.confirmed.label(class="form-control-label") }}
                 </label>

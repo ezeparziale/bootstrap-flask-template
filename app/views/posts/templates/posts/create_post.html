@@ -4,7 +4,6 @@
 {% include "navbar.html" %}
 {% endblock %}
 
-{% block title %} Create Post {% endblock %}
 
 {% block content %}
 
@@ -16,9 +15,9 @@
     </ol>
 </nav>
 
-<h3>New post</h3>
+<h3>{% block title %} Create Post {% endblock %}</h3>
 
-<div class="card p-3">
+<div class="card mt-3 p-3">
 
     <form method="post" action="" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
@@ -28,7 +27,7 @@
                 {{ form.title.label(class="form-control-label") }}
                 {{ form.title(class="form-control form-control-lg disabled") }}
             </div>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 {{ form.content.label(class="form-control-label") }}
                 {% if form.content.errors %}
                 {{ form.content(class="form-control form-control-lg is-invalid") }}
@@ -39,7 +38,7 @@
                 {{ form.content(class="form-control form-control-lg") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 {{ form.tags.label(class="form-control-label") }}
                 {% if form.tags.errors %}
                 {{ form.tags(class="form-select is-invalid") }}

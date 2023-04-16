@@ -20,8 +20,8 @@
 <h3>Moderar Comentarios</h3>
 
 {% for comment in pagination %}
-<div class="card">
-    <div class="card-body">
+<div class="card mt-3">
+    <div class="card-body m-3">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ comment.author.username }}</h5>
             <small>{{ moment(comment.created_at).fromNow() }}</small>
@@ -50,5 +50,5 @@
 
 
 {% block scripts %}
-<script src="{{ url_for('posts.static', filename='js/moderate_posts.js') }}"></script>
+<script src="{{ url_for('posts.static', filename='js/moderate_comments.js') }}"></script>
 {% endblock %}
