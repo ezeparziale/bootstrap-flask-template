@@ -180,7 +180,10 @@ class User(db.Model, UserMixin):
     def __init__(self, **kwargs) -> None:
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
+            if self.email in settings.ADMIN_EMAILS:
+                self.role = Role.query.filter_by(name="Admin").first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
 
     def __repr__(self) -> str:
         return f"User(username={self.username}, email={self.email}, created_at={self.created_at})"  # noqa: E501

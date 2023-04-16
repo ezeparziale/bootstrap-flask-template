@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     BLOCK_TIME: timedelta = timedelta(minutes=1)
     CHECK_LAST_PASSWORD: int = 5
     PASSWORD_EXPIRATION_DAYS: int = 90
+    ADMIN_EMAILS: list[str] = []
 
     # Mail
     MAIL_SERVER: str
