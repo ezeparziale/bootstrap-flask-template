@@ -16,63 +16,70 @@
 
 <h3>{% block title %} Posts {% endblock %}</h3>
 
-<div class="row mt-3">
-    <div class="col-auto me-auto">
-        <div class="nav nav-pills">
+<div class="row">
+    <div class="col-auto me-auto mt-3">
+        <ul class="nav nav-pills">
             <li class="nav-item">
-                <a class="nav-link {% if view_mode == 0 %} active {% endif %}" aria-current="page"
-                    href="{{ url_for('posts.show_all') }}"><i class="bi bi-clipboard2-fill"></i> Ver todos</a>
+                <a class="nav-link {%- if view_mode == 0 %} active {%- endif %}" {% if view_mode==0 %}
+                    aria-current="page" {% endif %} href="{{ url_for('posts.show_all') }}"><i
+                        class="bi bi-clipboard2-fill"></i> All</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if view_mode == 1 %} active {% endif %}"
-                    href="{{ url_for('posts.show_followed') }}"><i class="bi bi-person-plus-fill"></i> Seguidos</a>
+                <a class="nav-link {%- if view_mode == 1 %} active {%- endif %}" {% if view_mode==1 %}
+                    aria-current="page" {% endif %} href="{{ url_for('posts.show_followed') }}"><i
+                        class="bi bi-person-plus-fill"></i> Followed</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if view_mode == 2 %} active {% endif %}"
-                    href="{{ url_for('posts.show_favorite') }}"><i class="bi bi-bookmark-fill"></i> Favoritos</a>
+                <a class="nav-link {%- if view_mode == 2 %} active {%- endif %}" {% if view_mode==2 %}
+                    aria-current="page" {% endif %} href="{{ url_for('posts.show_favorite') }}"><i
+                        class="bi bi-bookmark-fill"></i> Favorities</a>
             </li>
-        </div>
+        </ul>
     </div>
-    <div class="col-auto">
-        <div class="nav nav-pills text-right">
+    <div class="col-auto mt-3">
+        <ul class="nav nav-pills text-right">
             <li class="nav-item">
                 <a class="nav-link active" href="{{ url_for('posts.create_post') }}"><i
-                        class="bi bi-file-earmark-fill"></i> Crear</a>
+                        class="bi bi-file-earmark-fill"></i> Create</a>
             </li>
-        </div>
+        </ul>
     </div>
+</div>
 
-    <div class="container">
-        <div class="list-group mt-3">
-            {% for post in pagination %}
-            <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action"
-                aria-current="true">
+<div class="list-group mt-3">
+    {% for post in pagination %}
+    <a href="{{ url_for('posts.get_post', id=post.id) }}" class="list-group-item list-group-item-action">
+        <div class="row">
+            <div class="col-auto">
+                <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }} "
+                    class="d-none d-sm-block d-sm-none d-md-block" alt="avatar" width="50" height="50">
+            </div>
+            <div class="col-10">
                 <div class="row">
                     <div class="col-auto">
-                        <img src="{{ url_for('static', filename='img/avatars/' ~ post.author.image_file) }} "
-                            class="image-posts" alt="avatar" width="50" height="50">
-                    </div>
-                    <div class="col-sm-11">
-                        <div class="d-flex w-100 justify-content-between">
-                            <div class="d-flex">
-                                <h5 class="mb-1">{{ post.title }}</h5>
-                                {% if post.is_closed() %}
-                                <h6><span class="badge text-bg-danger ms-2">Cerrado</span></h6>
-                                {% endif %}
-                            </div>
-                            <small><i class="bi bi-clock"></i> {{ moment(post.created_at).fromNow() }}</small>
+                        <div class="d-flex align-items-center">
+                            <h5 class="text-truncate">{{ post.title }}</h5>
+                            {% if post.is_closed() %}
+                            <h6><span class="badge text-bg-danger ms-2">Closed</span></h6>
+                            {% endif %}
                         </div>
-                        <div class="text-muted">
-                            <small><i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios</small>
-                            <small class="ms-2"><i class="bi bi-star"></i> {{ post.likes.count() }} Me gusta</small>
+                        <span class="small text-body-secondary"><i class="bi bi-chat"></i> {{ post.comments.count() }}
+                            Comments</span>
+                        <span class="small text-body-secondary ms-2"><i class="bi bi-star"></i> {{ post.likes.count() }}
+                            Likes</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="small text-body-secondary">
+                            <i class="bi bi-clock"></i> {{ moment(post.created_at).fromNow() }}
                         </div>
                     </div>
                 </div>
-            </a>
-            {% endfor %}
+            </div>
         </div>
-    </div>
+    </a>
+    {% endfor %}
+</div>
 
-    {{ widget.pagination(pagination, 'posts.posts', name="Post list") }}
+{{ widget.pagination(pagination, 'posts.posts', name="Post list") }}
 
-    {% endblock %}
+{% endblock %}
