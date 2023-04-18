@@ -1,0 +1,16 @@
+{% macro render_field(field) %}
+    {# --- Checkbox field ---- #}
+    {% if field.widget.input_type == "checkbox" %}
+        {{ field(class="form-check-input") }}
+        {{ field.label(class="form-check-label") }}
+    {% else %}
+        {# --- String field ---#}
+        {{ field.label(class="form-label") }}
+        {% if field.errors %}
+            {{ field(class="form-control form-control-lg is-invalid") }}
+            {% for error in field.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+        {% else %}
+            {{ field(class="form-control form-control-lg") }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
