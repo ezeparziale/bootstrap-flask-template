@@ -22,7 +22,7 @@
 				</li>
 				<li class="nav-item">
 					<a class="nav-link active" aria-current="page" href="{{ url_for('user.show_rooms') }}">
-						Mensajes
+						Messages
 						{% set count_messages = current_user.new_messages() %}
 						<span id="messages_unread" class="badge bg-secondary">{{ count_messages if count_messages else
 							"" }}</span>
@@ -69,12 +69,12 @@
 					<ul class="dropdown-menu" aria-labelledby="dropdownUser">
 						<li>
 							<a class="dropdown-item" aria-current="page" href="{{ url_for('account.account') }}">
-								<i class="bi bi-person"></i> Perfil
+								<i class="bi bi-person"></i> Profile
 							</a>
 						</li>
 						<li>
 							<a class="dropdown-item" aria-current="page" href="{{ url_for('account.account') }}">
-								<i class="bi bi-gear"></i> Configuración
+								<i class="bi bi-gear"></i> Configuration
 							</a>
 						</li>
 						<li>
