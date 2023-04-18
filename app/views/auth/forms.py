@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, PasswordField, StringField, SubmitField
+from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 
 from app.models import User
@@ -7,16 +7,16 @@ from app.models import User
 
 class RegistrationForm(FlaskForm):
     username = StringField(
-        label="USUARIO", validators=[DataRequired(), Length(min=3, max=20)]
+        label="Username", validators=[DataRequired(), Length(min=3, max=20)]
     )
-    email = StringField(label="EMAIL", validators=[DataRequired(), Email()])
+    email = EmailField(label="Email", validators=[DataRequired(), Email()])
     password = PasswordField(
-        label="PASSWORD", validators=[DataRequired(), Length(min=6, max=16)]
+        label="Password", validators=[DataRequired(), Length(min=6, max=16)]
     )
     confirm_password = PasswordField(
-        label="CONFIRMAR PASSWORD", validators=[DataRequired(), EqualTo("password")]
+        label="Confirm Password", validators=[DataRequired(), EqualTo("password")]
     )
-    submit = SubmitField(label="Registrar")
+    submit = SubmitField(label="Register")
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
@@ -30,17 +30,17 @@ class RegistrationForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = StringField(label="EMAIL", validators=[DataRequired(), Email()])
+    email = EmailField(label="Email", validators=[DataRequired(), Email()])
     password = PasswordField(
-        label="PASSWORD", validators=[DataRequired(), Length(min=6, max=16)]
+        label="Password", validators=[DataRequired(), Length(min=6, max=16)]
     )
-    remember_me = BooleanField(label="Recuérdame")
-    submit = SubmitField(label="Iniciar sesión")
+    remember_me = BooleanField(label="Remember me")
+    submit = SubmitField(label="Login")
 
 
 class ResetPasswordRequestForm(FlaskForm):
-    email = StringField(label="EMAIL", validators=[DataRequired(), Email()])
-    submit = SubmitField(label="Restablecer Password")
+    email = EmailField(label="Email", validators=[DataRequired(), Email()])
+    submit = SubmitField(label="Reset Password")
 
 
 class ResetPasswordForm(FlaskForm):
@@ -48,9 +48,10 @@ class ResetPasswordForm(FlaskForm):
         label="Password", validators=[DataRequired(), Length(min=6, max=16)]
     )
     confirm_password = PasswordField(
-        label="Confirma Password", validators=[DataRequired(), EqualTo("new_password")]
+        label="Confirm Password",
+        validators=[DataRequired(), EqualTo("new_password", "Passwords must match")],
     )
-    submit = SubmitField(label="Cambiar Password")
+    submit = SubmitField(label="Change Password")
 
 
 class TwoFAForm(FlaskForm):
