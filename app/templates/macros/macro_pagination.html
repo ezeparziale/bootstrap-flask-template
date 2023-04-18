@@ -1,11 +1,12 @@
 {% macro pagination(pagination, endpoint) %}
 
 {% if pagination.pages > 1 %}
-<nav aria-label="{{ kwargs.name }}">
-    <ul class="pagination justify-content-center">
+<nav aria-label="{{ kwargs.name }}" class="mt-3">
+    {% set _ = kwargs.pop("name", None) %}
+    <ul class="pagination justify-content-end">
         <li class="page-item {% if not pagination.has_prev %} disabled {% endif %}">
             <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}"
-                aria-label="Previous">Anterior</a>
+                aria-label="Previous">Previous</a>
         </li>
         {% for page in pagination.iter_pages() %}
         {% if page %}
@@ -20,7 +21,7 @@
         {% endfor %}
         <li class="page-item {% if not pagination.has_next %} disabled {% endif %}">
             <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}"
-                aria-label="Next">Siguiente</a>
+                aria-label="Next">Next</a>
         </li>
     </ul>
 </nav>
