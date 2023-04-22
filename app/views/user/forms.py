@@ -5,17 +5,17 @@ from wtforms.validators import DataRequired, Length
 
 class SendMessageForm(FlaskForm):
     message = TextAreaField(
-        label="Mensaje", validators=[DataRequired(), Length(min=10)]
+        label="Message", validators=[DataRequired(), Length(min=10)]
     )
-    submit = SubmitField(label="Enviar")
+    submit = SubmitField(label="Send")
 
 
 class ReplyMessageForm(FlaskForm):
     message = TextAreaField(
-        label="Mensaje", validators=[DataRequired(), Length(min=10)]
+        label="Message", validators=[DataRequired(), Length(min=10)]
     )
-    submit = SubmitField(label="Responder")
+    submit = SubmitField(label="Respond")
 
 
 class EmptyForm(FlaskForm):
-    submit = SubmitField(label="Reponder")
+    submit = SubmitField(label="Respond")
