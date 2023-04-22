@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "macros/macro_pagination.html" as widget %}
+{% from "macros/form.html" import render_field %}
 
 {% block navbar %}
 {% include "navbar.html" %}
@@ -9,9 +9,9 @@
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_view') }}">Admin</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.tags.tag_view') }}">Users</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('admin.admin_view') }}">Admin</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('admin.tags.tag_view') }}">Users</a></li>
         <li class="breadcrumb-item active" aria-current="page">Edit</li>
     </ol>
 </nav>
@@ -23,33 +23,14 @@
         {{ form.hidden_tag() }}
 
         <fieldset>
-            <div class="form-group mt-3">
-                {{ form.username.label(class="form-control-label") }}
-                {% if form.username.errors %}
-                {{ form.username(class="form-control is-invalid") }}
-                {% for error in form.username.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.username(class="form-control") }}
-                {% endif %}
+            <div class="form-group mt-2">
+                {{ render_field(form.username) }}
             </div>
-            <div class="form-group mt-3">
-                {{ form.email.label(class="form-control-label") }}
-                {% if form.email.errors %}
-                {{ form.email(class="form-control is-invalid") }}
-                {% for error in form.email.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.email(class="form-control") }}
-                {% endif %}
+            <div class="form-group mt-2">
+                {{ render_field(form.email) }}
             </div>
-            <div class="form-group mt-3">
-                {{ form.confirmed(class="form-check-input") }}
-                <label class="form-check-label" for="flexCheckDefault">
-                    {{ form.confirmed.label(class="form-control-label") }}
-                </label>
+            <div class="form-check form-switch mt-2">
+                {{ render_field(form.confirmed) }}
             </div>
         </fieldset>
         <div class="float-end mt-3">
