@@ -7,23 +7,22 @@
     {% include "navbar.html" %}
 {% endblock %}
 
-{% block title %} Mensaje {% endblock %}
+{% block title %} Message {% endblock %}
 
 {% block content %}
 
-
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('user.show_rooms') }}">Mensajes</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Sala</li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('user.show_rooms') }}">Messages</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Room</li>
         </ol>
     </nav>
 
     <div class="card">
         <form method="post" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
-            <div class="card-footer py-3 border-0 bg-light">
+            <div class="card-footer py-3 border-0">
                 <div class="d-flex flex-start w-100">
                     <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
                         <img class="rounded-circle"

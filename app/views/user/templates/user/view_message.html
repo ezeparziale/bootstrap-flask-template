@@ -22,8 +22,8 @@
 
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('user.messages') }}">Mensajes</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('user.messages') }}">Mensajes</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ message_type }}</li>
         </ol>
     </nav>
@@ -38,12 +38,12 @@
             <div class="card-body">
                 <div class="row">
                     <div class="d-flex w-100 justify-content-between">
-                        <small class="text-muted"> {{ type }}
-                            <a class="text-muted mb-1" type="button" href="{{ url_for('user.user', username=user.username) }}" role="button">
+                        <small class="text-body-secondary"> {{ type }}
+                            <a class="text-body-secondary mb-1" type="button" href="{{ url_for('user.user', username=user.username) }}" role="button">
                                 {{ user.username }}
                             </a>
                         </small>
-                        <small class="text-muted mb-1">{{ moment(message.created_at).fromNow() }}</small>
+                        <small class="text-body-secondary mb-1">{{ moment(message.created_at).fromNow() }}</small>
                     </div>
                 </div>
                 <p class="mb-1">{{ message.message }}</p>

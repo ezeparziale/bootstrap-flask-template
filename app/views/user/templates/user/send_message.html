@@ -9,9 +9,9 @@
 {% block content %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('user.messages') }}">Mensajes</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Enviar mensaje</li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('user.messages') }}">Messages</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Send message</li>
         </ol>
     </nav>
 
@@ -19,7 +19,7 @@
         {{ form.hidden_tag() }}
         <fieldset>
             <legend class="border-bottom mb-4">Destinatario:
-                <a class="text-muted" type="button" href="{{ url_for('user.user', username=recipient.username) }}" role="button">
+                <a class="text-body-secondary" type="button" href="{{ url_for('user.user', username=recipient.username) }}" role="button">
                     {{ recipient.username }}
                 </a>
             </legend>

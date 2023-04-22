@@ -1,45 +1,39 @@
 {% extends "base.html" %}
+{% from "macros/form.html" import render_field %}
 
 {% block navbar %}
-    {% include "navbar.html" %}
+{% include "navbar.html" %}
 {% endblock %}
 
 {% block title %} Enviar Mensaje {% endblock %}
 
 {% block content %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('user.show_rooms') }}">Mensajes</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Enviar mensaje Room</li>
-        </ol>
-    </nav>
 
-    <form method="post" action="" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <fieldset>
-            <legend class="border-bottom mb-4">Destinatario:
-                <a class="text-muted" type="button" href="{{ url_for('user.user', username=recipient.username) }}" role="button">
-                    {{ recipient.username }}
-                </a>
-            </legend>
-            <div class="form-group">
-                {{ form.message.label(class="form-control-label") }}
-                {% if form.message.errors %}
-                    {{ form.message(class="form-control form-control-lg is-invalid") }}
-                        {% for error in form.message.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor%}
-                {% else %}
-                    {{ form.message(class="form-control form-control-lg") }}
-                {% endif %}
-            </div>
-        </fieldset>
-        <div class="text-end">
-            <div class="form-group mt-3">
-                {{ form.submit(class="btn btn-primary") }}
-            </div>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('user.show_rooms') }}">Messages</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Send message</li>
+    </ol>
+</nav>
+
+<form method="post" action="" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <fieldset>
+        <legend class="mb-4">User:
+            <a class="text-body-secondary" type="button" href="{{ url_for('user.user', username=recipient.username) }}"
+                role="button">
+                {{ recipient.username }}
+            </a>
+        </legend>
+        <div class="form-group mt-2">
+            {{ render_field(form.message) }}
         </div>
-        
-    </form>
+    </fieldset>
+    <div class="float-end mt-3">
+        <a href="{{ url_for('user.show_rooms') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class="btn btn-primary") }}
+    </div>
+</form>
+
 {% endblock %}

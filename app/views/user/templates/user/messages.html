@@ -5,14 +5,14 @@
     {% include "navbar.html" %}
 {% endblock %}
 
-{% block title %} Mensajes {% endblock %}
+{% block title %} Messages {% endblock %}
 
 {% block content %}
 
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Mensajes</li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Messages</li>
         </ol>
     </nav>
 
@@ -40,7 +40,7 @@
                         {{ message.recipient.username }} 
                     {% endif %}
                     {% if not message.read and view_message == 0 %}
-                        <span class="badge bg-secondary">Nuevo</span>
+                        <span class="badge bg-secondary">New</span>
                     {% endif %}
                 </h5>
                 <small>{{ moment(message.created_at).fromNow() }}</small>
