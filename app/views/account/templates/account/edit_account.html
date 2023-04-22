@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/form.html" import render_field %}
 
 {% block navbar %}
 {% include "navbar.html" %}
@@ -8,8 +9,8 @@
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('account.account') }}">Perfil</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('account.account') }}">Account</a></li>
         <li class="breadcrumb-item active" aria-current="page">Editar</li>
     </ol>
 </nav>
@@ -42,61 +43,28 @@
                         </div>
                         <div class="col-6">
                             <button class="btn btn-secondary" role="button" onclick="reset_avatar()">
-                                Resetear
+                                Reset
                             </button>
                         </div>
                     </div>
                 </div>
                 <div class="form-group mt-3">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
-                    {{ form.email(class="form-control form-control-lg is-invalid") }}
-                    {% for error in form.email.errors %}
-                    <span>{{ error }}</span>
-                    {% endfor%}
-                    {% else %}
-                    {{ form.email(class="form-control form-control-lg") }}
-                    {% endif %}
+                    {{ render_field(form.email) }}
                 </div>
                 <div class="form-group mt-3">
-                    {{ form.username.label(class="form-control-label") }}
-                    {% if form.username.errors %}
-                    {{ form.username(class="form-control form-control-lg is-invalid") }}
-                    {% for error in form.username.errors %}
-                    <span>{{ error }}</span>
-                    {% endfor%}
-                    {% else %}
-                    {{ form.username(class="form-control form-control-lg") }}
-                    {% endif %}
+                    {{ render_field(form.username) }}
                 </div>
                 <div class="form-group mt-3">
-                    {{ form.firstname.label(class="form-control-label") }}
-                    {% if form.firstname.errors %}
-                    {{ form.firstname(class="form-control form-control-lg is-invalid") }}
-                    {% for error in form.firstname.errors %}
-                    <span>{{ error }}</span>
-                    {% endfor%}
-                    {% else %}
-                    {{ form.firstname(class="form-control form-control-lg") }}
-                    {% endif %}
+                    {{ render_field(form.firstname) }}
                 </div>
                 <div class="form-group mt-3">
-                    {{ form.lastname.label(class="form-control-label") }}
-                    {% if form.lastname.errors %}
-                    {{ form.lastname(class="form-control form-control-lg is-invalid") }}
-                    {% for error in form.lastname.errors %}
-                    <span>{{ error }}</span>
-                    {% endfor%}
-                    {% else %}
-                    {{ form.lastname(class="form-control form-control-lg") }}
-                    {% endif %}
+                    {{ render_field(form.lastname) }}
                 </div>
             </fieldset>
             <div class="text-end">
                 <div class="form-group mt-3">
-                    <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button"
-                        aria-disabled="true">
-                        Cancelar
+                    <a href="{{ url_for('account.account') }}" class="btn btn-secondary" tabindex="-1" role="button">
+                        Cancel
                     </a>
                     {{ form.submit(class="btn btn-primary") }}
                 </div>
