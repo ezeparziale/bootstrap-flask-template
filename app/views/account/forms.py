@@ -5,30 +5,30 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
 class AccountInfoForm(FlaskForm):
-    firstname = StringField(label="Nombre")
-    lastname = StringField(label="Apellido")
-    username = StringField(label="Usuario")
+    firstname = StringField(label="First name")
+    lastname = StringField(label="Last name")
+    username = StringField(label="Username")
     email = StringField(label="Email")
-    picture = FileField(label="Foto de perfil")
-    submit = SubmitField(label="Editar")
+    picture = FileField(label="Profile picture")
+    submit = SubmitField(label="Edit")
 
 
 class AccountUpdateForm(FlaskForm):
     firstname = StringField(
-        label="Nombre", validators=[DataRequired(), Length(min=3, max=20)]
+        label="First name", validators=[DataRequired(), Length(min=3, max=20)]
     )
     lastname = StringField(
-        label="Apellido", validators=[DataRequired(), Length(min=3, max=20)]
+        label="Last name", validators=[DataRequired(), Length(min=3, max=20)]
     )
     username = StringField(
-        label="Usuario", validators=[DataRequired(), Length(min=3, max=20)]
+        label="Username", validators=[DataRequired(), Length(min=3, max=20)]
     )
     email = StringField(label="Email", validators=[DataRequired(), Email()])
     picture = FileField(
-        label="Selecciona foto de perfil",
+        label="Choose a profile picture",
         validators=[FileAllowed(["jpg", "png"], "Images only!")],
     )
-    submit = SubmitField(label="Actualizar")
+    submit = SubmitField(label="Update")
 
 
 class ChangePasswordForm(FlaskForm):
