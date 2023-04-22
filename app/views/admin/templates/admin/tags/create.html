@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% import "macros/macro_pagination.html" as widget %}
 
 {% block navbar %}
 {% include "navbar.html" %}
@@ -9,9 +8,9 @@
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_view') }}">Admin</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.tags.tag_view') }}">Tags</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('admin.admin_view') }}">Admin</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('admin.tags.tag_view') }}">Tags</a></li>
         <li class="breadcrumb-item active" aria-current="page">Create</li>
     </ol>
 </nav>
