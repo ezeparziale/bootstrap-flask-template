@@ -9,10 +9,10 @@ from ...models import Tag
 
 class PostViewForm(FlaskForm):
     title = StringField(
-        label="Titulo", validators=[DataRequired(), Length(min=5, max=40)]
+        label="Title", validators=[DataRequired(), Length(min=5, max=40)]
     )
     content = TextAreaField(
-        label="Contenido", validators=[DataRequired(), Length(min=10)]
+        label="Content", validators=[DataRequired(), Length(min=10)]
     )
 
 
@@ -25,29 +25,29 @@ class PostForm(FlaskForm):
         ]
 
     title = StringField(
-        label="Titulo", validators=[DataRequired(), Length(min=5, max=40)]
+        label="Title", validators=[DataRequired(), Length(min=5, max=40)]
     )
     content = TextAreaField(
-        label="Contenido", validators=[DataRequired(), Length(min=10)]
+        label="Content", validators=[DataRequired(), Length(min=10)]
     )
     tags = SelectMultipleField(
         label="Tags",
         validators=[DataRequired()],
         coerce=int,
-        render_kw={"data-placeholder": "Seleccione una o más tags"},
+        render_kw={"data-placeholder": "Choose tags"},
     )
 
 
 class CreatePostForm(PostForm):
-    submit = SubmitField(label="Publicar")
+    submit = SubmitField(label="Publish")
 
 
 class EditPostForm(PostForm):
-    submit = SubmitField(label="Editar")
+    submit = SubmitField(label="Edit")
 
 
 class PostCommentForm(FlaskForm):
     comment = TextAreaField(
-        label="Comentario", validators=[DataRequired(), Length(min=10)]
+        label="Comment", validators=[DataRequired(), Length(min=10)]
     )
-    submit = SubmitField(label="Comentar")
+    submit = SubmitField(label="Comment")
