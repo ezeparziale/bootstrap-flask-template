@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/form.html" import render_field %}
 
 {% block navbar %}
 {% include "navbar.html" %}
@@ -9,9 +10,9 @@
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('posts.posts') }}">Posts</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Crear Post</li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('posts.posts') }}">Posts</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Create Post</li>
     </ol>
 </nav>
 
@@ -24,26 +25,17 @@
 
         <fieldset>
             <div class="form-group">
-                {{ form.title.label(class="form-control-label") }}
-                {{ form.title(class="form-control form-control-lg disabled") }}
+                {{ render_field(form.title) }}
             </div>
             <div class="form-group mt-3">
-                {{ form.content.label(class="form-control-label") }}
-                {% if form.content.errors %}
-                {{ form.content(class="form-control form-control-lg is-invalid") }}
-                {% for error in form.content.errors %}
-                <span>{{ error }}</span>
-                {% endfor%}
-                {% else %}
-                {{ form.content(class="form-control form-control-lg") }}
-                {% endif %}
+                {{ render_field(form.content) }}
             </div>
             <div class="form-group mt-3">
                 {{ form.tags.label(class="form-control-label") }}
                 {% if form.tags.errors %}
                 {{ form.tags(class="form-select is-invalid") }}
                 {% for error in form.tags.errors %}
-                <span>{{ error }}</span>
+                <span class="invalid-feedback">{{ error }}</span>
                 {% endfor%}
                 {% else %}
                 {{ form.tags(class="tom-select") }}
@@ -51,7 +43,7 @@
             </div>
         </fieldset>
         <div class="float-end mt-3">
-            <a class="btn btn-secondary" href="{{ url_for('posts.posts') }}" role="button">Cancelar</a>
+            <a class="btn btn-secondary" href="{{ url_for('posts.posts') }}" role="button">Cancel</a>
             {{ form.submit(class="btn btn-primary") }}
         </div>
     </form>

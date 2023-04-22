@@ -11,13 +11,13 @@
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('posts.moderate') }}">Moderate</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('posts.moderate') }}">Moderate</a></li>
         <li class="breadcrumb-item active" aria-current="page">Posts</li>
     </ol>
 </nav>
 
-<h3>Moderar Post</h3>
+<h3>Moderate Posts</h3>
 
 <div class="list-group mt-3">
     {% for post in pagination %}
@@ -43,7 +43,7 @@
                         <small>{{ moment(post.created_at).fromNow() }}</small>
                     </div>
                 </div>
-                <div class="text-muted">
+                <div class="text-body-secondary">
                     <small>
                         <i class="bi bi-chat"></i> {{ post.comments.count() }} Comentarios
                         <i class="bi bi-star"></i> {{ post.likes.count() }} Me gusta

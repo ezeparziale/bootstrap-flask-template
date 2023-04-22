@@ -14,21 +14,21 @@
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('home.home_view') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('posts.posts') }}">Posts</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Leer post</li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('home.home_view') }}">Home</a></li>
+        <li class="breadcrumb-item"><a class="link-secondary" href="{{ url_for('posts.posts') }}">Posts</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Read post</li>
     </ol>
 </nav>
 
 {% if post.is_closed() %}
 <div class="alert alert-danger" role="alert">
-    <strong>Este post ha sido cerrado</strong>
+    Post closed
 </div>
 {% endif %}
 
 {% if post.is_disabled() %}
 <div class="alert alert-warning" role="alert">
-    <strong>Este post ha sido desabilitado por el admin por infringir las normas</strong>
+    This post has been disabled due to a violation of our forum rules
 </div>
 {% endif %}
 
@@ -41,106 +41,138 @@
         <div class="card-body">
             <div class="row">
                 <div class="d-flex justify-content-between">
-                    <small class="text-muted mb-1">
-                        <a class="text-muted linkUsername" type="button"
+                    <small class="text-body-secondary mb-1">
+                        <a class="text-body-secondary text-decoration-none" type="button"
                             href="{{ url_for('user.user', username=username) }}" role="button">
                             {{ username }}
                         </a>
-                        <span class="badge text-bg-success">Autor</span>
+                        <span class="badge bg-success">Author</span>
                     </small>
-                    <small class="text-muted mb-1"><i class="bi bi-clock"></i> {{ moment(post.created_at).fromNow()
-                        }}</small>
+                    <small class="text-body-secondary mb-1">
+                        <i class="bi bi-clock"></i>
+                        {{moment(post.created_at).fromNow()}}
+                    </small>
                 </div>
             </div>
             <h5 class="mb-1">{{ post.title }}</h5>
             <p class="mb-1">{{ post.content }}</p>
-            <div id="actions" class="d-flex flex-row">
-                <div id="visits-section" class="small text-muted btn-align">
-                    <i class="bi bi-eye"></i> {{ post.get_views() }} <span class="desktop-only">Visitas</span>
+            <div id="actions" class="d-flex flex-row align-items-center">
+                <div id="visits-section" class="d-flex small text-body-secondary">
+                    <i class="bi bi-eye me-1"></i> {{ post.get_views() }}
+                    <span class="d-none d-md-block ms-1">Visits</span>
                 </div>
-                <div id="comments-section" class="small text-muted btn-align">
-                    <i class="bi bi-chat"></i> {{ post.comments.count() }} <span class="desktop-only">Comentarios</span>
+                <div id="comments-section" class="d-flex small text-body-secondary ms-2">
+                    <i class="bi bi-chat me-1"></i>
+                    {{ post.comments.count() }}
+                    <span class="d-none d-md-block ms-1">Comments</span>
                 </div>
-                <div id="likes-section" class="small text-muted">
-                    <button class="btn btn-sm shadow-none text-muted" id="likes-btn" value="{{post.id}}"
-                        onclick="likePost(this.value)">
+                <div id="likes-section" class="d-flex small text-body-secondary">
+                    <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" id="likes-btn"
+                        value="{{post.id}}" onclick="likePost(this.value)">
                         {% if post.is_like(current_user) %}
                         <i class="bi bi-star-fill" id="likes-icon"></i>
                         {% else %}
                         <i class="bi bi-star" id="likes-icon"></i>
                         {% endif %}
-                        <span id="likes-counts">{{ post.likes.count() }}</span><span class="desktop-only"> Me
-                            gusta</span>
+                        <span id="likes-counts" class="ms-1">{{ post.likes.count() }}</span>
+                        <span class="d-none d-md-block ms-1">Likes</span>
                     </button>
                 </div>
-                <div id="favs-section" class="small text-muted">
-                    <button class="btn btn-sm shadow-none text-muted" id="favs-btn" value="{{post.id}}"
-                        onclick="favoritePost(this.value)">
+                <span id="favs-section" class="d-flex small text-body-secondary">
+                    <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" id="favs-btn"
+                        value="{{post.id}}" onclick="favoritePost(this.value)">
                         {% if post.is_favorite(current_user) %}
                         <i class="bi bi-bookmark-fill" id="favs-icon"></i>
                         {% else %}
                         <i class="bi bi-bookmark" id="favs-icon"></i>
                         {% endif %}
-                        <span class="desktop-only">Favorito</span>
+                        <span class="d-none d-md-block ms-1">Favorities</span>
                     </button>
-                </div>
+                </span>
                 {% if current_user != post.author %}
-                <div id="report-post-section" class="small text-muted">
-                    <button class="btn btn-sm shadow-none text-muted" id="report-post-btn" value="{{post.id}}"
-                        onclick="reportPost(this.value)">
+                <span id="report-post-section" class="d-flex small text-body-secondary">
+                    <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" id="report-post-btn"
+                        value="{{post.id}}" onclick="reportPost(this.value)">
                         {% if post.is_report(current_user) %}
-                        <i class="bi bi-flag-fill" id="report-post-icon"></i><span class="desktop-only"> Reportar</span>
+                        <i class="bi bi-flag-fill" id="report-post-icon"></i>
                         {% else %}
-                        <i class="bi bi-flag" id="report-post-icon"></i><span class="desktop-only"> Reportar</span>
+                        <i class="bi bi-flag" id="report-post-icon"></i>
                         {% endif %}
+                        <span class="d-none d-md-block ms-1">Report</span>
                     </button>
-                </div>
+                </span>
                 {% endif %}
                 {% if current_user == post.author or current_user.is_admin() %}
-                <div class="btn-group" role="group">
+                <div>
                     <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-three-dots"></i>
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('posts.edit_post', post_id=post.id) }}"
-                                role="button"><i class="bi bi-pencil"></i> Editar</a></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('posts.edit_post', post_id=post.id) }}"
+                                role="button">
+                                <i class="bi bi-pencil"></i>
+                                Edit
+                            </a>
+                        </li>
                         {% if post.is_closed() %}
-                        <li><a class="dropdown-item dropdown-item-success"
-                                href="{{ url_for('posts.open_post', id=post.id) }}" role="button"><i
-                                    class="bi bi-door-open"></i> Abrir</a></li>
+                        <li>
+                            <a class="dropdown-item dropdown-item-success"
+                                href="{{ url_for('posts.open_post', id=post.id) }}" role="button">
+                                <i class="bi bi-door-open"></i>
+                                Open
+                            </a>
+                        </li>
                         {% else %}
-                        <li><a class="dropdown-item dropdown-item-warning"
-                                href="{{ url_for('posts.close_post', id=post.id) }}" role="button"><i
-                                    class="bi bi-x-circle"></i> Cerrar</a></li>
+                        <li>
+                            <a class="dropdown-item dropdown-item-warning"
+                                href="{{ url_for('posts.close_post', id=post.id) }}" role="button">
+                                <i class="bi bi-x-circle"></i>
+                                Close
+                            </a>
+                        </li>
                         {% endif %}
                         {% if current_user.is_admin() %}
                         {% if post.disabled %}
-                        <li><a class="dropdown-item"
-                                href="{{url_for('posts.post_enable', id=post.id, page=pagination.page)}}"
-                                role="button"><i class="bi bi-exclamation-circle"></i> Habilitar</a></li>
+                        <li>
+                            <a class="dropdown-item"
+                                href="{{url_for('posts.post_enable', id=post.id, page=pagination.page)}}" role="button">
+                                <i class="bi bi-exclamation-circle"></i>
+                                Enable
+                            </a>
+                        </li>
                         {% else %}
                         <li> <a class="dropdown-item"
                                 href="{{url_for('posts.post_disable', id=post.id, page=pagination.page)}}"
-                                role="button"><i class="bi bi-exclamation-circle"></i> Deshabilitar</a></li>
+                                role="button">
+                                <i class="bi bi-exclamation-circle"></i>
+                                Disable
+                            </a>
+                        </li>
                         {% endif %}
                         {% endif %}
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal"
+                        <li>
+                            <a class="dropdown-item dropdown-item-danger" data-bs-toggle="modal"
                                 data-bs-target="#modalDeletePost" role="button"
-                                data-bs-url="{{ url_for('posts.delete_post', id=post.id) }}"><i class="bi bi-trash"></i>
-                                Eliminar</a></li>
+                                data-bs-url="{{ url_for('posts.delete_post', id=post.id) }}">
+                                <i class="bi bi-trash"></i>
+                                Eliminar
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 {% endif %}
             </div>
-            <div class="text-muted mt-1">
+            <div class="d-flex text-body-secondary small mt-1">
                 {% for post_tag in post.tags %}
                 {% if loop.index == 1 %}
-                <i class="bi bi-tag"></i> <span class="desktop-only"> Tags:</span>
+                <i class="bi bi-tag"></i>
+                <span class="d-none d-md-block">Tags:</span>
                 {% endif %}
-                <span class="badge text-bg-secondary">{{ post_tag.tag.name }}</span>
+                <span class="badge text-bg-secondary ms-1">{{ post_tag.tag.name }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -149,7 +181,7 @@
     {% if not post.is_closed() and not post.is_disabled() %}
     <form method="post" action="" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
-        <div class="card-footer py-3 border-0 bg-light">
+        <div class="card-footer py-3 border-0">
             <div class="d-flex flex-start w-100">
                 <a class="me-3" href="{{ url_for('user.user', username=current_user.username) }}">
                     <img class="rounded-circle"
@@ -182,7 +214,7 @@
 {% if pagination.items %}
 <div class="nav nav-pills">
     <li class="nav-item">
-        <a class="nav-link active" aria-current="page"><i class="bi bi-chat-fill"></i> Comentarios</a>
+        <a class="nav-link active" aria-current="page"><i class="bi bi-chat-fill"></i> Comments</a>
     </li>
 </div>
 <div class="card mt-3">

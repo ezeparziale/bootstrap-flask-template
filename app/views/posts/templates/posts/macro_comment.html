@@ -2,77 +2,79 @@
 
 <div>
     <div class="d-flex justify-content-between align-items-center">
-        <small class="text-muted mb-1">
-            <a class="text-muted linkUsername" type="button"
+        <small class="text-body-secondary mb-1">
+            <a class="text-body-secondary text-decoration-none" type="button"
                 href="{{ url_for('user.user', username=comment.author.username) }}" role="button">
                 {{ comment.author.username }}
             </a>
             {% if comment.author.username == post.author.username %}
-            <span class="badge text-bg-success">Autor</span>
+            <span class="badge bg-success">Author</span>
             {% endif %}
         </small>
-        <span class="small text-muted mb-1"><i class="bi bi-clock"></i> {{ moment(comment.created_at).fromNow()
+        <span class="small text-body-secondary mb-1"><i class="bi bi-clock"></i> {{ moment(comment.created_at).fromNow()
             }}</span>
     </div>
     <p class="small mb-0">
         {% if comment.disabled %}
-    <div id="comment-{{ comment.id }}"><span class="badge text-bg-warning">Comentario deshabilitado</span></div>
+    <div id="comment-{{ comment.id }}"><span class="badge text-bg-warning">Comment disabled</span></div>
     {% else %}
     <div id="comment-{{ comment.id }}">
         <p class="mb-1">{{ comment.content }}</p>
     </div>
     {% endif %}
-    <div class="d-flex flex-row">
-        <div class="small text-muted btn-align">
-            <i class="bi bi-chat-text"></i> <span> {{ comment.childrens|length }} </span><span class="desktop-only">
-                Respuestas</span>
-        </div>
+    <div class="d-flex flex-row align-items-center">
+        <span class="d-flex small text-body-secondary">
+            <i class="bi bi-chat-text"></i>
+            <span class="ms-1">{{ comment.childrens|length }}</span>
+            <span class="d-none d-md-block ms-1">Answers</span>
+        </span>
         {% if not post.is_closed() and not post.is_disabled() %}
-        <button class="btn btn-sm shadow-none text-muted" type="button" data-bs-toggle="collapse"
+        <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" type="button" data-bs-toggle="collapse"
             data-bs-target="#collapseMessage{{ comment.id }}" aria-expanded="false" aria-controls="collapseMessage">
-            <i class="bi bi-chat"></i><span class="desktop-only"> Responder</span>
+            <i class="bi bi-reply"></i>
+            <span class="d-none d-md-block ms-1">Reply</span>
         </button>
         {% endif %}
-        <div id="likes-comment-{{comment.id}}-section" class="small text-muted">
-            <button class="btn btn-sm shadow-none text-muted" id="likes-comment-{{comment.id}}-btn"
+        <div id="likes-comment-{{comment.id}}-section" class="small text-body-secondary">
+            <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" id="likes-comment-{{comment.id}}-btn"
                 value="{{comment.id}}" onclick="likeComment(this.value)">
                 {% if comment.is_like(current_user) %}
                 <i class="bi bi-star-fill" id="likes-comment-{{comment.id}}-icon"></i>
                 {% else %}
                 <i class="bi bi-star" id="likes-comment-{{comment.id}}-icon"></i>
                 {% endif %}
-                <span id="likes-comment-{{comment.id}}-counts">{{ comment.likes.count() }}</span><span
-                    class="desktop-only"> Me gusta</span>
+                <span id="likes-comment-{{comment.id}}-counts" class="ms-1">{{ comment.likes.count() }}</span>
+                <span class="d-none d-md-block ms-1">Likes</span>
             </button>
         </div>
         {% if current_user.id != comment.author_id %}
-        <div id="report-comment-{{comment.id}}-section" class="small text-muted">
-            <button class="btn btn-sm shadow-none text-muted" id="report-comment-{{comment.id}}-btn"
+        <div id="report-comment-{{comment.id}}-section" class="small text-body-secondary">
+            <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" id="report-comment-{{comment.id}}-btn"
                 value="{{comment.id}}" onclick="reportComment(this.value)">
                 {% if comment.is_report(current_user) %}
-                <i class="bi bi-flag-fill" id="report-comment-{{comment.id}}-icon"></i><span class="desktop-only">
-                    Reportar</span>
+                <i class="bi bi-flag-fill" id="report-comment-{{comment.id}}-icon"></i>
                 {% else %}
-                <i class="bi bi-flag" id="report-comment-{{comment.id}}-icon"></i><span class="desktop-only">
-                    Reportar</span>
+                <i class="bi bi-flag" id="report-comment-{{comment.id}}-icon"></i>
                 {% endif %}
+                <span class="d-none d-md-block ms-1">Report</span>
             </button>
         </div>
         {% endif %}
         {% if current_user.is_moderate() %}
-        <div class="small text-muted btn-align">
-            <i class="bi bi-exclamation-triangle"></i><span> {{ comment.get_reports() }} </span><span
-                class="desktop-only"> Reportado</span>
+        <div class="d-flex small text-body-secondary ms-2">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span class="ms-1">{{ comment.get_reports() }}</span>
+            <span class="d-none d-md-block ms-1">Reported</span>
         </div>
-        <div id="disable-comment-{{comment.id}}-section" class="small text-muted">
-            <button class="btn btn-sm shadow-none text-muted" id="disable-comment-{{comment.id}}-btn"
+        <div id="disable-comment-{{comment.id}}-section" class="small text-body-secondary">
+            <button class="d-flex btn btn-sm border-0 pe-0 shadow-none text-body-secondary" id="disable-comment-{{comment.id}}-btn"
                 value="{{comment.id}}" onclick="disableComment(this.value)">
                 {% if comment.disabled %}
-                <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span
-                    id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Habilitar</span>
+                <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i>
+                <span id="disable-comment-{{comment.id}}-txt" class="d-none d-md-block mx-1">Enable</span>
                 {% else %}
-                <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span
-                    id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Deshabilitar</span>
+                <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i>
+                <span id="disable-comment-{{comment.id}}-txt" class="d-none d-md-block mx-1">Disable</span>
                 {% endif %}
             </button>
         </div>
@@ -80,23 +82,22 @@
 
     </div>
 
-    <div class="text-muted">
+    <div class="text-body-secondary">
         <small>
             {% if not post.is_closed() and not post.is_disabled() %}
             <div class="collapse" id="collapseMessage{{ comment.id }}">
                 <form action="{{ url_for('posts.reply_comment', id=comment.id) }}" method="POST">
-                    <div class="card-footer py-3 border-0 mt-1 bg-light" style="background-color: #f4f8fA;">
+                    <div class="card-footer py-3 border-0 mt-1">
                         <div class="d-flex flex-start w-100">
                             <img class="rounded-circle shadow-1-strong me-3"
                                 src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}"
                                 alt="avatar" width="40" height="40" data-toggle="tooltip" data-placement="top"
                                 title="{{ current_user.username }}" />
                             <div class="form-outline w-100">
-                                <textarea class="form-control" id="textAreaMessage" name="comment" rows="4"
-                                    style="background: #fff;"></textarea>
-                                <label class="form-label" for="textAreaMessage">Mensaje</label>
+                                <textarea class="form-control" id="textAreaMessage" name="comment" rows="4"></textarea>
+                                <label class="form-label" for="textAreaMessage">Message</label>
                                 <div class="float-end mt-2 pt-1">
-                                    <button type="submit" class="btn btn-primary btn-sm">Responder</button>
+                                    <button type="submit" class="btn btn-primary btn-sm">Reply</button>
                                 </div>
                             </div>
                         </div>

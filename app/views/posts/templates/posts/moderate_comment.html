@@ -17,7 +17,7 @@
     </ol>
 </nav>
 
-<h3>Moderar Comentarios</h3>
+<h3>Moderate Comments</h3>
 
 {% for comment in pagination %}
 <div class="card mt-3">
@@ -28,15 +28,15 @@
         </div>
         <p class="mb-1">{{ comment.content }}</p>
 
-        <div id="disable-comment-{{comment.id}}-section" class="small text-muted">
-            <button class="btn btn-sm shadow-none text-muted" id="disable-comment-{{comment.id}}-btn"
+        <div id="disable-comment-{{comment.id}}-section" class="small text-body-secondary">
+            <button class="btn btn-sm shadow-none text-body-secondary" id="disable-comment-{{comment.id}}-btn"
                 value="{{comment.id}}" onclick="disableComment(this.value)">
                 {% if comment.disabled %}
                 <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span
-                    id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Habilitar</span>
+                    id="disable-comment-{{comment.id}}-txt" class="d-none d-md-block"> Habilitar</span>
                 {% else %}
                 <i class="bi bi-exclamation-circle" id="disable-comment-{{comment.id}}-icon"></i><span
-                    id="disable-comment-{{comment.id}}-txt" class="desktop-only"> Deshabilitar</span>
+                    id="disable-comment-{{comment.id}}-txt" class="d-none d-md-block"> Deshabilitar</span>
                 {% endif %}
             </button>
         </div>
