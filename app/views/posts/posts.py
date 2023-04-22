@@ -236,7 +236,7 @@ def post_enable(id: int):
     post = db.get_or_404(Post, id)
     post.disabled = False
     db.session.commit()
-    flash("Post habilitado", category="success")
+    flash("Post enabled", category="success")
     return redirect(url_for("posts.get_post", id=id))
 
 
@@ -247,7 +247,7 @@ def post_disable(id: int):
     post = db.get_or_404(Post, id)
     post.disabled = True
     db.session.commit()
-    flash("Post deshabilitado", category="success")
+    flash("Post disabled", category="success")
     return redirect(url_for("posts.get_post", id=id))
 
 
@@ -259,11 +259,11 @@ def moderate_comment_disable(id: int):
     if comment.disabled:
         comment.enable()
         return jsonify(
-            {"disable": False, "text": " Deshabilitar", "content": comment.content}
+            {"disable": False, "text": "Disable", "content": comment.content}
         )
     else:
         comment.disable()
-        return jsonify({"disable": True, "text": " Habilitar"})
+        return jsonify({"disable": True, "text": "Enable"})
 
 
 # @posts_bp.route("/moderate/comment/enable/<id>", methods=["GET", "POST"])
