@@ -34,3 +34,5 @@ flask run --debug
 - [X] postgres database
 - [X] alembic
 - [X] docker compose
+- [X] 2FA
+- [X] Dark theme
