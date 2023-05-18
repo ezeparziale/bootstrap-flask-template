@@ -84,8 +84,9 @@
 			</svg>
 
 			<div class="dropdown text-end">
-				<button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center text-white" id="bd-theme"
-					type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (dark)">
+				<button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center text-white"
+					id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown"
+					aria-label="Toggle theme (dark)">
 					<svg class="bi my-1  theme-icon-active text-white" width="1em" height="1em">
 						<use href="#moon-stars-fill"></use>
 					</svg>
@@ -131,9 +132,8 @@
 				</ul>
 			</div>
 
-
-			{% if current_user.is_authenticated %}
 			<div class="dropdown text-end">
+				{% if current_user.is_authenticated %}
 				<a href="#" class="d-block text-decoration-none" id="dropdownUser1" data-bs-toggle="dropdown"
 					aria-expanded="false">
 					<img src="{{ url_for('static', filename='img/avatars/' ~ current_user.image_file) }}" alt="avatar"
@@ -165,17 +165,13 @@
 						</a>
 					</li>
 				</ul>
+				{% else %}
+					<a class="btn btn-outline-light me-1" href="{{ url_for('auth.login') }}">Login</a>
+					<a class="btn btn-primary me-1" href="{{ url_for('auth.register') }}">
+						Sign Up
+					</a>
+				{% endif %}
 			</div>
-			{% else %}
-			<li class="nav-item">
-				<a class="btn btn-outline-light  me-1" href="{{ url_for('auth.login') }}">Login</a>
-			</li>
-			<li class="nav-item">
-				<a class="btn btn-primary  me-1" aria-current="page" href="{{ url_for('auth.register') }}">Sign
-					Up</a>
-			</li>
-			{% endif %}
-			</ul>
 		</div>
 	</div>
 </nav>
