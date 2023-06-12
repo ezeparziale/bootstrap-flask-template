@@ -98,7 +98,7 @@ def login():
                 user.handle_failed_login()
             flash("Error al loguearse", category="danger")
             return redirect(url_for("auth.login"))
-        
+
     return render_template("auth/login.html", form=form, site_name=settings.SITE_NAME)
 
 
@@ -144,7 +144,9 @@ def register():
         send_email_confirm(user)
         return redirect(url_for("auth.login"))
 
-    return render_template("auth/register.html", form=form, site_name=settings.SITE_NAME)
+    return render_template(
+        "auth/register.html", form=form, site_name=settings.SITE_NAME
+    )
 
 
 @auth_bp.route("/logout")
@@ -184,7 +186,9 @@ def reset_password():
         else:
             flash("Email no registrado, por favor registrese", category="danger")
             return redirect(url_for("auth.register"))
-    return render_template("auth/reset_password.html", form=form, site_name=settings.SITE_NAME)
+    return render_template(
+        "auth/reset_password.html", form=form, site_name=settings.SITE_NAME
+    )
 
 
 @auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
@@ -208,7 +212,9 @@ def reset_token(token):
             flash("Password cambiado", category="success")
             return redirect(url_for("auth.login"))
 
-    return render_template("auth/change_password.html", form=form, site_name=settings.SITE_NAME)
+    return render_template(
+        "auth/change_password.html", form=form, site_name=settings.SITE_NAME
+    )
 
 
 @auth_bp.route("/confirm/<token>", methods=["GET", "POST"])

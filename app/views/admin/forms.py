@@ -47,7 +47,7 @@ class EditUserForm(FlaskForm):
         "Username", validators=[DataRequired(), Length(min=2, max=30)]
     )
     email = StringField("Email", validators=[DataRequired(), Email()])
-    confirmed = BooleanField("Confirmed", render_kw={"role":"switch"})
+    confirmed = BooleanField("Confirmed", render_kw={"role": "switch"})
     submit = SubmitField("Update")
 
     def validate_username(self, field):
@@ -87,7 +87,7 @@ class CreateUserForm(FlaskForm):
     password = PasswordField(
         label="Password", validators=[DataRequired(), Length(min=6, max=16)]
     )
-    confirmed = BooleanField("Confirmed", render_kw={"role":"switch"})
+    confirmed = BooleanField("Confirmed", render_kw={"role": "switch"})
     submit = SubmitField("Create")
 
     def validate_username(self, field):
