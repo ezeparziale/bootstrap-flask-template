@@ -12,6 +12,9 @@ app = Flask(__name__)
 app.config.from_object(settings)
 
 # Database
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = settings.SQLALCHEMY_DATABASE_URI.unicode_string()
 db = SQLAlchemy(app)
 
 # Bcrypt
